@@ -49,15 +49,9 @@ class ProfileSubSectionTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(title ?? "", style: TextStyle(fontSize: 20)),
-              Text(subTitle ?? ""),
+              Text(title ?? "", style: TextStyle(fontSize: 18)),
+              Text(subTitle ?? "", overflow: TextOverflow.ellipsis),
             ],
-          ),
-          Spacer(),
-          Icon(
-            trailing,
-            color: isCompleted ?? false ? Colors.green : Colors.red,
-            size: 30,
           ),
         ],
       ),

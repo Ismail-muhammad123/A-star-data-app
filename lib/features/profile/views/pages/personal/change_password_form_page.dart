@@ -64,7 +64,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     );
                     if (res) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('PIN changed successfully')),
+                        SnackBar(
+                          content: Text('PIN changed successfully'),
+                          backgroundColor: Colors.green,
+                        ),
                       );
                       if (mounted) {
                         context.canPop()

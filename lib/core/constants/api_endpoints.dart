@@ -16,7 +16,7 @@ class AuthEndpoints {
 class ProfileEndpoints {
   final String getProfile = "$baseUrl/account/profile/";
   final String updateProfile = "$baseUrl/account/profile/";
-  final String changePin = "$baseUrl/account/account/change-pin/";
+  final String changePin = "$baseUrl/account/change-pin/";
 
   // final String kycStatus = "$baseUrl/account/kyc/status/";
   // final String kycUpdate = "$baseUrl/account/kyc/update/";

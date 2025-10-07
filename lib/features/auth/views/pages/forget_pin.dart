@@ -13,6 +13,7 @@ class ForgetPinPage extends StatefulWidget {
 class _ForgetPinPageState extends State<ForgetPinPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   bool _isLoading = false;
+
   void _handlePinReset() async {
     if (_phoneNumberController.text.trim().isEmpty) {
       if (mounted) {
@@ -102,10 +103,10 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                         children: [
                           // SizedBox(height: 100),
                           Text(
-                            "Recover Password".toUpperCase(),
+                            "Recover PIN".toUpperCase(),
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.red,
+                              color: Colors.blue,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -113,6 +114,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                           Text(
                             "Enter the phone number used for your account",
                             style: TextStyle(fontStyle: FontStyle.italic),
+                            textAlign: TextAlign.center,
                           ),
                           SizedBox(height: 10),
                           Padding(
@@ -140,6 +142,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                             onPressed: _isLoading ? null : _handlePinReset,
                             height: 50,
                             minWidth: 300,
+                            color: Colors.lightBlue,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -148,11 +151,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                                     ? CircularProgressIndicator()
                                     : Text(
                                       "Submit",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
+                                      style: TextStyle(fontSize: 20),
                                     ),
                           ),
                           SizedBox(height: 20),
@@ -163,7 +162,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                               GestureDetector(
                                 onTap: () => context.go('/login'),
                                 child: Text(
-                                  "Login instead",
+                                  "Back to Login",
                                   style: TextStyle(color: Colors.blue),
                                 ),
                               ),

@@ -27,7 +27,7 @@ final GoRouter router = GoRouter(
       '/',
       '/login',
       '/register',
-      '/forgot-password',
+      '/forgot-pin',
       '/activate-account',
       '/account-not-activated',
       // '/account-activation-success',

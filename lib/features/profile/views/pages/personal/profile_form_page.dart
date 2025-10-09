@@ -100,7 +100,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
           child: Column(
             children: [
               TextFormField(
-                controller: _emailCOntroller,
+                controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Full Name',
                   border: OutlineInputBorder(),
@@ -109,7 +109,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _nameController,
+                controller: _emailCOntroller,
                 decoration: const InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),

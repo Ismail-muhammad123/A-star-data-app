@@ -59,7 +59,6 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
       ).showSnackBar(SnackBar(content: Text('Airtime purchase successful')));
       if (mounted) context.pop();
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString().split(":").last)));
@@ -79,7 +78,6 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
         _networks = networks;
       });
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error fetching networks')));
@@ -142,27 +140,35 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                       bool isSelected = _selectedNetworkId == network.id;
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: ChoiceChip(
-                          label: Image.network(
-                            network.imageUrl,
-                            height: 40,
-                            width: 40,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Text(network.name);
-                            },
-                          ),
-                          selected: isSelected,
-                          onSelected: (selected) {
+                        child: GestureDetector(
+                          onTap: () {
                             if (_isLoading) return;
                             setState(() {
-                              _selectedNetworkId = selected ? network.id : null;
+                              _selectedNetworkId =
+                                  _selectedNetworkId = network.id;
                             });
                           },
-                          selectedColor: Colors.blue,
-                          backgroundColor: Colors.lightBlue[50],
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
+                          child: Container(
+                            padding: EdgeInsets.all(6.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                width: isSelected ? 2 : 1,
+                                color:
+                                    isSelected
+                                        ? Colors.blue
+                                        : Colors.lightBlue[100]!,
+                              ),
+                            ),
+                            child: Image.network(
+                              network.imageUrl,
+                              height: 80,
+                              width: 80,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Text(network.name);
+                              },
+                            ),
                           ),
                         ),
                       );

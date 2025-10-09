@@ -8,34 +8,40 @@ class ConfirmPinReset extends StatefulWidget {
   final String phoneNumber;
 
   @override
-  State<ConfirmPinReset> createState() => _AccouConfirmPinReset();
+  State<ConfirmPinReset> createState() => _ConfirmPinResetState();
 }
 
-class _AccouConfirmPinReset extends State<ConfirmPinReset> {
+class _ConfirmPinResetState extends State<ConfirmPinReset> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
+  final TextEditingController _newPinController = TextEditingController();
   DateTime? _lastResend;
   bool _isLoading = false;
+  bool _hideText = true;
 
   _changePin() async {
     try {
       setState(() {
         _isLoading = true;
       });
+      var phone = _phoneNumberController.text.trim();
+      if (phone.startsWith("0")) {
+        phone = _phoneNumberController.text.substring(1);
+      }
       await AuthService().confirmPinReset(
-        _phoneNumberController.text.trim(),
         _codeController.text.trim(),
-        widget.phoneNumber,
+        _newPinController.text.trim(),
+        phone,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
+          backgroundColor: Colors.green,
           content: Text("Password Changed Successfully! Please Login"),
         ),
       );
       context.go('/login');
     } catch (e) {
-      print(e);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to Reset password! ${e.toString()}")),
@@ -50,14 +56,29 @@ class _AccouConfirmPinReset extends State<ConfirmPinReset> {
   }
 
   @override
+  void initState() {
+    _phoneNumberController.text = widget.phoneNumber;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _phoneNumberController.dispose();
+    _codeController.dispose();
+    _newPinController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Set New Password", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Colors.lightBlue,
         leading: BackButton(
           color: Colors.white,
-          onPressed: () => context.canPop() ? context.pop() : context.go("/"),
+          onPressed:
+              () => context.canPop() ? context.pop() : context.go("/reset-pin"),
         ),
       ),
       body: Padding(
@@ -91,6 +112,7 @@ class _AccouConfirmPinReset extends State<ConfirmPinReset> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextFormField(
+                obscureText: true,
                 enabled: !_isLoading,
                 controller: _codeController,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -109,11 +131,19 @@ class _AccouConfirmPinReset extends State<ConfirmPinReset> {
               padding: const EdgeInsets.all(8.0),
               child: TextFormField(
                 enabled: !_isLoading,
-                controller: _codeController,
+                obscureText: _hideText,
+                controller: _newPinController,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.center,
+                obscuringCharacter: "*",
                 decoration: InputDecoration(
+                  suffix: GestureDetector(
+                    onTap: () => setState(() => _hideText = !_hideText),
+                    child: Icon(
+                      _hideText ? Icons.visibility : Icons.visibility_off,
+                    ),
+                  ),
                   label: Text("New Pin"),
                   prefixIcon: Icon(Icons.lock),
                   border: OutlineInputBorder(
@@ -126,13 +156,14 @@ class _AccouConfirmPinReset extends State<ConfirmPinReset> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: MaterialButton(
-                onPressed: () => _isLoading ? null : _changePin(),
                 height: 40,
-                minWidth: double.maxFinite,
+                minWidth: 200,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text("Change Pin"),
+                color: Colors.lightBlueAccent,
+                onPressed: () => _isLoading ? null : _changePin(),
+                child: Text("Submit"),
               ),
             ),
 
@@ -157,7 +188,6 @@ class _AccouConfirmPinReset extends State<ConfirmPinReset> {
                               _isLoading = false;
                             });
                           } catch (e) {
-                            print(e);
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

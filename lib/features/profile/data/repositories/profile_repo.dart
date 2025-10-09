@@ -22,12 +22,9 @@ class ProfileService {
       if (response.statusCode == 200) {
         return UserProfile.fromJson(response.data as Map<String, dynamic>);
       } else {
-        print('Failed to load profile: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print(e);
-      print('Error fetching profile: $e');
       return null;
     }
   }
@@ -52,12 +49,9 @@ class ProfileService {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        print('Failed to update profile: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print(e);
-      print('Error updating profile: $e');
       return null;
     }
   }
@@ -75,16 +69,12 @@ class ProfileService {
           },
         ),
       );
-      print(response);
       if (response.statusCode == 200) {
         return true;
       } else {
-        print('Failed to change pin: ${response.statusCode}');
         return false;
       }
     } catch (e) {
-      print(e);
-      print('Error changing pin: $e');
       return false;
     }
   }

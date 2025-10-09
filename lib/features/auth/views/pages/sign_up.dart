@@ -75,7 +75,6 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
     } catch (e) {
-      print(e);
       if (mounted) {
         await showDialog(
           context: context,

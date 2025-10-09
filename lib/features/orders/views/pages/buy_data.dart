@@ -20,7 +20,7 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
   DataBundle? selectedBundle;
 
   bool _isLoading = false;
-  List<AirtimeNetwork> _networks = [];
+  List<DataNetwork> _networks = [];
   List<DataBundle> dataPlans = [];
 
   _purchaseData() async {
@@ -61,7 +61,6 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
       );
       if (mounted) context.pop();
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString().split(":").last)));
@@ -74,14 +73,13 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
 
   _fetchNetworks() async {
     try {
-      var networks = await OrderServices().fetchAirtimeNetworks(
+      var networks = await OrderServices().fetchDataNetworks(
         context.read<AuthProvider>().authToken ?? "",
       );
       setState(() {
         _networks = networks;
       });
     } catch (e) {
-      print(e);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error fetching networks')));
@@ -104,7 +102,7 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Buy Airtime"),
+        title: Text("Buy Data Plan"),
         elevation: 4,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
@@ -142,28 +140,35 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                       bool isSelected = _selectedNetworkId == network.id;
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: ChoiceChip(
-                          label: Image.network(
-                            network.imageUrl,
-                            height: 40,
-                            width: 40,
-                            fit: BoxFit.contain,
-                            errorBuilder:
-                                (context, error, stackTrace) =>
-                                    Text(network.name),
-                          ),
-                          selected: isSelected,
-                          onSelected: (selected) {
+                        child: GestureDetector(
+                          onTap: () {
                             if (_isLoading) return;
                             setState(() {
-                              selectedBundle = null;
-                              _selectedNetworkId = selected ? network.id : null;
+                              _selectedNetworkId =
+                                  _selectedNetworkId = network.id;
                             });
                           },
-                          selectedColor: Colors.blue,
-                          backgroundColor: Colors.grey[200],
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
+                          child: Container(
+                            padding: EdgeInsets.all(6.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                width: isSelected ? 2 : 1,
+                                color:
+                                    isSelected
+                                        ? Colors.blue
+                                        : Colors.lightBlue[100]!,
+                              ),
+                            ),
+                            child: Image.network(
+                              network.imageUrl,
+                              height: 80,
+                              width: 80,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Text(network.name);
+                              },
+                            ),
                           ),
                         ),
                       );

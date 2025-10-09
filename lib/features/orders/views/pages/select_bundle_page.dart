@@ -32,6 +32,7 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
       context.read<AuthProvider>().authToken ?? "",
     );
     _bundlesFuture.then((bundles) {
+      print(bundles.length);
       setState(() {
         _allBundles =
             bundles.where((b) => b.serviceType == widget.networkId).toList();

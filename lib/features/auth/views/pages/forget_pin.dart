@@ -28,7 +28,11 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
       _isLoading = true;
     });
     try {
-      await AuthService().resetPin(_phoneNumberController.text.trim());
+      var phone = _phoneNumberController.text.trim();
+      if (phone.startsWith("0")) {
+        phone = _phoneNumberController.text.substring(1);
+      }
+      await AuthService().resetPin(phone);
       if (mounted) {
         await showDialog(
           context: context,
@@ -55,12 +59,13 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                 ),
               ),
         );
-        context.go(
-          "/confirm-password-reset?phone=${_phoneNumberController.text.trim()}",
-        );
+        if (mounted) {
+          context.go(
+            "/confirm-pin-reset?phone=${_phoneNumberController.text.trim()}",
+          );
+        }
       }
     } catch (e) {
-      print(e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -77,6 +82,12 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
         });
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _phoneNumberController.dispose();
+    super.dispose();
   }
 
   @override
@@ -150,7 +161,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                                 _isLoading
                                     ? CircularProgressIndicator()
                                     : Text(
-                                      "Submit",
+                                      "Get OTP",
                                       style: TextStyle(fontSize: 20),
                                     ),
                           ),

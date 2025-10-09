@@ -20,8 +20,6 @@ class WalletService {
       ),
     );
 
-    print(response);
-
     if (response.statusCode == 200) {
       return response.data['balance'];
     } else {
@@ -46,7 +44,6 @@ class WalletService {
           .map((e) => WalletTransaction.fromJson(e as Map<String, dynamic>))
           .toList();
     } else {
-      print(response);
       throw Exception('Failed to load wallet transactions');
     }
   }
@@ -65,13 +62,10 @@ class WalletService {
         },
       ),
     );
-    print("transaction by id");
-    print(response);
 
     if (response.statusCode == 200) {
       return WalletTransaction.fromJson(response.data);
     } else {
-      print(response);
       throw Exception('Failed to load wallet transaction details');
     }
   }
@@ -91,13 +85,13 @@ class WalletService {
         },
       ),
     );
+    print(response);
     if (response.statusCode == 200 || response.statusCode == 201) {
       return (response.data as Map<String, dynamic>)['monnify_response'];
     } else {
       throw Exception('Failed to initiate deposit into wallet');
     }
   }
-
   // Future<Map<String, dynamic>?> withdrawFunds(
   //   String authToken,
   //   double amount,

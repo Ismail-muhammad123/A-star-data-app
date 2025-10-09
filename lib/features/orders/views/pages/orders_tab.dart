@@ -26,6 +26,12 @@ class _OrdersTabState extends State<OrdersTab> {
         title: Text("Welcome"),
         elevation: 0,
         backgroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: () => setState(() {}),
+            icon: Icon(Icons.refresh),
+          ),
+        ],
       ),
       backgroundColor: Colors.grey[100],
       body: Padding(
@@ -200,7 +206,11 @@ class _OrdersTabState extends State<OrdersTab> {
                               CircleAvatar(
                                 radius: 45,
                                 backgroundColor: Colors.lightBlueAccent[100],
-                                child: Icon(Icons.wifi, color: Colors.white),
+                                child: Icon(
+                                  Icons.wifi,
+                                  color: Colors.white,
+                                  size: 50,
+                                ),
                               ),
                               SizedBox(height: 10),
                               Text(

@@ -40,7 +40,6 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
       );
       context.go('/login');
     } catch (e) {
-      print(e);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to activate account! ${e.toString()}")),
@@ -150,7 +149,6 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
                               _isLoading = false;
                             });
                           } catch (e) {
-                            print(e);
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

@@ -79,7 +79,6 @@ class _WalletPageState extends State<WalletPage> {
                         return CircularProgressIndicator(color: Colors.white);
                       }
                       if (snapshot.hasError) {
-                        print(snapshot.error);
                         return Text(
                           "Error loading balance",
                           style: TextStyle(color: Colors.white),
@@ -176,7 +175,6 @@ class _WalletPageState extends State<WalletPage> {
                       return Center(child: CircularProgressIndicator());
                     }
                     if (snapshot.hasError) {
-                      print(snapshot.error);
                       return Center(child: Text("Error loading transactions"));
                     }
 

@@ -30,7 +30,7 @@ final GoRouter router = GoRouter(
       '/forgot-pin',
       '/activate-account',
       '/account-not-activated',
-      // '/account-activation-success',
+      '/confirm-pin-reset',
       // '/account-activation-failure',
     ];
     // Allow product details as public
@@ -48,7 +48,6 @@ final GoRouter router = GoRouter(
 
     // If not logged in, redirect to login
     if (!isLoggedIn) {
-      print(state.uri.toString());
       return '/login?next=${state.uri.toString()}';
     }
 

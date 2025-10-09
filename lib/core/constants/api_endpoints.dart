@@ -1,4 +1,4 @@
-const baseUrl = "http://127.0.0.1:8000/api";
+const baseUrl = "https://a-star-data.up.railway.app/api";
 
 // AUTH
 class AuthEndpoints {

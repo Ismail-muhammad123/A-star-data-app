@@ -17,8 +17,6 @@ class OrderServices {
         },
       ),
     );
-    print("Airtime networks");
-    print(response);
 
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
@@ -121,7 +119,6 @@ class OrderServices {
         },
       ),
     );
-    print(response);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       // Purchase successful

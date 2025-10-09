@@ -15,7 +15,6 @@ class AuthService {
       ),
       data: jsonEncode({'phone_number': phoneNumber, 'pin': pin}),
     );
-    print(response.data);
     if (response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     } else {
@@ -43,11 +42,9 @@ class AuthService {
         "email": email,
       }),
     );
-    print(response.statusCode);
     if (response.statusCode == 201 || response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     } else {
-      print(response);
       throw Exception(response.data['error'] ?? 'Failed to register');
     }
   }
@@ -62,8 +59,6 @@ class AuthService {
       ),
       data: jsonEncode({'refresh': refreshToken}),
     );
-    print("TOKEN REFRESHED");
-    print(response);
     if (response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     } else {
@@ -98,7 +93,6 @@ class AuthService {
       ),
       data: jsonEncode({"identifier": phoneNumber}),
     );
-    print(response.data);
     if (response.statusCode != 200) {
       throw Exception('Failed to request confirmation email');
     }
@@ -121,9 +115,7 @@ class AuthService {
         "new_pin": newPassword,
       }),
     );
-    print(response.statusCode);
     if (!(response.statusCode == 201 || response.statusCode == 200)) {
-      print(response);
       throw Exception('Failed to register');
     }
   }
@@ -152,9 +144,7 @@ class AuthService {
       ),
       data: jsonEncode({"identifier": phoneNumber, "otp": otp}),
     );
-    print(response.statusCode);
     if (!(response.statusCode == 201 || response.statusCode == 200)) {
-      print(response);
       throw Exception(response.data['error'] ?? 'Failed to register');
     }
   }

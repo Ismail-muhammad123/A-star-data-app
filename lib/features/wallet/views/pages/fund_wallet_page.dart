@@ -52,7 +52,6 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
 
       setState(() {
         paymentInfo = (res['responseBody'] as Map<String, dynamic>);
-        print(paymentInfo);
       });
     } catch (e) {
       if (mounted) {

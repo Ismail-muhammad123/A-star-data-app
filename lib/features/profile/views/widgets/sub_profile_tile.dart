@@ -27,7 +27,7 @@ class ProfileSubSectionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withAlpha(155),
             blurRadius: 6.0,
             offset: Offset(1, 1),
           ),

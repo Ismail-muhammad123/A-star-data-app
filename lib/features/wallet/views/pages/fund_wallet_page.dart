@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FundWalletFormPage extends StatefulWidget {
   const FundWalletFormPage({super.key});
@@ -17,7 +18,103 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
   final TextEditingController _amountController = TextEditingController();
   bool _isLoading = false;
 
+  String paymentMethod = "transfer";
+
   Map<String, dynamic>? paymentInfo;
+
+  _initCardPayment() async {
+    if (_amountController.text.isEmpty ||
+        double.tryParse(_amountController.text) == null ||
+        double.parse(_amountController.text) < 100) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please enter a valid amount (Min. of N100)")),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      paymentInfo = null;
+    });
+
+    try {
+      var res = await WalletService().fundWithCard(
+        Provider.of<AuthProvider>(context, listen: false).authToken ?? '',
+        double.parse(_amountController.text),
+      );
+      if (res == null) {
+        throw Exception('Failed to fetch payment info');
+      }
+
+      var checkoutUrl = res['responseBody']['checkoutUrl'];
+      var uri = Uri.parse(checkoutUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      }
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder:
+              (context) => AlertDialog(
+                title: Text("Payment Initiated"),
+                content: Text(
+                  "Your card payment has been initiated. If the payment page did not open, tap the button below to open it manually in your browser.",
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () async {
+                      var checkoutUrl = res['responseBody']['checkoutUrl'];
+                      var uri = Uri.parse(checkoutUrl);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Could not launch payment link"),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text("Open Payment Link"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      setState(() {
+                        _amountController.clear();
+                      });
+                      context.canPop() ? context.pop() : context.go("/wallet");
+                    },
+                    child: Text("Done"),
+                  ),
+                ],
+              ),
+        );
+        // setState(() {
+        //   _amountController.clear();
+        // });
+        // context.canPop() ? context.pop() : context.go("/wallet");
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to load payment info! ${e.toString()}"),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   _getPaymentInfo() async {
     if (_amountController.text.isEmpty ||
@@ -34,21 +131,13 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
       paymentInfo = null;
     });
     try {
-      var res = await WalletService().addFunds(
+      var res = await WalletService().fundWithTransfer(
         Provider.of<AuthProvider>(context, listen: false).authToken ?? '',
         double.parse(_amountController.text),
       );
       if (res == null) {
         throw Exception('Failed to fetch payment info');
       }
-      // print(res);
-      // final accountDetails = res['monnify_response']['responseBody'];
-
-      // Extract fields
-      // final accountNumber = accountDetails['accountNumber'];
-      // final accountName = accountDetails['accountName'];
-      // final bankName = accountDetails['bankName'];
-      // final bankCode = accountDetails['bankCode'];
 
       setState(() {
         paymentInfo = (res['responseBody'] as Map<String, dynamic>);
@@ -150,6 +239,8 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
           onPressed:
               _isLoading
                   ? null
+                  : paymentMethod == "card"
+                  ? _initCardPayment
                   : paymentInfo == null
                   ? _getPaymentInfo
                   : () =>
@@ -200,6 +291,43 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
               ),
             ),
 
+            SizedBox(height: 20),
+            Text("Method"),
+            Row(
+              children: [
+                Radio<String>(
+                  value: 'transfer',
+                  groupValue: paymentMethod,
+                  onChanged:
+                      _isLoading
+                          ? null
+                          : (value) {
+                            setState(() {
+                              if (value != null) {
+                                paymentMethod = value;
+                              }
+                            });
+                          },
+                ),
+                Text('Bank Transfer'),
+                SizedBox(width: 20),
+                Radio<String>(
+                  value: 'card',
+                  groupValue: paymentMethod,
+                  onChanged:
+                      _isLoading
+                          ? null
+                          : (value) {
+                            setState(() {
+                              if (value != null) {
+                                paymentMethod = value;
+                              }
+                            });
+                          },
+                ),
+                Text('Debit/Credit Card'),
+              ],
+            ),
             SizedBox(height: 20),
             paymentInfo == null
                 ? SizedBox()

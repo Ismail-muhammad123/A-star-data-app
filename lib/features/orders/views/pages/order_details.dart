@@ -53,7 +53,7 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
       appBar: AppBar(
         title: Text("Purchase Details"),
         elevation: 4,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.lightBlue,
       ),
       backgroundColor: Colors.grey[50],
       body: Column(

@@ -38,6 +38,7 @@ class AuthProvider extends ChangeNotifier {
 
     if (refr == null) {
       _isAuthenticated = false;
+      authToken = null;
       notifyListeners();
       return;
     }
@@ -53,12 +54,14 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
       } else {
         _isAuthenticated = false;
+        authToken = null;
         await prefs.remove('auth_token');
         await prefs.remove('refresh_token');
         notifyListeners();
       }
     } catch (e) {
       _isAuthenticated = false;
+      authToken = null;
       notifyListeners();
     }
   }

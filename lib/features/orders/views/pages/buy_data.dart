@@ -104,8 +104,8 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
       appBar: AppBar(
         title: Text("Buy Data Plan"),
         elevation: 4,
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.lightBlue,
+        surfaceTintColor: Colors.lightBlue,
       ),
       backgroundColor: Colors.grey[50],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

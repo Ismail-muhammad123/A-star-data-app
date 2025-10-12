@@ -70,12 +70,12 @@ class WalletService {
     }
   }
 
-  Future<Map<String, dynamic>?> addFunds(
+  Future<Map<String, dynamic>?> fundWithTransfer(
     String authToken,
     double amount,
   ) async {
     var response = await _dio.post(
-      _endpoints.fundWalletViaTransafer,
+      _endpoints.fundWallet,
       data: jsonEncode({"amount": amount}),
       options: Options(
         validateStatus: (status) => true,
@@ -92,6 +92,30 @@ class WalletService {
       throw Exception('Failed to initiate deposit into wallet');
     }
   }
+
+  Future<Map<String, dynamic>?> fundWithCard(
+    String authToken,
+    double amount,
+  ) async {
+    var response = await _dio.post(
+      _endpoints.fundWallet,
+      data: jsonEncode({"amount": amount, "method": "card"}),
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          "Authorization": "Bearer $authToken",
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+    print(response);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return (response.data as Map<String, dynamic>)['monnify_response'];
+    } else {
+      throw Exception('Failed to initiate deposit into wallet');
+    }
+  }
+
   // Future<Map<String, dynamic>?> withdrawFunds(
   //   String authToken,
   //   double amount,

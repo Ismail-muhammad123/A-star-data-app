@@ -30,7 +30,7 @@ class ProfileEndpoints {
 
 class WalletEndpoints {
   final String getWallet = "$baseUrl/wallet/";
-  final String fundWalletViaTransafer = "$baseUrl/wallet/deposit/";
+  final String fundWallet = "$baseUrl/wallet/deposit/";
   final String withdraw = "$baseUrl/wallet/withdraw/";
   final String walletTransactions = "$baseUrl/wallet/transactions/";
 }

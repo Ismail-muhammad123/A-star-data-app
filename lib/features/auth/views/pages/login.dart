@@ -104,7 +104,16 @@ class _LoginPageState extends State<LoginPage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // SizedBox(height: 100),
+                          Hero(
+                            tag: "logo",
+                            child: Image.asset(
+                              "assets/images/logo/a-star_app_logo.png",
+                              height: 150,
+                              width: 150,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          SizedBox(height: 10),
                           Text(
                             "Login to your account".toUpperCase(),
                             style: TextStyle(

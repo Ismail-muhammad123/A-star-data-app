@@ -24,13 +24,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
         centerTitle: true,
       ),
+      backgroundColor: Colors.lightBlue[50],
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
               CircleAvatar(
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Colors.white,
                 radius: 70,
                 child: Icon(Icons.person, size: 80),
               ),

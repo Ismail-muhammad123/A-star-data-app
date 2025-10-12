@@ -25,7 +25,7 @@ class _OrdersTabState extends State<OrdersTab> {
       appBar: AppBar(
         title: Text("Welcome"),
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.lightBlue,
         actions: [
           IconButton(
             onPressed: () => setState(() {}),
@@ -33,7 +33,7 @@ class _OrdersTabState extends State<OrdersTab> {
           ),
         ],
       ),
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.lightBlue[50],
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: RefreshIndicator(

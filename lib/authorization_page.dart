@@ -38,7 +38,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: const Color.fromARGB(255, 255, 202, 198),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.lightBlue[50],
       body: SizedBox(
         height: double.maxFinite,
         width: double.maxFinite,
@@ -46,15 +46,16 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Hero(
-            //   tag: "logo",
-            //   child: Image.asset(
-            //     "assets/images/logo.png",
-            //     height: 200,
-            //     width: 200,
-            //     fit: BoxFit.contain,
-            //   ),
-            // ),
+            Hero(
+              tag: "logo",
+              child: Image.asset(
+                "assets/images/logo/a-star_app_logo.png",
+                height: 150,
+                width: 150,
+                fit: BoxFit.contain,
+              ),
+            ),
+            SizedBox(height: 20),
             Text(
               "Welcome to",
               textAlign: TextAlign.center,
@@ -65,68 +66,82 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                 fontStyle: FontStyle.italic,
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             Text(
-              "A-Star Data App",
+              "A-Star Connect".toUpperCase(),
               style: TextStyle(
                 fontSize: 30,
                 color: Colors.black,
                 fontWeight: FontWeight.w900,
-                fontStyle: FontStyle.italic,
               ),
             ),
-            SizedBox(height: 40),
-
-            _isLoading
-                ? CircularProgressIndicator(color: Colors.white)
-                : SizedBox(),
-
-            _isLoading
-                ? SizedBox()
-                : MaterialButton(
-                  onPressed: () {
-                    context.go('/login');
-                  },
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  height: 40,
-                  minWidth: 200,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text(
-                        'Log in',
-                        style: TextStyle(color: Colors.black, fontSize: 16),
-                      ),
-                      SizedBox(width: 4),
-                      Icon(Icons.arrow_forward, color: Colors.red),
-                    ],
-                  ),
-                ),
+            Text(
+              "Buy Airtime and Data Subscriptions at best prices",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontStyle: FontStyle.italic),
+            ),
             SizedBox(height: 20),
             _isLoading
-                ? SizedBox()
-                : MaterialButton(
-                  onPressed: () {
-                    context.go('/register');
-                  },
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  height: 40,
-                  minWidth: 200,
+                ? CircularProgressIndicator(color: Colors.lightBlue)
+                : Padding(
+                  padding: const EdgeInsets.all(8.0),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text(
-                        'Sign up',
-                        style: TextStyle(color: Colors.black, fontSize: 16),
+                    children: [
+                      Expanded(
+                        child: MaterialButton(
+                          onPressed: () {
+                            context.go('/login');
+                          },
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          height: 40,
+                          minWidth: 150,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Text(
+                                'Log in',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(Icons.arrow_forward, color: Colors.red),
+                            ],
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 4),
-                      Icon(Icons.add, color: Colors.red),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: MaterialButton(
+                          onPressed: () {
+                            context.go('/register');
+                          },
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          height: 40,
+                          minWidth: 150,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Text(
+                                'Sign up',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              Icon(Icons.add, color: Colors.red),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

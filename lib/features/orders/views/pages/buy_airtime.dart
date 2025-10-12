@@ -103,8 +103,8 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
       appBar: AppBar(
         title: Text("Buy Airtime"),
         elevation: 4,
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.lightBlue,
+        surfaceTintColor: Colors.lightBlue,
       ),
       backgroundColor: Colors.grey[50],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

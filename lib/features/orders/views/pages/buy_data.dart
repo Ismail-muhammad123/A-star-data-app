@@ -126,129 +126,131 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 20),
-            Text("Select Network"),
-            SizedBox(height: 18),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children:
-                    _networks.map((network) {
-                      bool isSelected = _selectedNetworkId == network.id;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            if (_isLoading) return;
-                            setState(() {
-                              _selectedNetworkId =
-                                  _selectedNetworkId = network.id;
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(6.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                width: isSelected ? 2 : 1,
-                                color:
-                                    isSelected
-                                        ? Colors.blue
-                                        : Colors.lightBlue[100]!,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20),
+              Text("Select Network"),
+              SizedBox(height: 18),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children:
+                      _networks.map((network) {
+                        bool isSelected = _selectedNetworkId == network.id;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_isLoading) return;
+                              setState(() {
+                                _selectedNetworkId =
+                                    _selectedNetworkId = network.id;
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(6.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  width: isSelected ? 2 : 1,
+                                  color:
+                                      isSelected
+                                          ? Colors.blue
+                                          : Colors.lightBlue[100]!,
+                                ),
+                              ),
+                              child: Image.network(
+                                network.imageUrl,
+                                height: 80,
+                                width: 80,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Text(network.name);
+                                },
                               ),
                             ),
-                            child: Image.network(
-                              network.imageUrl,
-                              height: 80,
-                              width: 80,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Text(network.name);
-                              },
+                          ),
+                        );
+                      }).toList(),
+                ),
+              ),
+              SizedBox(height: 20),
+              Text("Select Data bundle"),
+              GestureDetector(
+                onTap:
+                    _isLoading
+                        ? null
+                        : () async {
+                          // Navigate to bundle selector page and await result
+                          if (_selectedNetworkId == null) return;
+                          final bundle = await Navigator.push<DataBundle>(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => SelectBundlePage(
+                                    networkId: _selectedNetworkId!,
+                                  ),
+                            ),
+                          );
+                          if (bundle != null) {
+                            setState(() {
+                              selectedBundle = bundle;
+                            });
+                          }
+                        },
+                child: AbsorbPointer(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 18,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(6),
+                      color: Colors.white,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            selectedBundle != null
+                                ? selectedBundle!.name
+                                : (_selectedNetworkId == null
+                                    ? "Select a network first"
+                                    : "Tap to select Data Bundle"),
+                            style: TextStyle(
+                              color:
+                                  selectedBundle != null
+                                      ? Colors.black
+                                      : Colors.grey[600],
+                              fontSize: 16,
                             ),
                           ),
                         ),
-                      );
-                    }).toList(),
-              ),
-            ),
-            SizedBox(height: 20),
-            Text("Select Data bundle"),
-            GestureDetector(
-              onTap:
-                  _isLoading
-                      ? null
-                      : () async {
-                        // Navigate to bundle selector page and await result
-                        if (_selectedNetworkId == null) return;
-                        final bundle = await Navigator.push<DataBundle>(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => SelectBundlePage(
-                                  networkId: _selectedNetworkId!,
-                                ),
-                          ),
-                        );
-                        if (bundle != null) {
-                          setState(() {
-                            selectedBundle = bundle;
-                          });
-                        }
-                      },
-              child: AbsorbPointer(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(6),
-                    color: Colors.white,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          selectedBundle != null
-                              ? selectedBundle!.name
-                              : (_selectedNetworkId == null
-                                  ? "Select a network first"
-                                  : "Tap to select Data Bundle"),
-                          style: TextStyle(
-                            color:
-                                selectedBundle != null
-                                    ? Colors.black
-                                    : Colors.grey[600],
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      Icon(Icons.arrow_drop_down, color: Colors.grey),
-                    ],
+                        Icon(Icons.arrow_drop_down, color: Colors.grey),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: 20),
-            Text("Phone Number"),
-            SizedBox(height: 18),
-            TextFormField(
-              enabled: !_isLoading,
-              controller: _phoneController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: "08012345678",
+              SizedBox(height: 20),
+              Text("Phone Number"),
+              SizedBox(height: 18),
+              TextFormField(
+                enabled: !_isLoading,
+                controller: _phoneController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "08012345678",
+                ),
+                keyboardType: TextInputType.phone,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
-              keyboardType: TextInputType.phone,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

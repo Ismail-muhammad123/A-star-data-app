@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 // import 'package:provider/provider.dart';
-// import 'package:tubali_app/providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,7 +14,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _pinContrller = TextEditingController();
+  final TextEditingController _pinController = TextEditingController();
   String? countryCode;
   // bool _rememberMe = false;
   bool _isLoading = false;
@@ -28,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       var res = await authProvider.login(
         _phoneNumberController.text.trim(),
-        _pinContrller.text.trim(),
+        _pinController.text.trim(),
       );
       setState(() {
         _isLoading = false;
@@ -49,9 +48,7 @@ class _LoginPageState extends State<LoginPage> {
             builder:
                 (context) => AlertDialog(
                   title: Text("Error"),
-                  content: Text(
-                    res['message'] ?? "invalid Phone Number or Pin!",
-                  ),
+                  content: Text("Invalid Phone Number or Pin!"),
                 ),
           );
         }
@@ -147,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                             padding: const EdgeInsets.all(8.0),
                             child: TextFormField(
                               enabled: !_isLoading,
-                              controller: _pinContrller,
+                              controller: _pinController,
                               obscureText: _hidePassword,
                               textAlign: TextAlign.center,
                               inputFormatters: [
@@ -202,7 +199,6 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                           ),
                           SizedBox(height: 20),
-
                           Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [

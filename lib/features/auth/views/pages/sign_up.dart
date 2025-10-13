@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 // import 'package:provider/provider.dart';
-// import 'package:tubali_app/providers/auth_provider.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -16,7 +15,7 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _pinContrller = TextEditingController();
+  final TextEditingController _pinController = TextEditingController();
   // bool _rememberMe = false;
 
   String? countryCode = "+234";
@@ -34,10 +33,11 @@ class _SignUpPageState extends State<SignUpPage> {
     if (phone.startsWith('0')) {
       phone = phone.substring(1);
     }
+
     try {
       var res = await authProvider.register(
         phone,
-        _pinContrller.text.trim(),
+        _pinController.text.trim(),
         countryCode: countryCode ?? "+234",
         email: _emailController.text.trim(),
       );
@@ -63,8 +63,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 (context) => AlertDialog(
                   title: Text("Error"),
                   content: Text(
-                    res['message'] ??
-                        "Failed to complete registeration! An error occurred",
+                    "Failed to complete registration! An error occurred",
                   ),
                 ),
           );
@@ -409,7 +408,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             padding: const EdgeInsets.all(8.0),
                             child: TextFormField(
                               enabled: !_isLoading,
-                              controller: _pinContrller,
+                              controller: _pinController,
                               obscureText: _hidePassword,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,

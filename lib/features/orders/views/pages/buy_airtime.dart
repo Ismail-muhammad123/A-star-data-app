@@ -126,104 +126,106 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 20),
-            Text("Select Network"),
-            SizedBox(height: 18),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children:
-                    _networks.map((network) {
-                      bool isSelected = _selectedNetworkId == network.id;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            if (_isLoading) return;
-                            setState(() {
-                              _selectedNetworkId =
-                                  _selectedNetworkId = network.id;
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(6.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                width: isSelected ? 2 : 1,
-                                color:
-                                    isSelected
-                                        ? Colors.blue
-                                        : Colors.lightBlue[100]!,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20),
+              Text("Select Network"),
+              SizedBox(height: 18),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children:
+                      _networks.map((network) {
+                        bool isSelected = _selectedNetworkId == network.id;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_isLoading) return;
+                              setState(() {
+                                _selectedNetworkId =
+                                    _selectedNetworkId = network.id;
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(6.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  width: isSelected ? 2 : 1,
+                                  color:
+                                      isSelected
+                                          ? Colors.blue
+                                          : Colors.lightBlue[100]!,
+                                ),
+                              ),
+                              child: Image.network(
+                                network.imageUrl,
+                                height: 80,
+                                width: 80,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Text(network.name);
+                                },
                               ),
                             ),
-                            child: Image.network(
-                              network.imageUrl,
-                              height: 80,
-                              width: 80,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Text(network.name);
-                              },
-                            ),
                           ),
-                        ),
+                        );
+                      }).toList(),
+                ),
+              ),
+              SizedBox(height: 20),
+              Text("Amount (min ₦100)"),
+              SizedBox(height: 18),
+              TextFormField(
+                enabled: !_isLoading,
+                controller: _amountController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  prefixText: "₦ ",
+                  hintText: "100.00",
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+              SizedBox(height: 20),
+              Text("Quick Select"),
+              SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                children:
+                    [50, 100, 200, 500, 1000].map((amount) {
+                      return ActionChip(
+                        backgroundColor: Colors.lightBlue,
+                        label: Text("₦$amount"),
+                        labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                        labelStyle: TextStyle(color: Colors.white),
+                        onPressed: () {
+                          if (_isLoading) return;
+                          setState(() {
+                            _amountController.text = amount.toString();
+                          });
+                        },
                       );
                     }).toList(),
               ),
-            ),
-            SizedBox(height: 20),
-            Text("Amount (min ₦100)"),
-            SizedBox(height: 18),
-            TextFormField(
-              enabled: !_isLoading,
-              controller: _amountController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                prefixText: "₦ ",
-                hintText: "100.00",
+              SizedBox(height: 20),
+              Text("Phone Number"),
+              SizedBox(height: 18),
+              TextFormField(
+                enabled: !_isLoading,
+                controller: _phoneController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: "08012345678",
+                ),
+                keyboardType: TextInputType.phone,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-            SizedBox(height: 20),
-            Text("Quick Select"),
-            SizedBox(height: 10),
-            Wrap(
-              spacing: 10,
-              children:
-                  [50, 100, 200, 500, 1000].map((amount) {
-                    return ActionChip(
-                      backgroundColor: Colors.lightBlue,
-                      label: Text("₦$amount"),
-                      labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
-                      labelStyle: TextStyle(color: Colors.white),
-                      onPressed: () {
-                        if (_isLoading) return;
-                        setState(() {
-                          _amountController.text = amount.toString();
-                        });
-                      },
-                    );
-                  }).toList(),
-            ),
-            SizedBox(height: 20),
-            Text("Phone Number"),
-            SizedBox(height: 18),
-            TextFormField(
-              enabled: !_isLoading,
-              controller: _phoneController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: "08012345678",
-              ),
-              keyboardType: TextInputType.phone,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

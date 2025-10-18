@@ -51,19 +51,27 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Purchase Details"),
+        leading: BackButton(
+          onPressed:
+              () => context.canPop() ? context.pop() : context.go("/wallet"),
+          color: Colors.white,
+        ),
+        title: Text(
+          "Purchase Details",
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
         elevation: 4,
         backgroundColor: Colors.lightBlue,
       ),
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.grey[100],
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(8.0),
             child: Container(
               width: double.maxFinite,
-              height: 100,
-              padding: EdgeInsets.all(12),
+              // height: 100,
+              padding: EdgeInsets.all(10.0),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -72,14 +80,14 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircleAvatar(
-                    radius: 30,
+                    radius: 20,
                     backgroundColor: Colors.lightBlueAccent,
                     child: Icon(
                       transactionDetails?.purchaseType == "airtime"
                           ? Icons.phone_android
                           : Icons.wifi,
                       color: Colors.white,
-                      size: 30,
+                      size: 20,
                     ),
                   ),
                   SizedBox(width: 10),
@@ -90,12 +98,15 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
                       Text(
                         "${transactionDetails?.purchaseType ?? ""} Purchase"
                             .toUpperCase(),
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
                       ),
                       SizedBox(height: 6),
                       Text(
                         "To: ${transactionDetails?.beneficiary ?? '-'}",
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(fontSize: 11),
                       ),
                     ],
                   ),
@@ -108,9 +119,27 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
                         NumberFormat.currency(
                           symbol: "₦",
                         ).format(transactionDetails?.amount ?? 0),
-                        style: TextStyle(fontSize: 18),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      Text((transactionDetails?.status ?? '').toUpperCase()),
+                      SizedBox(height: 10),
+                      Container(
+                        padding: EdgeInsets.all(4.0),
+                        decoration: BoxDecoration(
+                          color:
+                              transactionDetails?.status.toLowerCase() ==
+                                      "success"
+                                  ? Colors.green
+                                  : Colors.orange,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        child: Text(
+                          (transactionDetails?.status ?? '').toUpperCase(),
+                          style: TextStyle(fontSize: 10),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -118,55 +147,62 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
             ),
           ),
           SizedBox(height: 14),
-          Container(
-            width: double.maxFinite,
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child:
-                isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : transactionDetails == null
-                    ? Center(child: Text("No details available"))
-                    : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // DetailRow(
-                        //   label: "Transaction ID",
-                        //   value: transactionDetails!..toString(),
-                        // ),
-                        DetailRow(
-                          label: "Amount",
-                          value: NumberFormat.currency(
-                            symbol: "₦",
-                          ).format(transactionDetails!.amount),
-                        ),
-                        // DetailRow(
-                        //   label: "Network",
-                        //   value: transactionDetails!.network,
-                        // ),
-                        DetailRow(
-                          label: "Phone Number",
-                          value: transactionDetails!.beneficiary,
-                        ),
-                        DetailRow(
-                          label: "Date",
-                          value: DateFormat.yMMMd().add_jm().format(
-                            transactionDetails!.time,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: double.maxFinite,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child:
+                  isLoading
+                      ? Center(child: CircularProgressIndicator())
+                      : transactionDetails == null
+                      ? Center(child: Text("No details available"))
+                      : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // DetailRow(
+                          //   label: "Transaction ID",
+                          //   value: transactionDetails!..toString(),
+                          // ),
+                          DetailRow(
+                            label: "Amount",
+                            value: NumberFormat.currency(
+                              symbol: "₦",
+                            ).format(transactionDetails!.amount),
                           ),
-                        ),
-                        DetailRow(
-                          label: "Status",
-                          value: transactionDetails!.status.toUpperCase(),
-                        ),
-                        DetailRow(
-                          label: "Reference",
-                          value: transactionDetails!.reference,
-                        ),
-                      ],
-                    ),
+                          Divider(),
+                          // DetailRow(
+                          //   label: "Network",
+                          //   value: transactionDetails!.network,
+                          // ),
+                          DetailRow(
+                            label: "Phone Number",
+                            value: transactionDetails!.beneficiary,
+                          ),
+                          Divider(),
+                          DetailRow(
+                            label: "Date",
+                            value: DateFormat.yMMMd().add_jm().format(
+                              transactionDetails!.time,
+                            ),
+                          ),
+                          Divider(),
+                          DetailRow(
+                            label: "Status",
+                            value: transactionDetails!.status.toUpperCase(),
+                          ),
+                          Divider(),
+                          DetailRow(
+                            label: "Reference",
+                            value: transactionDetails!.reference,
+                          ),
+                        ],
+                      ),
+            ),
           ),
         ],
       ),
@@ -194,15 +230,10 @@ class DetailRow extends StatelessWidget {
               color: Colors.grey[700],
             ),
           ),
-          SizedBox(
-            width: 200,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
+
+          Text(
+            value,
+            style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
           ),
         ],
       ),

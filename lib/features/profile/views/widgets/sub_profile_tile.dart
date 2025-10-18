@@ -14,13 +14,12 @@ class ProfileSubSectionTile extends StatelessWidget {
     this.trailing,
     this.isCompleted,
     this.leadingIconColor,
-    this.iconSize = 40,
+    this.iconSize = 30,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 80,
       width: double.maxFinite,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -33,7 +32,7 @@ class ProfileSubSectionTile extends StatelessWidget {
           ),
         ],
       ),
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.all(6.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -49,7 +48,10 @@ class ProfileSubSectionTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(title ?? "", style: TextStyle(fontSize: 18)),
+              Text(
+                title ?? "",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               Text(subTitle ?? "", overflow: TextOverflow.ellipsis),
             ],
           ),

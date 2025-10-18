@@ -102,8 +102,11 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
                   labelText: 'Full Name',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
                 ),
                 keyboardType: TextInputType.name,
               ),
@@ -111,29 +114,29 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
               TextFormField(
                 controller: _emailCOntroller,
                 decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
                   labelText: 'Email',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
                 ),
                 keyboardType: TextInputType.emailAddress,
-              ),
-
-              const SizedBox(height: 16),
-              MaterialButton(
-                onPressed: _isLoading ? null : _updateProfile,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                height: 50,
-                minWidth: 200,
-                color: Colors.lightBlue,
-                child:
-                    _isLoading
-                        ? CircularProgressIndicator(color: Colors.white)
-                        : Text("Save"),
               ),
             ],
           ),
         ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: MaterialButton(
+        onPressed: _isLoading ? null : _updateProfile,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        height: 35,
+        minWidth: 200,
+        color: Colors.lightBlue,
+        child:
+            _isLoading
+                ? CircularProgressIndicator(color: Colors.blue)
+                : Text("Save", style: TextStyle(color: Colors.white)),
       ),
     );
   }

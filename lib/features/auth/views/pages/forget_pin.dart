@@ -140,6 +140,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                               decoration: InputDecoration(
                                 prefixIcon: Icon(Icons.phone),
                                 label: Text("Phone Number"),
+                                contentPadding: EdgeInsets.zero,
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(),
                                   borderRadius: BorderRadius.circular(10),

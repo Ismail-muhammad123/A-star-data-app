@@ -72,13 +72,13 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         surfaceTintColor: Colors.lightBlue,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(10.0),
         child:
             _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : SingleChildScrollView(
                   child: Container(
-                    padding: EdgeInsets.all(18),
+                    padding: EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
@@ -98,25 +98,27 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                           'Transaction ID',
                           "#${transaction?.id != null ? transaction!.id.toString().padLeft(7, '0') : ''}",
                         ),
+                        Divider(),
                         _buildDetailRow(
                           'Amount',
                           transaction != null
                               ? '₦${transaction?.amount.toStringAsFixed(2)}'
                               : '',
                         ),
+                        Divider(),
                         _buildDetailRow(
                           'Type',
                           (transaction?.transactionType ?? '').toUpperCase(),
                         ),
+                        Divider(),
                         _buildDetailRow(
                           'Date',
                           DateFormat.yMMMEd().format(transaction!.timestamp),
                         ),
-                        // _buildDetailRow('Status', transaction['status']),
-                        _buildDetailRow(
-                          'Description',
-                          transaction?.description ?? '',
-                        ),
+                        // _buildDetailRow(
+                        //   'Description',
+                        //   transaction?.description ?? '',
+                        // ),
                       ],
                     ),
                   ),
@@ -127,17 +129,17 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
   _buildDetailRow(String name, value) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(2.0),
       child: Row(
         children: [
           Text(
             name,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
           SizedBox(width: 14.0),
           Spacer(),
           SizedBox(
-            width: 130,
+            width: 150,
             child: Text(
               value.toString(),
               softWrap: true,

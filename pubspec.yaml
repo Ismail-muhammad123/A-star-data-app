@@ -33,6 +33,7 @@ dependencies:
   http:
   url_launcher: 
   webview_flutter:
+  permission_handler: 
   flutter_launcher_icons:
   
 dev_dependencies:

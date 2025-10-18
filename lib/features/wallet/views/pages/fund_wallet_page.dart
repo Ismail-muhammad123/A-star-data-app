@@ -50,6 +50,8 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
       var uri = Uri.parse(checkoutUrl);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);
+      } else {
+        print("cant launch payment URL");
       }
 
       if (mounted) {
@@ -227,7 +229,10 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
           onPressed:
               () => context.canPop() ? context.pop() : context.go("/wallet"),
         ),
-        title: Text("Fund Wallet", style: TextStyle(color: Colors.white)),
+        title: Text(
+          "Fund Wallet",
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
         backgroundColor: Colors.lightBlue,
         surfaceTintColor: Colors.lightBlue,
       ),
@@ -268,7 +273,8 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Amount"),
+            Text("Amount:"),
+            SizedBox(height: 5.0),
             TextFormField(
               controller: _amountController,
               keyboardType: TextInputType.number,
@@ -288,46 +294,78 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: "Min. of N100",
+                contentPadding: EdgeInsets.symmetric(horizontal: 4.0),
               ),
             ),
-
             SizedBox(height: 20),
-            Text("Method"),
+            Text("Payment Method:"),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Radio<String>(
-                  value: 'transfer',
-                  groupValue: paymentMethod,
-                  onChanged:
-                      _isLoading
-                          ? null
-                          : (value) {
-                            setState(() {
-                              if (value != null) {
-                                paymentMethod = value;
-                              }
-                            });
-                          },
+                Flexible(
+                  child: GestureDetector(
+                    onTap:
+                        _isLoading
+                            ? null
+                            : () {
+                              setState(() => paymentMethod = "transfer");
+                            },
+                    child: Container(
+                      padding: EdgeInsets.all(6.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          width: paymentMethod == "transfer" ? 2 : 1,
+                          color:
+                              paymentMethod == "transfer"
+                                  ? Colors.blue
+                                  : Colors.lightBlue[100]!,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.send),
+                          SizedBox(width: 10),
+                          Text("Bank Transfer"),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                Text('Bank Transfer'),
-                SizedBox(width: 20),
-                Radio<String>(
-                  value: 'card',
-                  groupValue: paymentMethod,
-                  onChanged:
-                      _isLoading
-                          ? null
-                          : (value) {
-                            setState(() {
-                              if (value != null) {
-                                paymentMethod = value;
-                              }
-                            });
-                          },
+                SizedBox(width: 10),
+                Flexible(
+                  child: GestureDetector(
+                    onTap:
+                        _isLoading
+                            ? null
+                            : () {
+                              setState(() => paymentMethod = "card");
+                            },
+                    child: Container(
+                      padding: EdgeInsets.all(6.0),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          width: paymentMethod == "card" ? 2 : 1,
+                          color:
+                              paymentMethod == "card"
+                                  ? Colors.blue
+                                  : Colors.lightBlue[100]!,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.credit_card),
+                          SizedBox(width: 4),
+                          Text("Card Payment"),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                Text('Debit/Credit Card'),
               ],
             ),
+
             SizedBox(height: 20),
             paymentInfo == null
                 ? SizedBox()

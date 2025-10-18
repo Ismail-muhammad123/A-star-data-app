@@ -24,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = true;
     });
+
     try {
       var res = await authProvider.login(
         _phoneNumberController.text.trim(),
@@ -89,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
           width: double.maxFinite,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -105,8 +106,8 @@ class _LoginPageState extends State<LoginPage> {
                             tag: "logo",
                             child: Image.asset(
                               "assets/images/logo/a-star_app_logo.png",
-                              height: 150,
-                              width: 150,
+                              height: 120,
+                              width: 120,
                               fit: BoxFit.contain,
                             ),
                           ),
@@ -114,9 +115,8 @@ class _LoginPageState extends State<LoginPage> {
                           Text(
                             "Login to your account".toUpperCase(),
                             style: TextStyle(
-                              fontSize: 18,
                               color: Colors.blue,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           SizedBox(height: 20),
@@ -130,6 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                               ],
                               keyboardType: TextInputType.phone,
                               decoration: InputDecoration(
+                                contentPadding: EdgeInsets.zero,
                                 prefixText: countryCode ?? "",
                                 label: Text("Your Phone Number"),
                                 prefixIcon: Icon(Icons.phone),
@@ -152,6 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                               ],
                               keyboardType: TextInputType.phone,
                               decoration: InputDecoration(
+                                contentPadding: EdgeInsets.zero,
                                 hintText: "* * * * * *",
                                 suffix: GestureDetector(
                                   onTap:
@@ -205,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
                               GestureDetector(
                                 onTap: () => context.push('/forgot-pin'),
                                 child: Text(
-                                  "Forgot password?",
+                                  "Forgot pin?",
                                   style: TextStyle(color: Colors.blue),
                                 ),
                               ),
@@ -214,6 +216,14 @@ class _LoginPageState extends State<LoginPage> {
                                 onTap: () => context.go('/register'),
                                 child: Text(
                                   "Don't have an account?",
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              GestureDetector(
+                                onTap: () => context.push('/activate-account'),
+                                child: Text(
+                                  "Activate my account",
                                   style: TextStyle(color: Colors.blue),
                                 ),
                               ),

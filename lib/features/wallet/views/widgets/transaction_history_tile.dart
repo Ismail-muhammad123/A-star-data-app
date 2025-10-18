@@ -9,50 +9,48 @@ class TransactionHistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-      child: Card(
-        child: ListTile(
-          onTap:
-              () => context.push(
-                "/wallet/history/${transaction.id}",
-                extra: transaction,
-              ),
-          tileColor: Colors.white,
-          leading: CircleAvatar(
-            backgroundColor: const Color.fromARGB(37, 164, 164, 164),
-            child: Icon(Icons.history, size: 30),
-          ),
-          title: Text(
-            transaction.transactionType.toUpperCase(),
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text(
-            NumberFormat.currency(
-              locale: 'en_NG',
-              symbol: '₦',
-              decimalDigits: 2,
-            ).format(transaction.amount),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
+    return Card(
+      child: ListTile(
+        dense: true,
+        onTap:
+            () => context.push(
+              "/wallet/history/${transaction.id}",
+              extra: transaction,
             ),
+        tileColor: Colors.white,
+        leading: CircleAvatar(
+          backgroundColor: const Color.fromARGB(37, 164, 164, 164),
+          child: Icon(Icons.history, size: 30),
+        ),
+        title: Text(
+          transaction.transactionType.toUpperCase(),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          NumberFormat.currency(
+            locale: 'en_NG',
+            symbol: '₦',
+            decimalDigits: 2,
+          ).format(transaction.amount),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
           ),
-          trailing: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                DateFormat.yMMMd().format(transaction.timestamp),
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-              // Text(
-              //   transaction.status,
-              //   style: TextStyle(fontSize: 14, color: Colors.orange),
-              // ),
-            ],
-          ),
+        ),
+        trailing: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              DateFormat.yMMMd().format(transaction.timestamp),
+              style: TextStyle(fontSize: 11, color: Colors.grey),
+            ),
+            // Text(
+            //   transaction.status,
+            //   style: TextStyle(fontSize: 14, color: Colors.orange),
+            // ),
+          ],
         ),
       ),
     );

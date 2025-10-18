@@ -34,6 +34,16 @@ class _SignUpPageState extends State<SignUpPage> {
       phone = phone.substring(1);
     }
 
+    if (_pinController.text.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.orange,
+          content: Text("Pin has to be 6 characters long."),
+        ),
+      );
+      return;
+    }
+
     try {
       var res = await authProvider.register(
         phone,
@@ -82,7 +92,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 title: Text("Error"),
                 icon: Icon(Icons.error, color: Colors.blue),
                 content: Text(
-                  "Failed to complete account registration! please check all foelds and try again",
+                  "Failed to complete account registration! please check all fields and try again",
                 ),
               ),
         );
@@ -317,7 +327,7 @@ class _SignUpPageState extends State<SignUpPage> {
           height: MediaQuery.of(context).size.height,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -334,8 +344,8 @@ class _SignUpPageState extends State<SignUpPage> {
                             tag: "logo",
                             child: Image.asset(
                               "assets/images/logo/a-star_app_logo.png",
-                              height: 150,
-                              width: 150,
+                              height: 120,
+                              width: 120,
                               fit: BoxFit.contain,
                             ),
                           ),
@@ -343,9 +353,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           Text(
                             "Create an account".toUpperCase(),
                             style: TextStyle(
-                              fontSize: 18,
                               color: Colors.blue,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           SizedBox(height: 20),
@@ -354,14 +363,15 @@ class _SignUpPageState extends State<SignUpPage> {
                             child: DropdownButtonFormField<String>(
                               decoration: const InputDecoration(
                                 labelText: "Select Country",
+
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.all(
                                     Radius.circular(12),
                                   ),
                                 ),
                                 contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
+                                  horizontal: 6,
+                                  vertical: 6,
                                 ),
                               ),
                               value: countryCode,
@@ -377,11 +387,14 @@ class _SignUpPageState extends State<SignUpPage> {
                                       ),
                                     );
                                   }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  countryCode = value;
-                                });
-                              },
+                              onChanged:
+                                  _isLoading
+                                      ? null
+                                      : (value) {
+                                        setState(() {
+                                          countryCode = value;
+                                        });
+                                      },
                             ),
                           ),
                           Padding(
@@ -397,6 +410,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 prefixText: "$countryCode ",
                                 label: Text("Your Phone Number"),
                                 prefixIcon: Icon(Icons.phone),
+
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(),
                                   borderRadius: BorderRadius.circular(10),
@@ -418,6 +432,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
                               keyboardType: TextInputType.phone,
                               decoration: InputDecoration(
+                                contentPadding: EdgeInsets.zero,
+
                                 hintText: "* * * * * *",
                                 suffix: GestureDetector(
                                   onTap:
@@ -462,17 +478,12 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           SizedBox(height: 20),
 
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              GestureDetector(
-                                onTap: () => context.go('/login'),
-                                child: Text(
-                                  "Already have an account?",
-                                  style: TextStyle(color: Colors.blue),
-                                ),
-                              ),
-                            ],
+                          GestureDetector(
+                            onTap: () => context.go('/login'),
+                            child: Text(
+                              "Already have an account?",
+                              style: TextStyle(color: Colors.blue),
+                            ),
                           ),
                         ],
                       ),

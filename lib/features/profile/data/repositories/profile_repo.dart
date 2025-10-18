@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:app/core/constants/api_endpoints.dart';
+import 'package:app/features/profile/data/models/kyc_data_model.dart';
 import 'package:app/features/profile/data/models/profile_model.dart';
 import 'package:dio/dio.dart';
 
@@ -49,6 +51,7 @@ class ProfileService {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
+        print(response);
         return null;
       }
     } catch (e) {
@@ -198,122 +201,122 @@ class ProfileService {
   //   }
   // }
 
-  // Future<KYCData?> retriveKYCStatus(String authToken) async {
-  //   try {
-  //     final response = await _dio.get(
-  //       profileEndpoints.kycStatus,
-  //       options: Options(
-  //         validateStatus: (status) => true,
-  //         headers: {
-  //           'content-Type': 'application/json',
-  //           'Authorization': "Bearer $authToken",
-  //         },
-  //       ),
-  //     );
-  //     print(response);
-  //     if (response.statusCode == 200) {
-  //       return KYCData.fromJson(response.data as Map<String, dynamic>);
-  //     } else if (response.statusCode == 404) {
-  //       return null;
-  //     } else {
-  //       print('Failed to load KYC status: ${response.statusCode}');
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     print(e);
-  //     print('Error fetching KYC status: $e');
-  //     return null;
-  //   }
-  // }
+  Future<KYCData?> retriveKYCStatus(String authToken) async {
+    try {
+      final response = await _dio.get(
+        profileEndpoints.kycStatus,
+        options: Options(
+          validateStatus: (status) => true,
+          headers: {
+            'content-Type': 'application/json',
+            'Authorization': "Bearer $authToken",
+          },
+        ),
+      );
+      print(response);
+      if (response.statusCode == 200) {
+        return KYCData.fromJson(response.data as Map<String, dynamic>);
+      } else if (response.statusCode == 404) {
+        return null;
+      } else {
+        print('Failed to load KYC status: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      print('Error fetching KYC status: $e');
+      return null;
+    }
+  }
 
-  // updateKYCData(String authToken, KYCData kycData, ByteData imageData) async {
-  //   try {
-  //     final response = await _dio.put(
-  //       profileEndpoints.kycUpdate,
-  //       data: jsonEncode(kycData.toJson()),
-  //       options: Options(
-  //         validateStatus: (status) => true,
-  //         headers: {
-  //           'Authorization': "Bearer $authToken",
-  //           'content-Type': 'application/json',
-  //         },
-  //       ),
-  //     );
-  //     // print(response);
-  //     if (response.statusCode == 200) {
-  //       return KYCData.fromJson(response.data as Map<String, dynamic>);
-  //     } else {
-  //       print('Failed to update KYC data: ${response.statusCode}');
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     print(e);
-  //     print('Error updating KYC data: $e');
-  //     return null;
-  //   }
-  // }
+  updateKYCData(String authToken, KYCData kycData, ByteData imageData) async {
+    try {
+      final response = await _dio.put(
+        profileEndpoints.kycUpdate,
+        data: jsonEncode(kycData.toJson()),
+        options: Options(
+          validateStatus: (status) => true,
+          headers: {
+            'Authorization': "Bearer $authToken",
+            'content-Type': 'application/json',
+          },
+        ),
+      );
+      // print(response);
+      if (response.statusCode == 200) {
+        return KYCData.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        print('Failed to update KYC data: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print(e);
+      print('Error updating KYC data: $e');
+      return null;
+    }
+  }
 
-  // Future<KYCData?> submitKYCData(
-  //   String authToken,
-  //   KYCData kycData,
-  //   ByteData imageData, {
-  //   bool isUpdate = false,
-  // }) async {
-  //   try {
-  //     // Convert ByteData to List<int>
-  //     final bytes = imageData.buffer.asUint8List();
+  Future<KYCData?> submitKYCData(
+    String authToken,
+    KYCData kycData,
+    ByteData imageData, {
+    bool isUpdate = false,
+  }) async {
+    try {
+      // Convert ByteData to List<int>
+      final bytes = imageData.buffer.asUint8List();
 
-  //     // Build FormData
-  //     final formData = FormData.fromMap({
-  //       // Add your JSON fields
-  //       ...kycData.toJson(),
+      // Build FormData
+      final formData = FormData.fromMap({
+        // Add your JSON fields
+        ...kycData.toJson(),
 
-  //       // Attach image
-  //       'id_image': MultipartFile.fromBytes(
-  //         bytes,
-  //         filename: 'kyc_image.jpg', // you can change the filename
-  //       ),
-  //     });
+        // Attach image
+        'id_image': MultipartFile.fromBytes(
+          bytes,
+          filename: 'kyc_image.jpg', // you can change the filename
+        ),
+      });
 
-  //     Response? response;
+      Response? response;
 
-  //     if (isUpdate) {
-  //       response = await _dio.put(
-  //         profileEndpoints.kycUpdate,
-  //         data: formData,
-  //         options: Options(
-  //           validateStatus: (status) => true,
-  //           headers: {
-  //             'Authorization': "Bearer $authToken",
-  //             'Content-Type': 'multipart/form-data',
-  //           },
-  //         ),
-  //       );
-  //     } else {
-  //       response = await _dio.post(
-  //         profileEndpoints.kycSubmit,
-  //         data: formData,
-  //         options: Options(
-  //           validateStatus: (status) => true,
-  //           headers: {
-  //             'Authorization': "Bearer $authToken",
-  //             'Content-Type': 'multipart/form-data',
-  //           },
-  //         ),
-  //       );
-  //     }
+      if (isUpdate) {
+        response = await _dio.put(
+          profileEndpoints.kycUpdate,
+          data: formData,
+          options: Options(
+            validateStatus: (status) => true,
+            headers: {
+              'Authorization': "Bearer $authToken",
+              'Content-Type': 'multipart/form-data',
+            },
+          ),
+        );
+      } else {
+        response = await _dio.post(
+          profileEndpoints.kycSubmit,
+          data: formData,
+          options: Options(
+            validateStatus: (status) => true,
+            headers: {
+              'Authorization': "Bearer $authToken",
+              'Content-Type': 'multipart/form-data',
+            },
+          ),
+        );
+      }
 
-  //     print(response);
+      print(response);
 
-  //     if (response.statusCode == 200 || response.statusCode == 201) {
-  //       return KYCData.fromJson(response.data as Map<String, dynamic>);
-  //     } else {
-  //       print('Failed to add KYC data: ${response.statusCode}');
-  //       return null;
-  //     }
-  //   } catch (e) {
-  //     print('Error adding KYC data: $e');
-  //     return null;
-  //   }
-  // }
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return KYCData.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        print('Failed to add KYC data: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error adding KYC data: $e');
+      return null;
+    }
+  }
 }

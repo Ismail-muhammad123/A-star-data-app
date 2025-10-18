@@ -3,7 +3,8 @@ import 'package:app/features/orders/views/pages/buy_airtime.dart';
 import 'package:app/features/orders/views/pages/buy_data.dart';
 import 'package:app/features/orders/views/pages/order_details.dart';
 import 'package:app/features/orders/views/pages/order_history.dart';
-import 'package:app/features/profile/views/pages/personal/change_password_form_page.dart';
+import 'package:app/features/profile/views/pages/kyc/kyc_form_page.dart';
+import 'package:app/features/profile/views/pages/personal/change_pin_form_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -161,6 +162,11 @@ final GoRouter router = GoRouter(
       path: '/profile/change-pin',
       builder: (context, state) => const ChangePasswordPage(),
     ),
+    GoRoute(
+      path: '/profile/kyc',
+      builder: (context, state) => const KycFormPage(),
+    ),
+
     // GoRoute(path: '/profile/kyc', builder: (context, state) => KycFormPage()),
     // GoRoute(
     //   path: '/profile/personal-info',

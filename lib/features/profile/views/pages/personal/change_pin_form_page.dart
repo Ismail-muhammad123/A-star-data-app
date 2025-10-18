@@ -12,13 +12,13 @@ class ChangePasswordPage extends StatefulWidget {
 }
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
-  final TextEditingController _oldpasswordController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _oldPinController = TextEditingController();
+  final TextEditingController _newPinController = TextEditingController();
   bool isLoading = false;
   @override
   void dispose() {
-    _oldpasswordController.dispose();
-    _newPasswordController.dispose();
+    _oldPinController.dispose();
+    _newPinController.dispose();
     super.dispose();
   }
 
@@ -26,7 +26,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Change Pin", style: TextStyle(color: Colors.white)),
+        title: Text(
+          "Change Pin",
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
         backgroundColor: Colors.lightBlue,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -35,8 +38,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ? CircularProgressIndicator()
               : MaterialButton(
                 onPressed: () async {
-                  if (_oldpasswordController.text.isEmpty ||
-                      _newPasswordController.text.isEmpty) {
+                  if (_oldPinController.text.isEmpty ||
+                      _newPinController.text.isEmpty) {
                     showDialog(
                       context: context,
                       builder:
@@ -59,8 +62,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   try {
                     var res = await ProfileService().changePin(
                       context.read<AuthProvider>().authToken ?? "",
-                      _oldpasswordController.text.trim(),
-                      _newPasswordController.text.trim(),
+                      _oldPinController.text.trim(),
+                      _newPinController.text.trim(),
                     );
                     if (res) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -117,11 +120,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           children: [
             TextFormField(
               enabled: !isLoading,
-              controller: _oldpasswordController,
+              controller: _oldPinController,
+              autofocus: true,
               decoration: InputDecoration(
                 label: Text("Current PIN"),
-                border: InputBorder.none,
-                focusedBorder: OutlineInputBorder(
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(color: Theme.of(context).primaryColor),
                 ),
@@ -134,11 +137,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             SizedBox(height: 10),
             TextFormField(
               enabled: !isLoading,
-              controller: _newPasswordController,
+              controller: _newPinController,
               decoration: InputDecoration(
                 label: Text("New PIN"),
-                border: InputBorder.none,
-                focusedBorder: OutlineInputBorder(
+                border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(color: Theme.of(context).primaryColor),
                 ),

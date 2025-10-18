@@ -2,8 +2,6 @@ class KYCData {
   final int? user;
   final String? bvn;
   final String? nin;
-  final String? idType;
-  final String? idNumber;
   final String? idImage;
   final bool? isVerified;
   final bool? isApproved;
@@ -17,8 +15,6 @@ class KYCData {
     this.user,
     this.bvn,
     this.nin,
-    this.idType,
-    this.idNumber,
     this.idImage,
     this.isVerified,
     this.isApproved,
@@ -34,8 +30,6 @@ class KYCData {
       user: json['user'],
       bvn: json['bvn'],
       nin: json['nin'],
-      idType: json['id_type'],
-      idNumber: json['id_number'],
       idImage: json['is_image'],
       isVerified: json['id_verified'],
       isApproved: json['is_approved'],
@@ -52,8 +46,6 @@ class KYCData {
       'user': user,
       'bvn': bvn,
       'nin': nin,
-      'id_type': idType,
-      'id_number': idNumber,
       'id_image': idImage,
       'id_verified': isVerified,
       'is_approved': isApproved,

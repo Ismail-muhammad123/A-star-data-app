@@ -45,56 +45,59 @@ class _WalletPageState extends State<WalletPage> {
         child: Column(
           children: [
             Container(
-              height: 170,
-              width: double.maxFinite,
+              padding: EdgeInsets.all(10.0),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.lightBlueAccent.withAlpha(100),
-                    spreadRadius: 5,
-                    blurRadius: 7,
-                    offset: Offset(0, 3),
+                    color: const Color.fromARGB(88, 158, 158, 158),
+                    blurRadius: 10,
+                    offset: Offset(2, 2),
                   ),
                 ],
               ),
-              padding: EdgeInsets.all(18),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    "Available Balance",
-                    style: TextStyle(fontSize: 18, color: Colors.black),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "Available balance",
+                      style: TextStyle(color: Colors.grey),
+                    ),
                   ),
                   FutureBuilder<String>(
                     future: WalletService().getBalance(
-                      Provider.of<AuthProvider>(
-                        context,
-                        listen: false,
-                      ).authToken!,
+                      context.read<AuthProvider>().authToken ?? "",
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator(color: Colors.white);
+                        return CircularProgressIndicator();
                       }
-                      if (snapshot.hasError) {
+                      if (!snapshot.hasData || snapshot.hasError) {
                         return Text(
-                          "Error loading balance",
-                          style: TextStyle(color: Colors.white),
+                          "Error",
+                          style: TextStyle(
+                            fontSize: 30,
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
                         );
                       }
+                      // if (snapshot.data != null) {
+                      var balance = double.tryParse(snapshot.data!);
+
                       return Text(
                         NumberFormat.currency(
                           locale: 'en_NG',
                           symbol: '₦',
-                          decimalDigits: 2,
-                        ).format(double.parse(snapshot.data!)),
-                        style: TextStyle(fontSize: 28),
+                        ).format(balance ?? 0).toString(),
+                        style: TextStyle(fontSize: 28, color: Colors.black),
                       );
                     },
                   ),
-                  Spacer(),
+                  SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -143,14 +146,14 @@ class _WalletPageState extends State<WalletPage> {
                     children: [
                       Text(
                         "Recent Transactions",
-                        style: TextStyle(fontSize: 18, color: Colors.black),
+                        style: TextStyle(fontSize: 14, color: Colors.black),
                       ),
                       GestureDetector(
                         onTap: () => context.push("/wallet/history"),
                         child: Text(
                           "view all",
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             decoration: TextDecoration.underline,
                           ),
                         ),

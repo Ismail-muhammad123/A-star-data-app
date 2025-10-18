@@ -18,9 +18,9 @@ class ProfileEndpoints {
   final String updateProfile = "$baseUrl/account/profile/";
   final String changePin = "$baseUrl/account/change-pin/";
 
-  // final String kycStatus = "$baseUrl/account/kyc/status/";
-  // final String kycUpdate = "$baseUrl/account/kyc/update/";
-  // final String kycSubmit = "$baseUrl/account/kyc/submit/";
+  final String kycStatus = "$baseUrl/account/kyc/status/";
+  final String kycUpdate = "$baseUrl/account/kyc/update/";
+  final String kycSubmit = "$baseUrl/account/kyc/submit/";
 
   // final String bankInfoSubmit = "$baseUrl/account/bank-details/create/";
   // final String bankInfoUpdate = "$baseUrl/account/bank-details/update/";

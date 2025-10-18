@@ -25,16 +25,15 @@ class _ProfilePageState extends State<ProfilePage> {
         centerTitle: true,
       ),
       backgroundColor: Colors.lightBlue[50],
-
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
               CircleAvatar(
                 backgroundColor: Colors.white,
-                radius: 70,
-                child: Icon(Icons.person, size: 80),
+                radius: 40,
+                child: Icon(Icons.person, size: 40),
               ),
               SizedBox(height: 10),
               Row(
@@ -88,7 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   isCompleted: true,
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 6.0),
               GestureDetector(
                 child: ProfileSubSectionTile(
                   title: "Phone Number",
@@ -100,7 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   isCompleted: true,
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 6.0),
               GestureDetector(
                 onTap:
                     () => context
@@ -120,19 +119,19 @@ class _ProfilePageState extends State<ProfilePage> {
                   isCompleted: true,
                 ),
               ),
-              SizedBox(height: 10),
-              // GestureDetector(
-              //   onTap: () => context.push('/profile/bank-info'),
-              //   child: ProfileSubSectionTile(
-              //     title: "Bank Information",
-              //     subTitle: "Bank information for withdrawals",
-              //     leading: Icons.account_balance,
-              //     isCompleted: true,
-              //   ),
-              // ),
-              // SizedBox(height: 10),
+              SizedBox(height: 6.0),
+              GestureDetector(
+                onTap: () => context.push('/profile/kyc'),
+                child: ProfileSubSectionTile(
+                  title: "KYC",
+                  subTitle: "Verify your Identity",
+                  leading: Icons.perm_identity,
+                  isCompleted: true,
+                ),
+              ),
+              // SizedBox(height: 6.0),
               Divider(),
-              SizedBox(height: 10),
+              // SizedBox(height: 6.0),
               GestureDetector(
                 onTap:
                     () => context.read<AuthProvider>().logout().then(

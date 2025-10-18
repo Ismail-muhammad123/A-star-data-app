@@ -61,7 +61,7 @@ class _OrdersTabState extends State<OrdersTab> {
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
                           "Available balance",
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                          style: TextStyle(color: Colors.grey),
                         ),
                       ),
                       FutureBuilder<String>(
@@ -95,7 +95,7 @@ class _OrdersTabState extends State<OrdersTab> {
                           );
                         },
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -135,7 +135,6 @@ class _OrdersTabState extends State<OrdersTab> {
                                 .push("/orders/buy-airtime")
                                 .then((_) => setState(() {})),
                         child: Container(
-                          height: 160,
                           width: double.maxFinite,
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -148,25 +147,27 @@ class _OrdersTabState extends State<OrdersTab> {
                               ),
                             ],
                           ),
-                          padding: EdgeInsets.all(16),
-                          child: Column(
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CircleAvatar(
-                                radius: 45,
+                                radius: 30,
                                 backgroundColor: Colors.lightBlueAccent[100],
                                 child: Icon(
                                   Icons.phone_android,
                                   color: Colors.white,
-                                  size: 50,
+                                  size: 30,
                                 ),
                               ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Buy Airtime",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  "Buy Airtime",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
@@ -182,7 +183,6 @@ class _OrdersTabState extends State<OrdersTab> {
                                 .push("/orders/buy-data")
                                 .then((_) => setState(() {})),
                         child: Container(
-                          height: 160,
                           width: double.maxFinite,
 
                           decoration: BoxDecoration(
@@ -196,28 +196,27 @@ class _OrdersTabState extends State<OrdersTab> {
                               ),
                             ],
                           ),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Column(
+                          padding: EdgeInsets.all(8.0),
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               CircleAvatar(
-                                radius: 45,
+                                radius: 30,
                                 backgroundColor: Colors.lightBlueAccent[100],
                                 child: Icon(
                                   Icons.wifi,
                                   color: Colors.white,
-                                  size: 50,
+                                  size: 30,
                                 ),
                               ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Buy Data",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  "Buy Data",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
                             ],
@@ -227,7 +226,6 @@ class _OrdersTabState extends State<OrdersTab> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
                 Row(
                   children: [
                     Text(
@@ -248,7 +246,10 @@ class _OrdersTabState extends State<OrdersTab> {
                   ],
                 ),
                 ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: 350, minHeight: 200),
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.7,
+                    minHeight: 200,
+                  ),
                   child: FutureBuilder<List<OrderHistory>>(
                     future: OrderServices().getTransactions(
                       context.read<AuthProvider>().authToken ?? "",
@@ -294,42 +295,41 @@ class OrderTransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Card(
-        color: Colors.white,
-        child: ListTile(
-          onTap: () => context.push("/orders/history/${transaction.id}"),
-          leading: Icon(
-            transaction.purchaseType == "data"
-                ? Icons.wifi
-                : Icons.phone_android,
-          ),
-          title: Text(
-            "${transaction.purchaseType} Purchase".toUpperCase(),
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text("To: ${transaction.beneficiary}"),
-          // subtitle: Text(DateFormat.yMMMd().format(date)),
-          trailing: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                NumberFormat.currency(
-                  locale: 'en_NG',
-                  symbol: '₦',
-                ).format(transaction.amount).toString(),
-                style: TextStyle(
-                  color: transaction.amount >= 0 ? Colors.green : Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
+    return Card(
+      color: Colors.white,
+      child: ListTile(
+        onTap: () => context.push("/orders/history/${transaction.id}"),
+        leading: Icon(
+          transaction.purchaseType == "data" ? Icons.wifi : Icons.phone_android,
+        ),
+        title: Text(
+          "${transaction.purchaseType} Purchase".toUpperCase(),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        ),
+        subtitle: Text(
+          "To: ${transaction.beneficiary}",
+          style: TextStyle(fontSize: 11),
+        ),
+        // subtitle: Text(DateFormat.yMMMd().format(date)),
+        trailing: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              NumberFormat.currency(
+                locale: 'en_NG',
+                symbol: '₦',
+              ).format(transaction.amount).toString(),
+              style: TextStyle(
+                color: transaction.amount >= 0 ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
               ),
-              Text(
-                DateFormat.yMMMd().format(transaction.time),
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
+            ),
+            Text(
+              DateFormat.yMMMd().format(transaction.time),
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
         ),
       ),
     );

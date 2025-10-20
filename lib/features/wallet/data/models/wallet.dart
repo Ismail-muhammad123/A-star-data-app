@@ -33,3 +33,26 @@ class WalletTransaction {
     };
   }
 }
+
+class VirtualAccount {
+  final String accountNumber;
+  final String bankName;
+  final String accountName;
+  final String status;
+
+  VirtualAccount({
+    required this.accountName,
+    required this.bankName,
+    required this.accountNumber,
+    required this.status,
+  });
+
+  factory VirtualAccount.fromJson(Map<String, dynamic> data) {
+    return VirtualAccount(
+      accountName: data['account_name'],
+      bankName: data['bank_name'],
+      accountNumber: data['account_number'],
+      status: data['status'],
+    );
+  }
+}

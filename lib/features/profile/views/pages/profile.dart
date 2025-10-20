@@ -21,7 +21,6 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: Text("My Profile", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.lightBlue,
-
         centerTitle: true,
       ),
       backgroundColor: Colors.lightBlue[50],
@@ -121,10 +120,10 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               SizedBox(height: 6.0),
               GestureDetector(
-                onTap: () => context.push('/profile/kyc'),
+                onTap: () => context.push('/profile/tier'),
                 child: ProfileSubSectionTile(
-                  title: "KYC",
-                  subTitle: "Verify your Identity",
+                  title: "Upgrade Account",
+                  subTitle: "Currently: Tier ${profileInfoRef?.tier}",
                   leading: Icons.perm_identity,
                   isCompleted: true,
                 ),

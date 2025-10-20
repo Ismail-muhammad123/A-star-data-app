@@ -116,6 +116,24 @@ class WalletService {
     }
   }
 
+  Future<VirtualAccount> getVirtualAccount(String authToken) async {
+    var response = await _dio.get(
+      _endpoints.getVirtualAccount,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          "Authorization": "Bearer $authToken",
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      return VirtualAccount.fromJson(response.data);
+    } else {
+      throw Exception('Failed to load wallet balance');
+    }
+  }
   // Future<Map<String, dynamic>?> withdrawFunds(
   //   String authToken,
   //   double amount,

@@ -147,17 +147,17 @@ class _OrdersTabState extends State<OrdersTab> {
                               ),
                             ],
                           ),
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(14.0),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               CircleAvatar(
-                                radius: 30,
+                                radius: 20,
                                 backgroundColor: Colors.lightBlueAccent[100],
                                 child: Icon(
                                   Icons.phone_android,
                                   color: Colors.white,
-                                  size: 30,
+                                  size: 20,
                                 ),
                               ),
                               Padding(
@@ -165,7 +165,7 @@ class _OrdersTabState extends State<OrdersTab> {
                                 child: Text(
                                   "Buy Airtime",
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -196,17 +196,17 @@ class _OrdersTabState extends State<OrdersTab> {
                               ),
                             ],
                           ),
-                          padding: EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(14.0),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               CircleAvatar(
-                                radius: 30,
+                                radius: 20,
                                 backgroundColor: Colors.lightBlueAccent[100],
                                 child: Icon(
                                   Icons.wifi,
                                   color: Colors.white,
-                                  size: 30,
+                                  size: 20,
                                 ),
                               ),
                               Padding(
@@ -214,7 +214,7 @@ class _OrdersTabState extends State<OrdersTab> {
                                 child: Text(
                                   "Buy Data",
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -226,6 +226,7 @@ class _OrdersTabState extends State<OrdersTab> {
                     ),
                   ],
                 ),
+                SizedBox(height: 10),
                 Row(
                   children: [
                     Text(

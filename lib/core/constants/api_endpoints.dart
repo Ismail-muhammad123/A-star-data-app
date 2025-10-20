@@ -17,10 +17,7 @@ class ProfileEndpoints {
   final String getProfile = "$baseUrl/account/profile/";
   final String updateProfile = "$baseUrl/account/profile/";
   final String changePin = "$baseUrl/account/change-pin/";
-
-  final String kycStatus = "$baseUrl/account/kyc/status/";
-  final String kycUpdate = "$baseUrl/account/kyc/update/";
-  final String kycSubmit = "$baseUrl/account/kyc/submit/";
+  final String upgradeAccountTier = "$baseUrl/account/upgrade-account/";
 
   // final String bankInfoSubmit = "$baseUrl/account/bank-details/create/";
   // final String bankInfoUpdate = "$baseUrl/account/bank-details/update/";
@@ -30,6 +27,7 @@ class ProfileEndpoints {
 
 class WalletEndpoints {
   final String getWallet = "$baseUrl/wallet/";
+  final String getVirtualAccount = "$baseUrl/wallet/virtual-account/";
   final String fundWallet = "$baseUrl/wallet/deposit/";
   final String withdraw = "$baseUrl/wallet/withdraw/";
   final String walletTransactions = "$baseUrl/wallet/transactions/";

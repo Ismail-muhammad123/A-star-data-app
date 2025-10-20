@@ -2,6 +2,7 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/profile/data/repositories/profile_repo.dart';
 import 'package:app/features/profile/providers/profile_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -13,14 +14,18 @@ class ProfileFormPage extends StatefulWidget {
 }
 
 class _ProfileFormPageState extends State<ProfileFormPage> {
-  final TextEditingController _emailCOntroller = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _bvnController = TextEditingController();
+  final TextEditingController _ninController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
     _nameController.dispose();
-    _emailCOntroller.dispose();
+    _emailController.dispose();
+    _bvnController.dispose();
+    _ninController.dispose();
     super.dispose();
   }
 
@@ -33,8 +38,10 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
   _initialize() {
     var profileRef =
         Provider.of<ProfileProvider>(context, listen: true).profile;
-    _emailCOntroller.text = profileRef?.email ?? "";
+    _emailController.text = profileRef?.email ?? "";
     _nameController.text = profileRef?.fullName ?? "";
+    _bvnController.text = profileRef?.bvn ?? "";
+    _ninController.text = profileRef?.bvn ?? "";
   }
 
   _updateProfile() async {
@@ -42,10 +49,13 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
       _isLoading = true;
     });
     try {
-      var res = await ProfileService().updateUserProfile(
-        context.read<AuthProvider>().authToken ?? "",
-        {"email": _emailCOntroller.text, "full_name": _nameController.text},
-      );
+      var res = await ProfileService()
+          .updateUserProfile(context.read<AuthProvider>().authToken ?? "", {
+            "email": _emailController.text,
+            "full_name": _nameController.text,
+            'bvn': _bvnController.text,
+            'nin': _ninController.text,
+          });
       if (res != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -60,12 +70,12 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
           context.canPop() ? context.pop() : context.go("/profile");
         }
       } else {
-        throw Exception("An error has ocured");
+        throw Exception("An error has occurred");
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Profile Updatee failed."),
+          content: Text("Profile Update failed."),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -112,7 +122,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _emailCOntroller,
+                controller: _emailController,
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
                   labelText: 'Email',
@@ -121,6 +131,32 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
                   ),
                 ),
                 keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _bvnController,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                  labelText: 'BVN',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _ninController,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                  labelText: 'NIN',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
             ],
           ),

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:app/core/constants/api_endpoints.dart';
 import 'package:app/features/wallet/data/models/wallet.dart';
 import 'package:dio/dio.dart';
@@ -76,7 +75,7 @@ class WalletService {
   ) async {
     var response = await _dio.post(
       _endpoints.fundWallet,
-      data: jsonEncode({"amount": amount}),
+      data: jsonEncode({"amount": amount, "method": "transfer"}),
       options: Options(
         validateStatus: (status) => true,
         headers: {
@@ -134,26 +133,4 @@ class WalletService {
       throw Exception('Failed to load wallet balance');
     }
   }
-  // Future<Map<String, dynamic>?> withdrawFunds(
-  //   String authToken,
-  //   double amount,
-  // ) async {
-  //   var response = await _dio.post(
-  //     _endpoints.withdraw,
-  //     data: jsonEncode({"amount": amount}),
-  //     options: Options(
-  //       validateStatus: (status) => true,
-  //       headers: {
-  //         "Authorization": "Bearer $authToken",
-  //         'Content-Type': 'application/json',
-  //       },
-  //     ),
-  //   );
-
-  //   if (response.statusCode == 201) {
-  //     return response.data as Map<String, dynamic>;
-  //   } else {
-  //     throw Exception('Failed to initiate withdrawal request from wallet');
-  //   }
-  // }
 }

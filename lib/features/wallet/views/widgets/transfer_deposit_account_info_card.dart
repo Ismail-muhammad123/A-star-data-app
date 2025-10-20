@@ -5,13 +5,15 @@ class TransferDepositAccountInfoCard extends StatefulWidget {
   final String accountNumber;
   final String bankName;
   final String accountName;
-  final double amount;
+  final double? amount;
+  final Color? color;
   const TransferDepositAccountInfoCard({
     super.key,
     required this.accountNumber,
     required this.bankName,
     required this.accountName,
-    required this.amount,
+    this.amount,
+    this.color,
   });
 
   @override
@@ -26,7 +28,7 @@ class _TransferDepositAccountInfoCardState
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: widget.color ?? Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -69,24 +71,26 @@ class _TransferDepositAccountInfoCardState
               ),
             ],
           ),
-          const Divider(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Amount',
-                style: TextStyle(fontSize: 14, color: Colors.black87),
+          widget.amount == null ? SizedBox() : const Divider(height: 24),
+          widget.amount == null
+              ? SizedBox()
+              : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Amount',
+                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                  Text(
+                    '₦${widget.amount?.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                '₦${widget.amount.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );

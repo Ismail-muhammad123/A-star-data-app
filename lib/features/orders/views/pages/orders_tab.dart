@@ -42,6 +42,7 @@ class _OrdersTabState extends State<OrdersTab> {
             child: Column(
               children: [
                 Container(
+                  width: double.maxFinite,
                   padding: EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -60,7 +61,7 @@ class _OrdersTabState extends State<OrdersTab> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          "Available balance",
+                          "Available Wallet Balance",
                           style: TextStyle(color: Colors.grey),
                         ),
                       ),
@@ -108,10 +109,10 @@ class _OrdersTabState extends State<OrdersTab> {
                               color: Colors.blue,
                               onPressed:
                                   () => context
-                                      .push("/wallet/fund")
+                                      .push("/wallet")
                                       .then((_) => setState(() {})),
                               child: Text(
-                                "Fund Wallet",
+                                "Go to Wallet",
                                 style: TextStyle(
                                   fontSize: 18,
                                   color: Colors.white,

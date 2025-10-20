@@ -1,4 +1,5 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
+import 'package:app/features/profile/providers/profile_provider.dart';
 import 'package:app/features/wallet/data/repository/wallet_repo.dart';
 import 'package:app/features/wallet/views/widgets/transfer_deposit_account_info_card.dart';
 import 'package:flutter/material.dart';
@@ -222,6 +223,7 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    var profileRef = context.watch<ProfileProvider>().profile;
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
@@ -244,7 +246,7 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
           onPressed:
               _isLoading
                   ? null
-                  : paymentMethod == "card"
+                  : profileRef?.tier == 2 || paymentMethod == "card"
                   ? _initCardPayment
                   : paymentInfo == null
                   ? _getPaymentInfo
@@ -273,6 +275,77 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            profileRef?.tier == 2 ? SizedBox() : Text("Payment Method:"),
+            profileRef?.tier == 2
+                ? SizedBox()
+                : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: GestureDetector(
+                        onTap:
+                            _isLoading
+                                ? null
+                                : () {
+                                  setState(() => paymentMethod = "transfer");
+                                },
+                        child: Container(
+                          padding: EdgeInsets.all(6.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              width: paymentMethod == "transfer" ? 2 : 1,
+                              color:
+                                  paymentMethod == "transfer"
+                                      ? Colors.blue
+                                      : Colors.lightBlue[100]!,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.send),
+                              SizedBox(width: 10),
+                              Text("Bank Transfer"),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Flexible(
+                      child: GestureDetector(
+                        onTap:
+                            _isLoading
+                                ? null
+                                : () {
+                                  setState(() => paymentMethod = "card");
+                                },
+                        child: Container(
+                          padding: EdgeInsets.all(6.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              width: paymentMethod == "card" ? 2 : 1,
+                              color:
+                                  paymentMethod == "card"
+                                      ? Colors.blue
+                                      : Colors.lightBlue[100]!,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.credit_card),
+                              SizedBox(width: 4),
+                              Text("Card Payment"),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+            SizedBox(height: 20),
             Text("Amount:"),
             SizedBox(height: 5.0),
             TextFormField(
@@ -296,74 +369,6 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
                 hintText: "Min. of N100",
                 contentPadding: EdgeInsets.symmetric(horizontal: 4.0),
               ),
-            ),
-            SizedBox(height: 20),
-            Text("Payment Method:"),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: GestureDetector(
-                    onTap:
-                        _isLoading
-                            ? null
-                            : () {
-                              setState(() => paymentMethod = "transfer");
-                            },
-                    child: Container(
-                      padding: EdgeInsets.all(6.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          width: paymentMethod == "transfer" ? 2 : 1,
-                          color:
-                              paymentMethod == "transfer"
-                                  ? Colors.blue
-                                  : Colors.lightBlue[100]!,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.send),
-                          SizedBox(width: 10),
-                          Text("Bank Transfer"),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                Flexible(
-                  child: GestureDetector(
-                    onTap:
-                        _isLoading
-                            ? null
-                            : () {
-                              setState(() => paymentMethod = "card");
-                            },
-                    child: Container(
-                      padding: EdgeInsets.all(6.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          width: paymentMethod == "card" ? 2 : 1,
-                          color:
-                              paymentMethod == "card"
-                                  ? Colors.blue
-                                  : Colors.lightBlue[100]!,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.credit_card),
-                          SizedBox(width: 4),
-                          Text("Card Payment"),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
 
             SizedBox(height: 20),

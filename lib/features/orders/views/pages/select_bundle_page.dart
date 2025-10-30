@@ -35,9 +35,11 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
       print(bundles.length);
       setState(() {
         _allBundles =
-            bundles.where((b) => b.serviceType == widget.networkId).toList();
+            bundles.where((b) => b.serviceType == widget.networkId).toList()
+              ..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
         _filteredBundles =
-            bundles.where((b) => b.serviceType == widget.networkId).toList();
+            bundles.where((b) => b.serviceType == widget.networkId).toList()
+              ..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
       });
     });
   }
@@ -54,7 +56,8 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
                       query.toLowerCase(),
                     ),
               )
-              .toList();
+              .toList()
+            ..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
     });
   }
 
@@ -65,7 +68,14 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Select Data Plan')),
+      appBar: AppBar(
+        title: const Text(
+          'Select Data Plan',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.lightBlue,
+        surfaceTintColor: Colors.lightBlue,
+      ),
       body: FutureBuilder<List<DataBundle>>(
         future: _bundlesFuture,
         builder: (context, snapshot) {
@@ -102,14 +112,16 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
                                 vertical: 4.0,
                                 horizontal: 2,
                               ),
-                              child: ListTile(
-                                tileColor: Colors.white,
-                                title: Text(bundle.name),
-                                subtitle: Text(bundle.description),
-                                trailing: Text(
-                                  '₦${bundle.sellingPrice.toStringAsFixed(0)}',
+                              child: Card(
+                                child: ListTile(
+                                  tileColor: Colors.white,
+                                  title: Text(bundle.name),
+                                  subtitle: Text(bundle.description),
+                                  trailing: Text(
+                                    '₦${bundle.sellingPrice.toStringAsFixed(0)}',
+                                  ),
+                                  onTap: () => _onBundleSelected(bundle),
                                 ),
-                                onTap: () => _onBundleSelected(bundle),
                               ),
                             );
                           },

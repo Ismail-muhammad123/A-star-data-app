@@ -1,5 +1,5 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
-import 'package:app/features/profile/providers/profile_provider.dart';
+// import 'package:app/features/profile/providers/profile_provider.dart';
 import 'package:app/features/wallet/data/models/wallet.dart';
 import 'package:app/features/wallet/data/repository/wallet_repo.dart';
 import 'package:app/features/wallet/views/widgets/transaction_history_list.dart';
@@ -102,118 +102,77 @@ class _WalletPageState extends State<WalletPage> {
                   ),
                   SizedBox(height: 10),
 
-                  context.watch<ProfileProvider>().profile?.tier == 2
-                      ? FutureBuilder<VirtualAccount>(
-                        future: WalletService().getVirtualAccount(
-                          context.read<AuthProvider>().authToken ?? "",
-                        ),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return SizedBox();
-                          }
-                          if (!snapshot.hasData || snapshot.hasError) {
-                            return Text("ERROR");
-                          }
-                          var account = snapshot.data!;
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
+                  FutureBuilder<VirtualAccount>(
+                    future: WalletService().getVirtualAccount(
+                      context.read<AuthProvider>().authToken ?? "",
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return SizedBox();
+                      }
+                      if (!snapshot.hasData || snapshot.hasError) {
+                        return SizedBox();
+                      }
+                      var account = snapshot.data!;
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Fund via transfer",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 6.0),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TransferDepositAccountInfoCard(
-                                  accountName: account.accountName,
-                                  accountNumber: account.accountNumber,
-                                  bankName: account.bankName,
-                                  color: Colors.lightBlue[50],
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: MaterialButton(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      height: 40,
-                                      color: Colors.blue,
-                                      onPressed:
-                                          () => context
-                                              .push("/wallet/fund")
-                                              .then((_) => setState(() {})),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.credit_card,
-                                            color: Colors.white,
-                                          ),
-                                          SizedBox(width: 10),
-                                          Text(
-                                            "Fund with Card",
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                "Fund via transfer",
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                             ],
-                          );
-                        },
-                      )
-                      : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: MaterialButton(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              height: 40,
-                              color: Colors.blue,
-                              onPressed:
-                                  () => context
-                                      .push("/wallet/fund")
-                                      .then((_) => setState(() {})),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.payment, color: Colors.white),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    "Fund Wallet",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          ),
+                          SizedBox(height: 6.0),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TransferDepositAccountInfoCard(
+                              accountName: account.accountName,
+                              accountNumber: account.accountNumber,
+                              bankName: account.bankName,
+                              color: Colors.lightBlue[50],
                             ),
                           ),
                         ],
+                      );
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: MaterialButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          height: 40,
+                          color: Colors.blue,
+                          onPressed:
+                              () => context
+                                  .push("/wallet/fund")
+                                  .then((_) => setState(() {})),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.payment, color: Colors.white),
+                              SizedBox(width: 10),
+                              Text(
+                                "Fund with Card",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
+                    ],
+                  ),
                 ],
               ),
             ),

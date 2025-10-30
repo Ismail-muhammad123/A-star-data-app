@@ -35,6 +35,7 @@ dependencies:
   webview_flutter:
   permission_handler: 
   flutter_launcher_icons:
+  font_awesome_flutter:
   
 dev_dependencies:
   flutter_test:

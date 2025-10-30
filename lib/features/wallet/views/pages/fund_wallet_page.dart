@@ -1,7 +1,10 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/profile/providers/profile_provider.dart';
 import 'package:app/features/wallet/data/repository/wallet_repo.dart';
+import 'package:app/features/wallet/views/pages/funding_guide_page.dart';
+import 'package:app/features/wallet/views/pages/webview_payment_page.dart';
 import 'package:app/features/wallet/views/widgets/transfer_deposit_account_info_card.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -47,60 +50,69 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
         throw Exception('Failed to fetch payment info');
       }
 
-      var checkoutUrl = res['responseBody']['checkoutUrl'];
-      var uri = Uri.parse(checkoutUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      } else {
-        print("cant launch payment URL");
-      }
+      // print(res);
 
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: Text("Payment Initiated"),
-                content: Text(
-                  "Your card payment has been initiated. If the payment page did not open, tap the button below to open it manually in your browser.",
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () async {
-                      var checkoutUrl = res['responseBody']['checkoutUrl'];
-                      var uri = Uri.parse(checkoutUrl);
-                      if (await canLaunchUrl(uri)) {
-                        await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Could not launch payment link"),
-                          ),
-                        );
-                      }
-                    },
-                    child: Text("Open Payment Link"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      setState(() {
-                        _amountController.clear();
-                      });
-                      context.canPop() ? context.pop() : context.go("/wallet");
-                    },
-                    child: Text("Done"),
-                  ),
-                ],
-              ),
+      var checkoutUrl = res['authorization_url'];
+
+      if (!kIsWeb) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => PaymentWebViewPage(paymentUrl: checkoutUrl),
+          ),
         );
-        // setState(() {
-        //   _amountController.clear();
-        // });
-        // context.canPop() ? context.pop() : context.go("/wallet");
+      } else {
+        var uri = Uri.parse(checkoutUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri);
+        } else {
+          print("can't launch payment URL");
+        }
+
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder:
+                (context) => AlertDialog(
+                  title: Text("Payment Initiated"),
+                  content: Text(
+                    "Your card payment has been initiated. If the payment page did not open, tap the button below to open it manually in your browser.",
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () async {
+                        var checkoutUrl = res['responseBody']['checkoutUrl'];
+                        var uri = Uri.parse(checkoutUrl);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Could not launch payment link"),
+                            ),
+                          );
+                        }
+                      },
+                      child: Text("Open Payment Link"),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          _amountController.clear();
+                        });
+                        context.canPop()
+                            ? context.pop()
+                            : context.go("/wallet");
+                      },
+                      child: Text("Done"),
+                    ),
+                  ],
+                ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -275,6 +287,32 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            GestureDetector(
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const FundingGuidePage()),
+                  ),
+              child: Container(
+                padding: EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  border: Border.all(color: Colors.blue),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(Icons.help, color: Colors.blue),
+                    ),
+                    Text("How to fund wallet."),
+                  ],
+                ),
+              ),
+            ),
+
             profileRef?.tier == 2 ? SizedBox() : Text("Payment Method:"),
             profileRef?.tier == 2
                 ? SizedBox()

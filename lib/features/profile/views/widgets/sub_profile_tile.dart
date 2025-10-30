@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 
 class ProfileSubSectionTile extends StatelessWidget {
   final String? title, subTitle;
-  final IconData? leading, trailing;
+  final IconData? leadingIcon, trailingIcon;
   final bool? isCompleted;
   final Color? leadingIconColor;
+  final Widget? leading, trailing;
   final double iconSize;
   const ProfileSubSectionTile({
     super.key,
     this.title,
     this.subTitle,
+    this.leadingIcon,
+    this.trailingIcon,
     this.leading,
     this.trailing,
     this.isCompleted,
@@ -38,11 +41,13 @@ class ProfileSubSectionTile extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Icon(
-              leading,
-              color: leadingIconColor ?? Colors.grey,
-              size: iconSize,
-            ),
+            child:
+                leading ??
+                Icon(
+                  leadingIcon,
+                  color: leadingIconColor ?? Colors.grey,
+                  size: iconSize,
+                ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,6 +60,8 @@ class ProfileSubSectionTile extends StatelessWidget {
               Text(subTitle ?? "", overflow: TextOverflow.ellipsis),
             ],
           ),
+          Spacer(),
+          trailing ?? SizedBox(),
         ],
       ),
     );

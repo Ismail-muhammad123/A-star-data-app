@@ -107,9 +107,9 @@ class WalletService {
         },
       ),
     );
-    print(response);
+    // print(response);
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return (response.data as Map<String, dynamic>)['monnify_response'];
+      return (response.data as Map<String, dynamic>)['response'];
     } else {
       throw Exception('Failed to initiate deposit into wallet');
     }
@@ -130,7 +130,7 @@ class WalletService {
     if (response.statusCode == 200) {
       return VirtualAccount.fromJson(response.data);
     } else {
-      throw Exception('Failed to load wallet balance');
+      throw Exception('Failed to load virtual wallet');
     }
   }
 }

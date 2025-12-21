@@ -1,4 +1,5 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
+import 'package:app/features/profile/data/models/profile_model.dart';
 import 'package:app/features/profile/providers/profile_provider.dart';
 import 'package:app/features/profile/views/widgets/sub_profile_tile.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +73,41 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  int _calculateProfileCompletion(UserProfile? profile) {
+    int completionPercentage = 0;
+    int totalFields = 0;
+
+    if (profile == null) {
+      return 0;
+    }
+
+    // Check phoneNumber
+    totalFields++;
+    if (profile.phoneNumber.isNotEmpty) {
+      completionPercentage += 25;
+    }
+
+    // Check email
+    totalFields++;
+    if (profile.email != null && profile.email!.isNotEmpty) {
+      completionPercentage += 25;
+    }
+
+    // Check email
+    totalFields++;
+    if (profile.bvn != null && profile.bvn!.isNotEmpty) {
+      completionPercentage += 25;
+    }
+
+    // Check tier
+    totalFields++;
+    if (profile.tier == 2) {
+      completionPercentage += 25;
+    }
+
+    return (completionPercentage / (totalFields * 25)) * 100 ~/ 1;
+  }
+
   @override
   Widget build(BuildContext context) {
     var profileInfoRef =
@@ -88,45 +124,87 @@ class _ProfilePageState extends State<ProfilePage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                radius: 40,
-                child: Icon(Icons.person, size: 40),
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  MaterialButton(
-                    onPressed:
-                        () => context
-                            .push("/profile/update")
-                            .then(
-                              (_) => ProfileProvider().loadProfile(
-                                context.read<AuthProvider>().authToken ?? "",
+              Card(
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.grey[100],
+                            radius: 30,
+                            child: Icon(Icons.person, size: 30),
+                          ),
+                          SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                profileInfoRef?.phoneNumber ?? "Phone Number",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[700],
+                                ),
                               ),
+                              SizedBox(height: 4),
+                              Text(
+                                "Tier ${profileInfoRef?.tier ?? "N/A"}",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          MaterialButton(
+                            onPressed:
+                                () => context
+                                    .push("/profile/update")
+                                    .then(
+                                      (_) => ProfileProvider().loadProfile(
+                                        context
+                                                .read<AuthProvider>()
+                                                .authToken ??
+                                            "",
+                                      ),
+                                    ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    height: 30,
-                    minWidth: 100,
-                    color: Colors.lightBlueAccent,
-                    child: Text("Edit Profile"),
+                            height: 30,
+                            minWidth: 100,
+                            color: Colors.lightBlueAccent,
+                            child: Text("Edit Profile"),
+                          ),
+                          SizedBox(width: 10),
+                          MaterialButton(
+                            onPressed:
+                                () => context.push("/profile/change-pin"),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            height: 30,
+                            minWidth: 100,
+                            color: Colors.lightBlueAccent,
+                            child: Text("Change PIN"),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 10),
-                  MaterialButton(
-                    onPressed: () => context.push("/profile/change-pin"),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    height: 30,
-                    minWidth: 100,
-                    color: Colors.lightBlueAccent,
-                    child: Text("Change PIN"),
-                  ),
-                ],
+                ),
               ),
+
               SizedBox(height: 10),
               GestureDetector(
                 onTap:
@@ -138,48 +216,16 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                 child: ProfileSubSectionTile(
-                  title: "Full Name",
+                  title: "My Profile",
                   subTitle:
-                      profileInfoRef?.fullName ?? "Click here to add your name",
+                      "${_calculateProfileCompletion(profileInfoRef)}% Complete",
                   leadingIcon: Icons.person,
                   isCompleted: true,
                 ),
               ),
               SizedBox(height: 6.0),
               GestureDetector(
-                child: ProfileSubSectionTile(
-                  title: "Phone Number",
-                  subTitle:
-                      profileInfoRef != null
-                          ? profileInfoRef.phoneNumber
-                          : "Your Phone Number",
-                  leadingIcon: Icons.phone,
-                  isCompleted: true,
-                ),
-              ),
-              SizedBox(height: 6.0),
-              GestureDetector(
-                onTap:
-                    () => context
-                        .push("/profile/update")
-                        .then(
-                          (_) => ProfileProvider().loadProfile(
-                            context.read<AuthProvider>().authToken ?? "",
-                          ),
-                        ),
-                child: ProfileSubSectionTile(
-                  title: "Email",
-                  subTitle:
-                      (profileInfoRef?.email ?? "").isEmpty
-                          ? "Click here to add your email"
-                          : profileInfoRef?.email ?? "",
-                  leadingIcon: Icons.email,
-                  isCompleted: true,
-                ),
-              ),
-              SizedBox(height: 6.0),
-              GestureDetector(
-                // onTap: () => context.push('/profile/tier'),
+                onTap: () => context.push('/profile/tier'),
                 child: ProfileSubSectionTile(
                   title: "Upgrade Account",
                   subTitle: "Currently: Tier ${profileInfoRef?.tier}",

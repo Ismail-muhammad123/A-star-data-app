@@ -85,8 +85,9 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
         padding: const EdgeInsets.all(10.0),
 
         child:
-            (profileInfoRef?.bvn ?? "") == "" ||
-                    (profileInfoRef?.nin ?? "") == ""
+            (profileInfoRef?.bvn ?? "").isEmpty ||
+                    (profileInfoRef?.email ?? "").isEmpty ||
+                    (profileInfoRef?.fullName ?? "").isEmpty
                 ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

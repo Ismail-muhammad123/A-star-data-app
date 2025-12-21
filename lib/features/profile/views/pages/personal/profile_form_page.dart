@@ -17,7 +17,6 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _bvnController = TextEditingController();
-  final TextEditingController _ninController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -25,7 +24,6 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     _nameController.dispose();
     _emailController.dispose();
     _bvnController.dispose();
-    _ninController.dispose();
     super.dispose();
   }
 
@@ -41,7 +39,6 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     _emailController.text = profileRef?.email ?? "";
     _nameController.text = profileRef?.fullName ?? "";
     _bvnController.text = profileRef?.bvn ?? "";
-    _ninController.text = profileRef?.bvn ?? "";
   }
 
   _updateProfile() async {
@@ -54,7 +51,6 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
             "email": _emailController.text,
             "full_name": _nameController.text,
             'bvn': _bvnController.text,
-            'nin': _ninController.text,
           });
       if (res != null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -138,19 +134,6 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
                   labelText: 'BVN',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _ninController,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                  labelText: 'NIN',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   ),

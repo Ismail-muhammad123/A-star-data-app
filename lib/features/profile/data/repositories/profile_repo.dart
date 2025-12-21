@@ -92,7 +92,8 @@ class ProfileService {
           },
         ),
       );
-      if (response.statusCode != 201) {
+      if (response.statusCode != 200) {
+        print(response);
         throw Exception(response.data['error'] ?? "Failed to upgrade account");
       }
     } catch (e) {

@@ -148,4 +148,20 @@ class AuthService {
       throw Exception(response.data['error'] ?? 'Failed to register');
     }
   }
+
+  Future<void> closeAccount(String authToken) async {
+    final response = await _dio.post(
+      endpoints.closeAccount,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to close account');
+    }
+  }
 }

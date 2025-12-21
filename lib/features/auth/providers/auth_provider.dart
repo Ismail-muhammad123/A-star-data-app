@@ -126,4 +126,16 @@ class AuthProvider extends ChangeNotifier {
     _isAuthenticated = false;
     notifyListeners();
   }
+
+  Future<void> closeAccount() async {
+    final prefs = await SharedPreferences.getInstance();
+    var token = prefs.getString('auth_token');
+    if (token != null) {
+      await _authService.closeAccount(token);
+    }
+    await prefs.remove('auth_token');
+    await prefs.remove('refresh_token');
+    _isAuthenticated = false;
+    notifyListeners();
+  }
 }

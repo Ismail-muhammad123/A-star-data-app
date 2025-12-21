@@ -87,7 +87,8 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
         child:
             (profileInfoRef?.bvn ?? "").isEmpty ||
                     (profileInfoRef?.email ?? "").isEmpty ||
-                    (profileInfoRef?.fullName ?? "").isEmpty
+                    (profileInfoRef?.firstName ?? "").isEmpty ||
+                    (profileInfoRef?.lastName ?? "").isEmpty
                 ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

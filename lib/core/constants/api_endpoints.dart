@@ -11,6 +11,7 @@ class AuthEndpoints {
       "$baseUrl/account/resend-activation-code/";
   final String activateAccount = "$baseUrl/account/activate-account/";
   final String confirmPinReset = "$baseUrl/account/confirm-reset-password/";
+  final String closeAccount = "$baseUrl/account/close-account/";
 }
 
 class ProfileEndpoints {

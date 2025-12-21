@@ -23,7 +23,7 @@ class _OrdersTabState extends State<OrdersTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Welcome"),
+        title: Text("A-Star Data & Airtime"),
         elevation: 0,
         backgroundColor: Colors.lightBlue,
         actions: [

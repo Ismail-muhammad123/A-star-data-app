@@ -74,38 +74,50 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   int _calculateProfileCompletion(UserProfile? profile) {
-    int completionPercentage = 0;
+    int completedFields = 0;
     int totalFields = 0;
 
     if (profile == null) {
       return 0;
     }
 
+    // Check firstName
+    totalFields++;
+    if (profile.firstName != null && profile.firstName!.isNotEmpty) {
+      completedFields++;
+    }
+
+    // Check lastName
+    totalFields++;
+    if (profile.lastName != null && profile.lastName!.isNotEmpty) {
+      completedFields++;
+    }
+
     // Check phoneNumber
     totalFields++;
     if (profile.phoneNumber.isNotEmpty) {
-      completionPercentage += 25;
+      completedFields++;
     }
 
     // Check email
     totalFields++;
     if (profile.email != null && profile.email!.isNotEmpty) {
-      completionPercentage += 25;
+      completedFields++;
     }
 
     // Check email
     totalFields++;
     if (profile.bvn != null && profile.bvn!.isNotEmpty) {
-      completionPercentage += 25;
+      completedFields++;
     }
 
     // Check tier
     totalFields++;
     if (profile.tier == 2) {
-      completionPercentage += 25;
+      completedFields++;
     }
 
-    return (completionPercentage / (totalFields * 25)) * 100 ~/ 1;
+    return (completedFields / (totalFields)) * 100 ~/ 1;
   }
 
   @override
@@ -116,7 +128,7 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: Text("My Profile", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.lightBlue,
-        centerTitle: true,
+        surfaceTintColor: Colors.lightBlue,
       ),
       backgroundColor: Colors.lightBlue[50],
       body: Padding(
@@ -260,6 +272,48 @@ class _ProfilePageState extends State<ProfilePage> {
                   title: "Logout",
                   subTitle: "log out of your account",
                   leadingIcon: Icons.logout,
+                  leadingIconColor: Colors.red,
+                  // trailing: Icons.check_circle_sharp,
+                  // isCompleted: true,
+                ),
+              ),
+              Divider(),
+              GestureDetector(
+                onTap:
+                    () => showDialog(
+                      context: context,
+                      builder:
+                          (ctx) => AlertDialog(
+                            icon: Icon(Icons.warning, color: Colors.red),
+                            title: const Text("Close Account"),
+                            content: const Text(
+                              "Are you sure you want to permanently close your account? This action cannot be undone.",
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text("Cancel"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(ctx).pop();
+                                  context
+                                      .read<AuthProvider>()
+                                      .closeAccount()
+                                      .then((_) => context.go("/"));
+                                },
+                                child: const Text(
+                                  "Close Account",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                    ),
+                child: ProfileSubSectionTile(
+                  title: "Close Account",
+                  subTitle: "permanently close your account",
+                  leadingIcon: Icons.delete_forever,
                   leadingIconColor: Colors.red,
                   // trailing: Icons.check_circle_sharp,
                   // isCompleted: true,

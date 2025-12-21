@@ -15,13 +15,17 @@ class ProfileFormPage extends StatefulWidget {
 
 class _ProfileFormPageState extends State<ProfileFormPage> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _middleNameController = TextEditingController();
   final TextEditingController _bvnController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _middleNameController.dispose();
     _emailController.dispose();
     _bvnController.dispose();
     super.dispose();
@@ -37,7 +41,9 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     var profileRef =
         Provider.of<ProfileProvider>(context, listen: true).profile;
     _emailController.text = profileRef?.email ?? "";
-    _nameController.text = profileRef?.fullName ?? "";
+    _firstNameController.text = profileRef?.firstName ?? "";
+    _lastNameController.text = profileRef?.lastName ?? "";
+    _middleNameController.text = profileRef?.middleName ?? "";
     _bvnController.text = profileRef?.bvn ?? "";
   }
 
@@ -49,7 +55,9 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
       var res = await ProfileService()
           .updateUserProfile(context.read<AuthProvider>().authToken ?? "", {
             "email": _emailController.text,
-            "full_name": _nameController.text,
+            "first_name": _firstNameController.text,
+            "last_name": _lastNameController.text,
+            "middle_name": _middleNameController.text,
             'bvn': _bvnController.text,
           });
       if (res != null) {
@@ -106,10 +114,34 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
           child: Column(
             children: [
               TextFormField(
-                controller: _nameController,
+                controller: _firstNameController,
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                  labelText: 'Full Name',
+                  labelText: 'First Name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+                keyboardType: TextInputType.name,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                  labelText: 'Last Name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+                keyboardType: TextInputType.name,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _middleNameController,
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                  labelText: 'Middle Name',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   ),

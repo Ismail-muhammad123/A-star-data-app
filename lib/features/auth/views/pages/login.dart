@@ -20,6 +20,18 @@ class _LoginPageState extends State<LoginPage> {
   bool _isLoading = false;
 
   void handleLogin(BuildContext context) async {
+    if (_phoneNumberController.text.isEmpty || _pinController.text.isEmpty) {
+      await showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text("Error", style: TextStyle(color: Colors.red)),
+              content: Text("Please enter both phone number and pin."),
+            ),
+      );
+      return;
+    }
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     setState(() {
       _isLoading = true;
@@ -33,6 +45,8 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         _isLoading = false;
       });
+
+      print("Login Response: $res");
       if (res!['success'] == true) {
         if (mounted) {
           final nextUri = GoRouterState.of(context).uri.queryParameters['next'];

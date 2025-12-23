@@ -12,15 +12,15 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
       ],
-      child: const TubaliApp(),
+      child: const AStarDataApp(),
     ),
   );
 }
 
 class SurfaceAndroidWebView {}
 
-class TubaliApp extends StatelessWidget {
-  const TubaliApp({super.key});
+class AStarDataApp extends StatelessWidget {
+  const AStarDataApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(

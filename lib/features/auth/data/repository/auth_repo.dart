@@ -42,6 +42,7 @@ class AuthService {
         "email": email,
       }),
     );
+    print(response.data);
     if (response.statusCode == 201 || response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     } else {

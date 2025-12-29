@@ -66,6 +66,7 @@ class _SignUpPageState extends State<SignUpPage> {
         if (!mounted) return;
         context.go('/activate-account', extra: _phoneController.text);
       } else {
+        print(res);
         if (mounted) {
           await showDialog(
             context: context,
@@ -84,6 +85,7 @@ class _SignUpPageState extends State<SignUpPage> {
         return;
       }
     } catch (e) {
+      print(e);
       if (mounted) {
         await showDialog(
           context: context,

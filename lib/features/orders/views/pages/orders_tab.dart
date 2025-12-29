@@ -299,40 +299,40 @@ class _OrdersTabState extends State<OrdersTab> {
                     ),
                   ],
                 ),
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.7,
-                    minHeight: 200,
+                FutureBuilder<List<OrderHistory>>(
+                  future: OrderServices().getTransactions(
+                    context.read<AuthProvider>().authToken ?? "",
                   ),
-                  child: FutureBuilder<List<OrderHistory>>(
-                    future: OrderServices().getTransactions(
-                      context.read<AuthProvider>().authToken ?? "",
-                    ),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (!snapshot.hasData || snapshot.hasError) {
-                        return Center(
-                          child: Text("Error loading transactions"),
-                        );
-                      }
-                      var transactions = snapshot.data!;
-                      if (transactions.isEmpty) {
-                        return Center(child: Text("No transactions found"));
-                      }
-                      transactions.sort((a, b) => b.time.compareTo(a.time));
-                      transactions = transactions.take(10).toList();
-
-                      return ListView.builder(
-                        itemCount: transactions.length,
-                        itemBuilder:
-                            (context, index) => OrderTransactionTile(
-                              transaction: transactions[index],
-                            ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData || snapshot.hasError) {
+                      return Center(child: Text("Error loading transactions"));
+                    }
+                    var transactions = snapshot.data!;
+                    if (transactions.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(18.0),
+                          child: Text("No Subscriptions found"),
+                        ),
                       );
-                    },
-                  ),
+                    }
+                    transactions.sort((a, b) => b.time.compareTo(a.time));
+                    transactions = transactions.take(10).toList();
+
+                    return Column(
+                      children:
+                          transactions
+                              .map(
+                                (transaction) => OrderTransactionTile(
+                                  transaction: transaction,
+                                ),
+                              )
+                              .toList(),
+                    );
+                  },
                 ),
               ],
             ),

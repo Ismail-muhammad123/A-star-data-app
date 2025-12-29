@@ -3,7 +3,6 @@ import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_cors_image/flutter_cors_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -145,30 +144,37 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                         bool isSelected = _selectedNetworkId == network.id;
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: Container(
-                            padding: EdgeInsets.all(6.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                width: isSelected ? 2 : 1,
-                                color:
-                                    isSelected
-                                        ? Colors.blue
-                                        : Colors.lightBlue[100]!,
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_isLoading) return;
+                              setState(() {
+                                _selectedNetworkId =
+                                    _selectedNetworkId = network.id;
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(6.0),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  width: isSelected ? 2 : 1,
+                                  color:
+                                      isSelected
+                                          ? Colors.blue
+                                          : Colors.lightBlue[100]!,
+                                ),
                               ),
-                            ),
-                            child: CustomNetworkImage(
-                              url: network.imageUrl,
-                              width: 80,
-                              height: 80,
-                              fit: BoxFit.cover,
-                              onTap: () {
-                                if (_isLoading) return;
-                                setState(() {
-                                  _selectedNetworkId =
-                                      _selectedNetworkId = network.id;
-                                });
-                              },
+                              child: Image.network(
+                                network.imageUrl,
+                                webHtmlElementStrategy:
+                                    WebHtmlElementStrategy.prefer,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (context, error, stackTrace) =>
+                                        Text(network.name),
+                              ),
                             ),
                           ),
                         );
@@ -218,7 +224,7 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                 controller: _phoneController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: "enter phone number",
+                  hintText: "Enter phone number",
                 ),
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],

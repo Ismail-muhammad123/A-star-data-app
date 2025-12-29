@@ -36,7 +36,6 @@ dependencies:
   permission_handler: 
   flutter_launcher_icons:
   font_awesome_flutter:
-  flutter_cors_image:
   
 dev_dependencies:
   flutter_test:

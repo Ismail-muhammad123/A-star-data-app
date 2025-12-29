@@ -44,176 +44,180 @@ class _WalletPageState extends State<WalletPage> {
       backgroundColor: Colors.grey[50],
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Container(
-              width: double.maxFinite,
-              padding: EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color.fromARGB(88, 158, 158, 158),
-                    blurRadius: 10,
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "Available balance",
-                      style: TextStyle(color: Colors.grey),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                width: double.maxFinite,
+                padding: EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(88, 158, 158, 158),
+                      blurRadius: 10,
+                      offset: Offset(2, 2),
                     ),
-                  ),
-                  FutureBuilder<String>(
-                    future: WalletService().getBalance(
-                      context.read<AuthProvider>().authToken ?? "",
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        "Available balance",
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
-                      }
-                      if (!snapshot.hasData || snapshot.hasError) {
+                    FutureBuilder<String>(
+                      future: WalletService().getBalance(
+                        context.read<AuthProvider>().authToken ?? "",
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+                        if (!snapshot.hasData || snapshot.hasError) {
+                          return Text(
+                            "Error",
+                            style: TextStyle(
+                              fontSize: 30,
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        }
+                        // if (snapshot.data != null) {
+                        var balance = double.tryParse(snapshot.data!);
+
                         return Text(
-                          "Error",
-                          style: TextStyle(
-                            fontSize: 30,
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          NumberFormat.currency(
+                            locale: 'en_NG',
+                            symbol: '₦',
+                          ).format(balance ?? 0).toString(),
+                          style: TextStyle(fontSize: 28, color: Colors.black),
                         );
-                      }
-                      // if (snapshot.data != null) {
-                      var balance = double.tryParse(snapshot.data!);
-
-                      return Text(
-                        NumberFormat.currency(
-                          locale: 'en_NG',
-                          symbol: '₦',
-                        ).format(balance ?? 0).toString(),
-                        style: TextStyle(fontSize: 28, color: Colors.black),
-                      );
-                    },
-                  ),
-                  SizedBox(height: 10),
-
-                  FutureBuilder<VirtualAccount>(
-                    future: WalletService().getVirtualAccount(
-                      context.read<AuthProvider>().authToken ?? "",
+                      },
                     ),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return SizedBox();
-                      }
-                      if (!snapshot.hasData || snapshot.hasError) {
-                        return SizedBox();
-                      }
-                      var account = snapshot.data!;
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Fund via transfer",
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                    SizedBox(height: 10),
+
+                    FutureBuilder<VirtualAccount>(
+                      future: WalletService().getVirtualAccount(
+                        context.read<AuthProvider>().authToken ?? "",
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return SizedBox();
+                        }
+                        if (!snapshot.hasData || snapshot.hasError) {
+                          return SizedBox();
+                        }
+                        var account = snapshot.data!;
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Fund via transfer",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 6.0),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TransferDepositAccountInfoCard(
+                                accountName: account.accountName,
+                                accountNumber: account.accountNumber,
+                                bankName: account.bankName,
+                                color: Colors.lightBlue[50],
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 6.0),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TransferDepositAccountInfoCard(
-                              accountName: account.accountName,
-                              accountNumber: account.accountNumber,
-                              bankName: account.bankName,
-                              color: Colors.lightBlue[50],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: MaterialButton(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            height: 40,
+                            color: Colors.blue,
+                            onPressed:
+                                () => context
+                                    .push("/wallet/fund")
+                                    .then((_) => setState(() {})),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.payment, color: Colors.white),
+                                SizedBox(width: 10),
+                                Text(
+                                  "Fund with Card",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      );
-                    },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: MaterialButton(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          height: 40,
-                          color: Colors.blue,
-                          onPressed:
-                              () => context
-                                  .push("/wallet/fund")
-                                  .then((_) => setState(() {})),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.payment, color: Colors.white),
-                              SizedBox(width: 10),
-                              Text(
-                                "Fund with Card",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Container(
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.lightBlue.shade50,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(6)),
-                  border: Border(
-                    top: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Recent Transactions",
-                        style: TextStyle(fontSize: 14, color: Colors.black),
-                      ),
-                      GestureDetector(
-                        onTap: () => context.push("/wallet/history"),
-                        child: Text(
-                          "view all",
-                          style: TextStyle(
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
+              ),
+              SizedBox(height: 6),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.lightBlue.shade50,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(6),
+                    ),
+                    border: Border(
+                      top: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Recent Transactions",
+                          style: TextStyle(fontSize: 14, color: Colors.black),
+                        ),
+                        GestureDetector(
+                          onTap: () => context.push("/wallet/history"),
+                          child: Text(
+                            "view all",
+                            style: TextStyle(
+                              fontSize: 14,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Padding(
+              Padding(
                 padding: const EdgeInsets.all(2.0),
                 child: FutureBuilder<List<WalletTransaction>>(
                   future: WalletService().getTransactions(
@@ -245,8 +249,8 @@ class _WalletPageState extends State<WalletPage> {
                   },
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

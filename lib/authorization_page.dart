@@ -69,7 +69,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
               ),
               SizedBox(height: 10),
               Text(
-                "A-Star Connect".toUpperCase(),
+                "A-Star Data & Airtime".toUpperCase(),
                 style: TextStyle(
                   fontSize: 22,
                   color: Colors.black,

@@ -38,7 +38,18 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
             bundles.where((b) => b.serviceType == widget.networkId).toList()
               ..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
         _filteredBundles =
-            bundles.where((b) => b.serviceType == widget.networkId).toList()
+            bundles
+                .where((b) => b.serviceType == widget.networkId)
+                .where(
+                  (bundle) =>
+                      (!bundle.name.toLowerCase().contains('smile') &&
+                          !bundle.variationCode.toLowerCase().contains(
+                            'smile',
+                          )) ||
+                      (bundle.name.toLowerCase().contains('smile') &&
+                          !bundle.name.toLowerCase().contains('voice')),
+                )
+                .toList()
               ..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
       });
     });

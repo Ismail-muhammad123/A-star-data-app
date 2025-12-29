@@ -4,6 +4,7 @@ import 'package:app/features/orders/data/services.dart';
 import 'package:app/features/orders/views/pages/select_bundle_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cors_image/flutter_cors_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -102,28 +103,15 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Buy Data Plan"),
+        title: Text(
+          "Buy Data Plan",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         elevation: 4,
         backgroundColor: Colors.lightBlue,
         surfaceTintColor: Colors.lightBlue,
       ),
       backgroundColor: Colors.grey[50],
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-
-      floatingActionButton: MaterialButton(
-        height: 40,
-        minWidth: 200,
-        onPressed: _isLoading ? null : _purchaseData,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        color: Colors.blue,
-        child:
-            _isLoading
-                ? CircularProgressIndicator()
-                : Text(
-                  "Continue",
-                  style: TextStyle(fontSize: 19, color: Colors.white),
-                ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
@@ -141,35 +129,30 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                         bool isSelected = _selectedNetworkId == network.id;
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: GestureDetector(
-                            onTap: () {
-                              if (_isLoading) return;
-                              setState(() {
-                                _selectedNetworkId =
-                                    _selectedNetworkId = network.id;
-                              });
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(6.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  width: isSelected ? 2 : 1,
-                                  color:
-                                      isSelected
-                                          ? Colors.blue
-                                          : Colors.lightBlue[100]!,
-                                ),
+                          child: Container(
+                            padding: EdgeInsets.all(6.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                width: isSelected ? 2 : 1,
+                                color:
+                                    isSelected
+                                        ? Colors.blue
+                                        : Colors.lightBlue[100]!,
                               ),
-                              child: Image.network(
-                                network.imageUrl,
-                                height: 80,
-                                width: 80,
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Text(network.name);
-                                },
-                              ),
+                            ),
+                            child: CustomNetworkImage(
+                              url: network.imageUrl,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                              onTap: () {
+                                if (_isLoading) return;
+                                setState(() {
+                                  _selectedNetworkId =
+                                      _selectedNetworkId = network.id;
+                                });
+                              },
                             ),
                           ),
                         );
@@ -244,10 +227,29 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                 controller: _phoneController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: "08012345678",
+                  hintText: "enter phone number",
                 ),
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+              SizedBox(height: 50),
+              Center(
+                child: MaterialButton(
+                  height: 40,
+                  minWidth: 200,
+                  onPressed: _isLoading ? null : _purchaseData,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  color: Colors.blue,
+                  child:
+                      _isLoading
+                          ? CircularProgressIndicator()
+                          : Text(
+                            "Continue",
+                            style: TextStyle(fontSize: 19, color: Colors.white),
+                          ),
+                ),
               ),
             ],
           ),

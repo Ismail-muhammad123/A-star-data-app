@@ -1,6 +1,7 @@
 import 'package:app/features/auth/views/pages/confirm_pin_reset.dart';
 import 'package:app/features/orders/views/pages/buy_airtime.dart';
 import 'package:app/features/orders/views/pages/buy_data.dart';
+import 'package:app/features/orders/views/pages/buy_smile_voice.dart';
 import 'package:app/features/orders/views/pages/order_details.dart';
 import 'package:app/features/orders/views/pages/order_history.dart';
 import 'package:app/features/profile/views/pages/tier/upgrade_tier.dart';
@@ -123,6 +124,10 @@ final GoRouter router = GoRouter(
     ),
 
     // ===================== Wallet Routes =====================
+    GoRoute(
+      path: "/orders/buy-smile-voice",
+      builder: (context, state) => SmileVoicePurchasePage(),
+    ),
     GoRoute(
       path: '/wallet',
       builder: (context, state) => const HomePage(index: 1),

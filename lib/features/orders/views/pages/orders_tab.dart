@@ -228,6 +228,58 @@ class _OrdersTabState extends State<OrdersTab> {
                   ],
                 ),
                 SizedBox(height: 10),
+                GestureDetector(
+                  onTap:
+                      () => context
+                          .push("/orders/buy-smile-voice")
+                          .then((_) => setState(() {})),
+                  child: Container(
+                    width: double.maxFinite,
+
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color.fromARGB(88, 158, 158, 158),
+                          blurRadius: 10,
+                          offset: Offset(2, 2),
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsets.all(14.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/images/smile voice.png',
+                          width: 50,
+                          height: 50,
+                          errorBuilder: (context, error, stackTrace) {
+                            print(error);
+                            return Icon(
+                              Icons.call,
+                              color: Colors.white,
+                              size: 20,
+                            );
+                          },
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Buy SmileVoice",
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
                 Row(
                   children: [
                     Text(

@@ -8,11 +8,14 @@ class TransactionHistoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: transactions.length,
-      itemBuilder:
-          (context, index) =>
-              TransactionHistoryTile(transaction: transactions[index]),
+    return Column(
+      children:
+          transactions
+              .map(
+                (transaction) =>
+                    TransactionHistoryTile(transaction: transaction),
+              )
+              .toList(),
     );
   }
 }

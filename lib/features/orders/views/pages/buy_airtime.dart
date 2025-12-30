@@ -110,23 +110,6 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
         surfaceTintColor: Colors.lightBlue,
       ),
       backgroundColor: Colors.grey[50],
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-
-      floatingActionButton: MaterialButton(
-        height: 40,
-        minWidth: 200,
-
-        onPressed: _isLoading ? null : _purchaseAirtime,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        color: Colors.blue,
-        child:
-            _isLoading
-                ? CircularProgressIndicator()
-                : Text(
-                  "Continue",
-                  style: TextStyle(fontSize: 19, color: Colors.white),
-                ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
@@ -228,6 +211,24 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                 ),
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ),
+              SizedBox(height: 30),
+              MaterialButton(
+                height: 40,
+                minWidth: 200,
+
+                onPressed: _isLoading ? null : _purchaseAirtime,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                color: Colors.blue,
+                child:
+                    _isLoading
+                        ? CircularProgressIndicator()
+                        : Text(
+                          "Continue",
+                          style: TextStyle(fontSize: 19, color: Colors.white),
+                        ),
               ),
             ],
           ),

@@ -324,175 +324,166 @@ class _SignUpPageState extends State<SignUpPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        child: SizedBox(
-          width: double.maxFinite,
-          height: MediaQuery.of(context).size.height,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: 20),
-                  Card(
-                    elevation: 8.0,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Hero(
-                            tag: "logo",
-                            child: Image.asset(
-                              "assets/images/logo/a-star_app_logo.png",
-                              height: 120,
-                              width: 120,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            "Create an account".toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: DropdownButtonFormField<String>(
-                              decoration: const InputDecoration(
-                                labelText: "Select Country",
-
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(12),
-                                  ),
-                                ),
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 6,
-                                ),
-                              ),
-                              value: countryCode,
-                              items:
-                                  countryPhoneCodes.entries.map((entry) {
-                                    final country = entry.key;
-                                    final code = entry.value;
-                                    return DropdownMenuItem<String>(
-                                      value: code,
-                                      child: SizedBox(
-                                        width: 200,
-                                        child: Text("$country ($code)"),
-                                      ),
-                                    );
-                                  }).toList(),
-                              onChanged:
-                                  _isLoading
-                                      ? null
-                                      : (value) {
-                                        setState(() {
-                                          countryCode = value;
-                                        });
-                                      },
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              enabled: !_isLoading,
-                              controller: _phoneController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              keyboardType: TextInputType.phone,
-                              decoration: InputDecoration(
-                                prefixText: "$countryCode ",
-                                label: Text("Your Phone Number"),
-                                prefixIcon: Icon(Icons.phone),
-
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              enabled: !_isLoading,
-                              controller: _pinController,
-                              obscureText: _hidePassword,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(6),
-                              ],
-                              textAlign: TextAlign.center,
-
-                              keyboardType: TextInputType.phone,
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.zero,
-
-                                hintText: "* * * * * *",
-                                suffix: GestureDetector(
-                                  onTap:
-                                      () => setState(
-                                        () => _hidePassword = !_hidePassword,
-                                      ),
-                                  child: Icon(
-                                    _hidePassword
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                  ),
-                                ),
-                                label: Text("Pin"),
-                                prefixIcon: Icon(Icons.lock),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          SizedBox(height: 20),
-                          MaterialButton(
-                            onPressed: _isLoading ? null : handleSignUp,
-                            color: Colors.blueAccent,
-                            height: 50,
-                            minWidth: 300,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child:
-                                _isLoading
-                                    ? CircularProgressIndicator()
-                                    : Text(
-                                      "Create Account",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                          ),
-                          SizedBox(height: 20),
-
-                          GestureDetector(
-                            onTap: () => context.go('/login'),
-                            child: Text(
-                              "Already have an account?",
-                              style: TextStyle(color: Colors.blue),
-                            ),
-                          ),
-                        ],
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Hero(
+                        tag: "logo",
+                        child: Image.asset(
+                          "assets/images/logo/a-star_app_logo.png",
+                          height: 120,
+                          width: 120,
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                    ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Create an account".toUpperCase(),
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(
+                            labelText: "Select Country",
+
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 6,
+                            ),
+                          ),
+                          value: countryCode,
+                          items:
+                              countryPhoneCodes.entries.map((entry) {
+                                final country = entry.key;
+                                final code = entry.value;
+                                return DropdownMenuItem<String>(
+                                  value: code,
+                                  child: SizedBox(
+                                    width: 200,
+                                    child: Text("$country ($code)"),
+                                  ),
+                                );
+                              }).toList(),
+                          onChanged:
+                              _isLoading
+                                  ? null
+                                  : (value) {
+                                    setState(() {
+                                      countryCode = value;
+                                    });
+                                  },
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          enabled: !_isLoading,
+                          controller: _phoneController,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                            prefixText: "$countryCode ",
+                            label: Text("Your Phone Number"),
+                            prefixIcon: Icon(Icons.phone),
+
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          enabled: !_isLoading,
+                          controller: _pinController,
+                          obscureText: _hidePassword,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(6),
+                          ],
+                          textAlign: TextAlign.center,
+
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.zero,
+
+                            hintText: "* * * * * *",
+                            suffix: GestureDetector(
+                              onTap:
+                                  () => setState(
+                                    () => _hidePassword = !_hidePassword,
+                                  ),
+                              child: Icon(
+                                _hidePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                              ),
+                            ),
+                            label: Text("Pin"),
+                            prefixIcon: Icon(Icons.lock),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 20),
+                      MaterialButton(
+                        onPressed: _isLoading ? null : handleSignUp,
+                        color: Colors.blueAccent,
+                        height: 50,
+                        minWidth: 300,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child:
+                            _isLoading
+                                ? CircularProgressIndicator()
+                                : Text(
+                                  "Create Account",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                      ),
+                      SizedBox(height: 20),
+
+                      GestureDetector(
+                        onTap: () => context.go('/login'),
+                        child: Text(
+                          "Already have an account?",
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

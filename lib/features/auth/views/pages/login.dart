@@ -99,156 +99,149 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: double.maxFinite,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Card(
-                    elevation: 8.0,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Hero(
-                            tag: "logo",
-                            child: Image.asset(
-                              "assets/images/logo/a-star_app_logo.png",
-                              height: 120,
-                              width: 120,
-                              fit: BoxFit.contain,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Hero(
+                        tag: "logo",
+                        child: Image.asset(
+                          "assets/images/logo/a-star_app_logo.png",
+                          height: 120,
+                          width: 120,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        "Login to your account".toUpperCase(),
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          enabled: !_isLoading,
+                          controller: _phoneNumberController,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.zero,
+                            prefixText: countryCode ?? "",
+                            label: Text("Your Phone Number"),
+                            prefixIcon: Icon(Icons.phone),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          SizedBox(height: 10),
-                          Text(
-                            "Login to your account".toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              enabled: !_isLoading,
-                              controller: _phoneNumberController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              keyboardType: TextInputType.phone,
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.zero,
-                                prefixText: countryCode ?? "",
-                                label: Text("Your Phone Number"),
-                                prefixIcon: Icon(Icons.phone),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          enabled: !_isLoading,
+                          controller: _pinController,
+                          obscureText: _hidePassword,
+                          textAlign: TextAlign.center,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.zero,
+                            hintText: "* * * * * *",
+                            suffix: GestureDetector(
+                              onTap:
+                                  () => setState(
+                                    () => _hidePassword = !_hidePassword,
+                                  ),
+                              child: Icon(
+                                _hidePassword
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                               ),
                             ),
+                            label: Text("Pin"),
+                            prefixIcon: Icon(Icons.lock),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: TextFormField(
-                              enabled: !_isLoading,
-                              controller: _pinController,
-                              obscureText: _hidePassword,
-                              textAlign: TextAlign.center,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              keyboardType: TextInputType.phone,
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.zero,
-                                hintText: "* * * * * *",
-                                suffix: GestureDetector(
-                                  onTap:
-                                      () => setState(
-                                        () => _hidePassword = !_hidePassword,
-                                      ),
-                                  child: Icon(
-                                    _hidePassword
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      MaterialButton(
+                        onPressed:
+                            _isLoading
+                                ? null
+                                : () {
+                                  handleLogin(context);
+                                },
+                        color: Colors.blue,
+                        height: 50,
+                        minWidth: 300,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child:
+                            _isLoading
+                                ? CircularProgressIndicator()
+                                : Text(
+                                  "Login",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
                                   ),
                                 ),
-                                label: Text("Pin"),
-                                prefixIcon: Icon(Icons.lock),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
+                      ),
+                      SizedBox(height: 20),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () => context.push('/forgot-pin'),
+                            child: Text(
+                              "Forgot pin?",
+                              style: TextStyle(color: Colors.blue),
                             ),
                           ),
-                          SizedBox(height: 20),
-                          MaterialButton(
-                            onPressed:
-                                _isLoading
-                                    ? null
-                                    : () {
-                                      handleLogin(context);
-                                    },
-                            color: Colors.blue,
-                            height: 50,
-                            minWidth: 300,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                          SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () => context.go('/register'),
+                            child: Text(
+                              "Don't have an account?",
+                              style: TextStyle(color: Colors.blue),
                             ),
-                            child:
-                                _isLoading
-                                    ? CircularProgressIndicator()
-                                    : Text(
-                                      "Login",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
-                                    ),
                           ),
-                          SizedBox(height: 20),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              GestureDetector(
-                                onTap: () => context.push('/forgot-pin'),
-                                child: Text(
-                                  "Forgot pin?",
-                                  style: TextStyle(color: Colors.blue),
-                                ),
-                              ),
-                              SizedBox(height: 16),
-                              GestureDetector(
-                                onTap: () => context.go('/register'),
-                                child: Text(
-                                  "Don't have an account?",
-                                  style: TextStyle(color: Colors.blue),
-                                ),
-                              ),
-                              SizedBox(height: 16),
-                              GestureDetector(
-                                onTap: () => context.push('/activate-account'),
-                                child: Text(
-                                  "Activate my account",
-                                  style: TextStyle(color: Colors.blue),
-                                ),
-                              ),
-                            ],
+                          SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () => context.push('/activate-account'),
+                            child: Text(
+                              "Activate my account",
+                              style: TextStyle(color: Colors.blue),
+                            ),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

@@ -114,7 +114,42 @@ class _WalletPageState extends State<WalletPage> {
                           return SizedBox();
                         }
                         if (!snapshot.hasData || snapshot.hasError) {
-                          return SizedBox();
+                          return GestureDetector(
+                            onTap: () => context.push("/profile/update"),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.yellow[100],
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: Colors.orange,
+                                  width: 1,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    blurRadius: 4,
+                                    offset: Offset(2, 2),
+                                  ),
+                                ],
+                              ),
+                              padding: EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.info,
+                                    size: 30,
+                                    color: Colors.orange,
+                                  ),
+                                  SizedBox(width: 8.0),
+                                  Flexible(
+                                    child: Text(
+                                      "Complete your profile to get a permanent virtual account",
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
                         }
                         var account = snapshot.data!;
                         return Column(
@@ -124,7 +159,7 @@ class _WalletPageState extends State<WalletPage> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Fund via transfer",
+                                  "Fund your wallet",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -163,7 +198,7 @@ class _WalletPageState extends State<WalletPage> {
                                 Icon(Icons.payment, color: Colors.white),
                                 SizedBox(width: 10),
                                 Text(
-                                  "Fund with Card",
+                                  "Fund Wallet",
                                   style: TextStyle(
                                     fontSize: 18,
                                     color: Colors.white,

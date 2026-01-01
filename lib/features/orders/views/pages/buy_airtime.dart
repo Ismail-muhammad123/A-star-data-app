@@ -213,22 +213,24 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
               SizedBox(height: 30),
-              MaterialButton(
-                height: 40,
-                minWidth: 200,
+              Center(
+                child: MaterialButton(
+                  height: 40,
+                  minWidth: 200,
 
-                onPressed: _isLoading ? null : _purchaseAirtime,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  onPressed: _isLoading ? null : _purchaseAirtime,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  color: Colors.blue,
+                  child:
+                      _isLoading
+                          ? CircularProgressIndicator()
+                          : Text(
+                            "Continue",
+                            style: TextStyle(fontSize: 19, color: Colors.white),
+                          ),
                 ),
-                color: Colors.blue,
-                child:
-                    _isLoading
-                        ? CircularProgressIndicator()
-                        : Text(
-                          "Continue",
-                          style: TextStyle(fontSize: 19, color: Colors.white),
-                        ),
               ),
             ],
           ),

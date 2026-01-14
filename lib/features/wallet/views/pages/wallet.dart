@@ -22,15 +22,9 @@ class _WalletPageState extends State<WalletPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-
-        elevation: 8.0,
-        title: Text(
-          "My Wallet",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.lightBlue[200],
-        surfaceTintColor: Colors.lightBlue[200],
+        title: Text("My Wallet", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.lightBlue,
+        surfaceTintColor: Colors.lightBlue,
         actions: [
           IconButton(
             onPressed:
@@ -118,10 +112,10 @@ class _WalletPageState extends State<WalletPage> {
                             onTap: () => context.push("/profile/update"),
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.yellow[100],
+                                color: Colors.yellow[50],
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: Colors.orange,
+                                  color: Colors.orange[200]!,
                                   width: 1,
                                 ),
                                 boxShadow: [
@@ -138,12 +132,19 @@ class _WalletPageState extends State<WalletPage> {
                                   Icon(
                                     Icons.info,
                                     size: 30,
-                                    color: Colors.orange,
+                                    color: Colors.orange[200]!,
                                   ),
                                   SizedBox(width: 8.0),
                                   Flexible(
                                     child: Text(
                                       "Complete your profile to get a permanent virtual account",
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 16,
                                     ),
                                   ),
                                 ],

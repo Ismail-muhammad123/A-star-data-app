@@ -18,6 +18,20 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
   int? selectedTier;
 
   upgradeAccountTier() async {
+    var profileInfoRef =
+        Provider.of<ProfileProvider>(context, listen: true).profile;
+    if ((profileInfoRef?.email ?? "").isEmpty ||
+        (profileInfoRef?.firstName ?? "").isEmpty ||
+        (profileInfoRef?.lastName ?? "").isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please complete your profile before upgrading tier."),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -85,8 +99,7 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
         padding: const EdgeInsets.all(10.0),
 
         child:
-            (profileInfoRef?.bvn ?? "").isEmpty ||
-                    (profileInfoRef?.email ?? "").isEmpty ||
+            (profileInfoRef?.email ?? "").isEmpty ||
                     (profileInfoRef?.firstName ?? "").isEmpty ||
                     (profileInfoRef?.lastName ?? "").isEmpty
                 ? Column(

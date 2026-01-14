@@ -106,10 +106,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     // Check email
-    totalFields++;
-    if (profile.bvn != null && profile.bvn!.isNotEmpty) {
-      completedFields++;
-    }
+    // totalFields++;
+    // if (profile.bvn != null && profile.bvn!.isNotEmpty) {
+    //   completedFields++;
+    // }
 
     // Check tier
     totalFields++;
@@ -247,7 +247,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               SizedBox(height: 6.0),
               GestureDetector(
-                onTap: () => openWhatsAppChat(context, "+2348123456789"),
+                onTap: () => openWhatsAppChat(context, "+2348067682425"),
                 child: ProfileSubSectionTile(
                   title: "Support",
                   subTitle: "Contact us on WhatsApp",

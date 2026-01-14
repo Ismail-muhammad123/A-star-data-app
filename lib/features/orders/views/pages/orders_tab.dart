@@ -23,7 +23,11 @@ class _OrdersTabState extends State<OrdersTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("A-Star Data & Airtime"),
+        title: Text(
+          "A-Star Data & Airtime",
+          style: TextStyle(color: Colors.white),
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
         elevation: 0,
         backgroundColor: Colors.lightBlue,
         actions: [
@@ -353,11 +357,7 @@ class _OrdersTabState extends State<OrdersTab> {
                           padding: EdgeInsets.all(14.0),
                           child: Row(
                             children: [
-                              Icon(
-                                Icons.satellite_alt_outlined,
-                                size: 30,
-                                color: Colors.purple,
-                              ),
+                              Icon(Icons.tv, size: 30, color: Colors.purple),
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),

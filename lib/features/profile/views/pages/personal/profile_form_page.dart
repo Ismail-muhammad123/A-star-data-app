@@ -165,7 +165,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
                 controller: _bvnController,
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                  labelText: 'BVN',
+                  labelText: 'BVN (optional)',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   ),
@@ -173,6 +173,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
+              SizedBox(height: 80),
             ],
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class SelectBundlePage extends StatefulWidget {
@@ -35,15 +36,15 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
       print(bundles.length);
       setState(() {
         _allBundles =
-            bundles.where((b) => b.serviceType == widget.networkId).toList()
+            bundles.where((b) => b.service.id == widget.networkId).toList()
               ..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
         _filteredBundles =
             bundles
-                .where((b) => b.serviceType == widget.networkId)
+                .where((b) => b.service.id == widget.networkId)
                 .where(
                   (bundle) =>
                       (!bundle.name.toLowerCase().contains('smile') &&
-                          !bundle.variationCode.toLowerCase().contains(
+                          !bundle.variationId.toLowerCase().contains(
                             'smile',
                           )) ||
                       (bundle.name.toLowerCase().contains('smile') &&
@@ -62,10 +63,7 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
           _allBundles
               .where(
                 (bundle) =>
-                    bundle.name.toLowerCase().contains(query.toLowerCase()) ||
-                    bundle.description.toLowerCase().contains(
-                      query.toLowerCase(),
-                    ),
+                    bundle.name.toLowerCase().contains(query.toLowerCase()),
               )
               .toList()
             ..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
@@ -125,11 +123,24 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
                               ),
                               child: Card(
                                 child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors.lightBlue,
+                                    radius: 20,
+                                    child: Image.network(
+                                      bundle.service.imageUrl,
+                                      fit: BoxFit.contain,
+                                      webHtmlElementStrategy:
+                                          WebHtmlElementStrategy.prefer,
+                                    ),
+                                  ),
                                   tileColor: Colors.white,
                                   title: Text(bundle.name),
-                                  subtitle: Text(bundle.description),
+                                  subtitle: Text(bundle.service.serviceName),
                                   trailing: Text(
-                                    '₦${bundle.sellingPrice.toStringAsFixed(0)}',
+                                    NumberFormat.currency(
+                                      symbol: '₦',
+                                      decimalDigits: 0,
+                                    ).format(bundle.sellingPrice),
                                   ),
                                   onTap: () => _onBundleSelected(bundle),
                                 ),

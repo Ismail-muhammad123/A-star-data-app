@@ -282,6 +282,105 @@ class _OrdersTabState extends State<OrdersTab> {
                 SizedBox(height: 10),
                 Row(
                   children: [
+                    Flexible(
+                      child: GestureDetector(
+                        onTap:
+                            () => context
+                                .push("/orders/select-electricity-provider")
+                                .then((_) => setState(() {})),
+                        child: Container(
+                          width: double.maxFinite,
+
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color.fromARGB(88, 158, 158, 158),
+                                blurRadius: 10,
+                                offset: Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                          padding: EdgeInsets.all(14.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.electric_bolt,
+                                size: 30,
+                                color: Colors.orange,
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    "Pay Electricity",
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.0),
+
+                    Flexible(
+                      child: GestureDetector(
+                        onTap:
+                            () => context
+                                .push("/orders/buy-cable-tv")
+                                .then((_) => setState(() {})),
+                        child: Container(
+                          width: double.maxFinite,
+
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color.fromARGB(88, 158, 158, 158),
+                                blurRadius: 10,
+                                offset: Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                          padding: EdgeInsets.all(14.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.satellite_alt_outlined,
+                                size: 30,
+                                color: Colors.purple,
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    "Pay Cable TV",
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
                     Text(
                       "Recent Transactions",
                       style: TextStyle(

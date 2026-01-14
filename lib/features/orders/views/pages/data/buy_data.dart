@@ -1,7 +1,7 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
-import 'package:app/features/orders/views/pages/select_bundle_page.dart';
+import 'package:app/features/orders/views/pages/data/select_bundle_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -157,7 +157,7 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                                 fit: BoxFit.cover,
                                 errorBuilder:
                                     (context, error, stackTrace) =>
-                                        Text(network.name),
+                                        Text(network.serviceName),
                               ),
                             ),
                           ),

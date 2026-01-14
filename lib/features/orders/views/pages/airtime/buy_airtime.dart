@@ -17,7 +17,7 @@ class AirtimePurchaseFormPage extends StatefulWidget {
 class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
   final _amountController = TextEditingController();
   final _phoneController = TextEditingController();
-  int? _selectedNetworkId;
+  String? _selectedNetworkId;
 
   bool _isLoading = false;
   List<AirtimeNetwork> _networks = [];
@@ -31,9 +31,9 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
     }
     if (_amountController.text.isEmpty ||
         int.tryParse(_amountController.text) == null ||
-        int.parse(_amountController.text) < 100) {
+        int.parse(_amountController.text) < 50) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a valid amount (min ₦100)')),
+        SnackBar(content: Text('Please enter a valid amount (min ₦50)')),
       );
       return;
     }
@@ -50,7 +50,7 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
     try {
       await OrderServices().purchaseAirtime(
         authToken: context.read<AuthProvider>().authToken ?? "",
-        networkId: _selectedNetworkId!,
+        serviceId: _selectedNetworkId!,
         amount: double.parse(_amountController.text),
         phoneNumber: _phoneController.text,
       );
@@ -124,7 +124,8 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                 child: Row(
                   children:
                       _networks.map((network) {
-                        bool isSelected = _selectedNetworkId == network.id;
+                        bool isSelected =
+                            _selectedNetworkId == network.serviceId;
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           child: GestureDetector(
@@ -132,7 +133,7 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                               if (_isLoading) return;
                               setState(() {
                                 _selectedNetworkId =
-                                    _selectedNetworkId = network.id;
+                                    _selectedNetworkId = network.serviceId;
                               });
                             },
                             child: Container(
@@ -156,7 +157,7 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                                 fit: BoxFit.cover,
                                 errorBuilder:
                                     (context, error, stackTrace) =>
-                                        Text(network.name),
+                                        Text(network.serviceName),
                               ),
                             ),
                           ),

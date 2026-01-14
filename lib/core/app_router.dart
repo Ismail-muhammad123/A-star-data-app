@@ -1,9 +1,12 @@
 import 'package:app/features/auth/views/pages/confirm_pin_reset.dart';
-import 'package:app/features/orders/views/pages/buy_airtime.dart';
-import 'package:app/features/orders/views/pages/buy_data.dart';
-import 'package:app/features/orders/views/pages/buy_smile_voice.dart';
-import 'package:app/features/orders/views/pages/order_details.dart';
-import 'package:app/features/orders/views/pages/order_history.dart';
+import 'package:app/features/orders/data/models.dart';
+import 'package:app/features/orders/views/pages/airtime/buy_airtime.dart';
+import 'package:app/features/orders/views/pages/data/buy_data.dart';
+import 'package:app/features/orders/views/pages/data/buy_smile_voice.dart';
+import 'package:app/features/orders/views/pages/electricity/buy_electricity_page.dart';
+import 'package:app/features/orders/views/pages/electricity/list_electricity_providers.dart';
+import 'package:app/features/orders/views/pages/history/order_details.dart';
+import 'package:app/features/orders/views/pages/history/order_history.dart';
 import 'package:app/features/profile/views/pages/tier/upgrade_tier.dart';
 import 'package:app/features/profile/views/pages/personal/change_pin_form_page.dart';
 import 'package:flutter/material.dart';
@@ -121,6 +124,20 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: "/orders/buy-data",
       builder: (context, state) => DataPurchaseFormPage(),
+    ),
+
+    // ==================== Electricity Routes =====================
+    GoRoute(
+      path: "/orders/select-electricity-provider",
+      builder: (context, state) => ElectricityProvidersListPage(),
+    ),
+
+    GoRoute(
+      path: "/orders/buy-electricity",
+      builder: (context, state) {
+        final service = state.extra as ElectricityService;
+        return PurchaseElectricityFormPage(service: service);
+      },
     ),
 
     // ===================== Wallet Routes =====================

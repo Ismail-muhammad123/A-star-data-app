@@ -1,4 +1,5 @@
-const baseUrl = "https://backend.stardata.com.ng/api";
+// const baseUrl = "https://backend.stardata.com.ng/api";
+const baseUrl = "https://0663225b3ddb.ngrok-free.app/api";
 
 // AUTH
 class AuthEndpoints {
@@ -41,6 +42,15 @@ class OrderEndpoints {
 
   final String getAirtimeNetworks = "$baseUrl/orders/airtime-networks/";
   final String purchaseAirtime = "$baseUrl/orders/buy-airtime/";
+
+  final String verifyCustomer = "$baseUrl/orders/verify-customer/";
+
+  final String getTVServices = "$baseUrl/orders/tv-services/";
+  final String getTVPackages = "$baseUrl/orders/tv-packages/";
+  final String purchaseTVSubscription = "$baseUrl/orders/buy-tv-subscription/";
+
+  final String getElectricityServices = "$baseUrl/orders/electricity-services/";
+  final String purchaseElectricity = "$baseUrl/orders/buy-electricity/";
 
   final String orderHistory = "$baseUrl/orders/purchase-history/";
 }

@@ -1,13 +1,13 @@
 // DATA NETWORKS
 class DataNetwork {
   final int id;
-  final String name;
+  final String serviceName;
   final String serviceId;
   final String imageUrl;
 
   DataNetwork({
     required this.id,
-    required this.name,
+    required this.serviceName,
     required this.serviceId,
     required this.imageUrl,
   });
@@ -15,7 +15,7 @@ class DataNetwork {
   factory DataNetwork.fromJson(Map<String, dynamic> json) {
     return DataNetwork(
       id: json['id'],
-      name: json['name'],
+      serviceName: json['service_name'],
       serviceId: json['service_id'],
       imageUrl: json['image_url'],
     );
@@ -24,38 +24,38 @@ class DataNetwork {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'service_name': serviceName,
       'service_id': serviceId,
       'image_url': imageUrl,
     };
   }
 }
 
-// AITIME NETWORKS
+// AIRTIME NETWORKS
 class AirtimeNetwork {
-  final int id;
-  final String name;
+  final int? id;
+  final String serviceName;
   final String serviceId;
-  final double minimumAmount;
-  final double maximumAmount;
+  // final double minimumAmount;
+  // final double maximumAmount;
   final String imageUrl;
 
   AirtimeNetwork({
     required this.id,
-    required this.name,
+    required this.serviceName,
     required this.serviceId,
-    required this.minimumAmount,
-    required this.maximumAmount,
+    // required this.minimumAmount,
+    // required this.maximumAmount,
     required this.imageUrl,
   });
 
   factory AirtimeNetwork.fromJson(Map<String, dynamic> json) {
     return AirtimeNetwork(
       id: json['id'],
-      name: json['name'],
+      serviceName: json['service_name'],
       serviceId: json['service_id'],
-      minimumAmount: (json['minimum_amount'] as num).toDouble(),
-      maximumAmount: (json['maximum_amount'] as num).toDouble(),
+      // minimumAmount: (json['minimum_amount'] as num).toDouble(),
+      // maximumAmount: (json['maximum_amount'] as num).toDouble(),
       imageUrl: json['image_url'],
     );
   }
@@ -63,34 +63,140 @@ class AirtimeNetwork {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'service_name': serviceName,
       'service_id': serviceId,
-      'minimum_amount': minimumAmount,
-      'maximum_amount': maximumAmount,
+      // 'minimum_amount': minimumAmount,
+      // 'maximum_amount': maximumAmount,
       'image_url': imageUrl,
+    };
+  }
+}
+
+// Electricity Service
+class ElectricityService {
+  final int? id;
+  final String serviceName;
+  final String serviceId;
+  final String? imageUrl;
+
+  ElectricityService({
+    required this.id,
+    required this.serviceName,
+    required this.serviceId,
+    required this.imageUrl,
+  });
+
+  factory ElectricityService.fromJson(Map<String, dynamic> json) {
+    return ElectricityService(
+      id: json['id'],
+      serviceName: json['service_name'],
+      serviceId: json['service_id'],
+      imageUrl: json['image_url'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'service_name': serviceName,
+      'service_id': serviceId,
+      'image_url': imageUrl,
+    };
+  }
+}
+
+// Cable TV Service
+class CableTVService {
+  final int? id;
+  final String serviceName;
+  final String serviceId;
+  final String imageUrl;
+  CableTVService({
+    required this.id,
+    required this.serviceName,
+    required this.serviceId,
+    required this.imageUrl,
+  });
+  factory CableTVService.fromJson(Map<String, dynamic> json) {
+    return CableTVService(
+      id: json['id'],
+      serviceName: json['service_name'],
+      serviceId: json['service_id'],
+      imageUrl: json['image_url'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'service_name': serviceName,
+      'service_id': serviceId,
+      'image_url': imageUrl,
+    };
+  }
+}
+
+// Cable TV Packages
+class CableTVPackage {
+  final int? id;
+  final String name;
+  final CableTVService service;
+  final String variationId;
+  final String? description;
+  final double sellingPrice;
+  final bool isActive;
+  CableTVPackage({
+    this.id,
+    this.description,
+    required this.name,
+    required this.service,
+    required this.variationId,
+    required this.sellingPrice,
+    required this.isActive,
+  });
+
+  factory CableTVPackage.fromJson(Map<String, dynamic> json) {
+    return CableTVPackage(
+      id: json['id'],
+      name: json['name'],
+      service: CableTVService.fromJson(json['service']),
+      variationId: json['variation_id'],
+      description: json['description'],
+      sellingPrice: double.tryParse(json['selling_price']) ?? 0.0,
+      isActive: json['is_active'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'service': service.toJson(),
+      'variation_id': variationId,
+      'description': description,
+      'selling_price': sellingPrice,
+      'is_active': isActive,
     };
   }
 }
 
 // DATA BUNDLES
 class DataBundle {
-  final int id;
+  final int? id;
   final String name;
-  final int serviceType;
-  final String variationCode;
-  final String description;
-  final double costPrice;
+  final DataNetwork service;
+  final String variationId;
+  final String? description;
   final double sellingPrice;
   final int? durationDays;
   final bool isActive;
 
   DataBundle({
-    required this.id,
+    this.id,
+    this.description,
     required this.name,
-    required this.serviceType,
-    required this.variationCode,
-    required this.description,
-    required this.costPrice,
+    required this.service,
+    required this.variationId,
     required this.sellingPrice,
     required this.durationDays,
     required this.isActive,
@@ -100,10 +206,9 @@ class DataBundle {
     return DataBundle(
       id: json['id'],
       name: json['name'],
-      serviceType: json['service_type'],
-      variationCode: json['variation_code'],
+      service: DataNetwork.fromJson(json['service']),
+      variationId: json['variation_id'],
       description: json['description'],
-      costPrice: double.tryParse(json['cost_price']) ?? 0.0,
       sellingPrice: double.tryParse(json['selling_price']) ?? 0.0,
       durationDays: json['duration_days'],
       isActive: json['is_active'],
@@ -114,10 +219,9 @@ class DataBundle {
     return {
       'id': id,
       'name': name,
-      'service_type': serviceType,
-      'variation_code': variationCode,
+      'service': service.toJson(),
+      'variation_id': variationId,
       'description': description,
-      'cost_price': costPrice,
       'selling_price': sellingPrice,
       'duration_days': durationDays,
       'is_active': isActive,
@@ -129,8 +233,8 @@ class DataBundle {
 class OrderHistory {
   int id;
   final String purchaseType;
-  final int? airtimeType;
-  final int? dataPlan;
+  final int? airtimeService;
+  final int? dataVariation;
   final String reference;
   final double amount;
   final String beneficiary;
@@ -140,8 +244,8 @@ class OrderHistory {
   OrderHistory({
     required this.id,
     required this.purchaseType,
-    required this.airtimeType,
-    required this.dataPlan,
+    required this.airtimeService,
+    required this.dataVariation,
     required this.reference,
     required this.amount,
     required this.beneficiary,
@@ -153,8 +257,8 @@ class OrderHistory {
     return OrderHistory(
       id: json['id'],
       purchaseType: json['purchase_type'],
-      airtimeType: json['airtime_type'],
-      dataPlan: json['data_plan'],
+      airtimeService: json['airtime_service'],
+      dataVariation: json['data_variation'],
       reference: json['reference'],
       amount: double.parse(json['amount']),
       beneficiary: json['beneficiary'],
@@ -167,8 +271,8 @@ class OrderHistory {
     return {
       'id': id,
       'purchase_type': purchaseType,
-      'airtime_type': airtimeType,
-      'data_plan': dataPlan,
+      'airtime_service': airtimeService,
+      'data_variation': dataVariation,
       'reference': reference,
       'amount': amount,
       'beneficiary': beneficiary,

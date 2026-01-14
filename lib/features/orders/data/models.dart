@@ -110,7 +110,7 @@ class CableTVService {
   final int? id;
   final String serviceName;
   final String serviceId;
-  final String imageUrl;
+  final String? imageUrl;
   CableTVService({
     required this.id,
     required this.serviceName,

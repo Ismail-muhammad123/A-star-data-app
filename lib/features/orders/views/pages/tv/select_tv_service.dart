@@ -4,30 +4,30 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-class ElectricityProvidersListPage extends StatefulWidget {
-  const ElectricityProvidersListPage({super.key});
+class TvServiceProvidersListPage extends StatefulWidget {
+  const TvServiceProvidersListPage({super.key});
 
   @override
-  State<ElectricityProvidersListPage> createState() =>
-      ElectricityProvidersListPageState();
+  State<TvServiceProvidersListPage> createState() =>
+      TvServiceProvidersListPageState();
 }
 
-class ElectricityProvidersListPageState
-    extends State<ElectricityProvidersListPage> {
+class TvServiceProvidersListPageState
+    extends State<TvServiceProvidersListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(
-          'Select Electricity Provider',
+          'Select TV Service Provider',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.blueAccent,
         surfaceTintColor: Colors.blueAccent,
       ),
       body: FutureBuilder(
-        future: OrderServices().fetchElectricityServices(
+        future: OrderServices().fetchTVServices(
           context.read<AuthProvider>().authToken ?? "",
         ),
         builder: (context, snapshot) {
@@ -37,7 +37,7 @@ class ElectricityProvidersListPageState
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
-              child: Text('No available electricity providers found.'),
+              child: Text('No available TV service providers found.'),
             );
           } else {
             final providers = snapshot.data!;
@@ -61,14 +61,13 @@ class ElectricityProvidersListPageState
                                       WebHtmlElementStrategy.prefer,
                                   errorBuilder:
                                       (context, error, stackTrace) =>
-                                          Icon(Icons.electrical_services),
+                                          Icon(Icons.tv),
                                 )
-                                : Icon(Icons.electrical_services),
+                                : Icon(Icons.tv),
                         title: Text(provider.serviceName),
-
                         onTap: () {
                           context.push(
-                            "/orders/buy-electricity",
+                            "/orders/select-tv-plan",
                             extra: provider,
                           );
                         },

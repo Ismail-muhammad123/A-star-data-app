@@ -46,20 +46,35 @@ class _PurchaseElectricityFormPageState
       return;
     }
 
-    var meterInfo = await OrderServices().verifyCustomer(
-      authToken: context.read<AuthProvider>().authToken ?? "",
-      serviceId: widget.service.serviceId,
-      customerId: _meterNumberController.text,
-      variationId: _meterType!,
-    );
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      var meterInfo = await OrderServices().verifyCustomer(
+        authToken: context.read<AuthProvider>().authToken ?? "",
+        serviceId: widget.service.serviceId,
+        customerId: _meterNumberController.text,
+        variationId: _meterType!,
+      );
+      setState(() {
+        minimumAmount = meterInfo['minimum_amount'] ?? 500;
+        maximumAmount = meterInfo['maximum_amount'] ?? 100000;
 
-    setState(() {
-      minimumAmount = meterInfo['minimum_amount'] ?? 0;
-      maximumAmount = meterInfo['maximum_amount'] ?? 100000;
-
-      meterDetails = meterInfo;
-      _isVerified = true;
-    });
+        meterDetails = meterInfo;
+        _isVerified = true;
+        _isLoading = false;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString().split(":").last)));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   _purchase() async {
@@ -202,7 +217,14 @@ class _PurchaseElectricityFormPageState
               Text("Enter Meter Number"),
               SizedBox(height: 8),
               TextFormField(
+                controller: _meterNumberController,
+                enabled: !_isLoading,
                 keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  setState(() {
+                    _isVerified = false;
+                  });
+                },
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
@@ -213,6 +235,8 @@ class _PurchaseElectricityFormPageState
               if (_isVerified) Text("Enter Amount"),
               if (_isVerified)
                 TextFormField(
+                  controller: _amountController,
+                  enabled: !_isLoading && _isVerified,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Amount',
@@ -267,13 +291,7 @@ class _PurchaseElectricityFormPageState
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
-                        onPressed: () {
-                          // Implement meter verification logic here
-                          setState(() {
-                            _isVerified =
-                                true; // Simulate successful verification
-                          });
-                        },
+                        onPressed: _isLoading ? null : _verifyMeter,
                         child: Text("Verify Meter"),
                       ),
                     ],
@@ -281,13 +299,13 @@ class _PurchaseElectricityFormPageState
               SizedBox(height: 30),
               if (_isVerified)
                 Center(
-                  child: ElevatedButton(
-                    onPressed:
-                        _isLoading
-                            ? null
-                            : () {
-                              // Implement purchase logic here
-                            },
+                  child: MaterialButton(
+                    onPressed: _isLoading ? null : _purchase,
+                    color: Colors.blueAccent,
+                    textColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child:
                         _isLoading
                             ? CircularProgressIndicator()

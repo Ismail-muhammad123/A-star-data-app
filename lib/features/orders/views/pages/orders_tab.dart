@@ -334,7 +334,7 @@ class _OrdersTabState extends State<OrdersTab> {
                       child: GestureDetector(
                         onTap:
                             () => context
-                                .push("/orders/buy-cable-tv")
+                                .push("/orders/select-tv-service")
                                 .then((_) => setState(() {})),
                         child: Container(
                           width: double.maxFinite,

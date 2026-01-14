@@ -7,6 +7,9 @@ import 'package:app/features/orders/views/pages/electricity/buy_electricity_page
 import 'package:app/features/orders/views/pages/electricity/list_electricity_providers.dart';
 import 'package:app/features/orders/views/pages/history/order_details.dart';
 import 'package:app/features/orders/views/pages/history/order_history.dart';
+import 'package:app/features/orders/views/pages/tv/buy_tv_page.dart';
+import 'package:app/features/orders/views/pages/tv/select_tv_pachage.dart';
+import 'package:app/features/orders/views/pages/tv/select_tv_service.dart';
 import 'package:app/features/profile/views/pages/tier/upgrade_tier.dart';
 import 'package:app/features/profile/views/pages/personal/change_pin_form_page.dart';
 import 'package:flutter/material.dart';
@@ -137,6 +140,31 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final service = state.extra as ElectricityService;
         return PurchaseElectricityFormPage(service: service);
+      },
+    ),
+
+    // ==================== Cable/TV Routes =====================
+    GoRoute(
+      path: "/orders/select-tv-service",
+      builder: (context, state) => TvServiceProvidersListPage(),
+    ),
+
+    GoRoute(
+      path: "/orders/select-tv-plan",
+      builder: (context, state) {
+        final service = state.extra as CableTVService;
+        return SelectTvPackagePage(provider: service);
+      },
+    ),
+
+    GoRoute(
+      path: "/orders/buy-tv-subscription",
+      builder: (context, state) {
+        final package = state.extra as CableTVPackage;
+        return PurchaseTVSubscriptionFormPage(
+          service: package.service,
+          package: package,
+        );
       },
     ),
 

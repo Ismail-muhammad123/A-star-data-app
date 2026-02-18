@@ -15,6 +15,7 @@ class AuthService {
       ),
       data: jsonEncode({'phone_number': phoneNumber, 'pin': pin}),
     );
+    print(response.data);
     if (response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     } else {

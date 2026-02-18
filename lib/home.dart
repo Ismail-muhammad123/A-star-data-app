@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
-import 'package:app/features/profile/providers/profile_provider.dart';
-import 'package:app/features/profile/views/pages/profile.dart';
+import 'package:app/features/settings/providers/profile_provider.dart';
+import 'package:app/features/settings/views/pages/settings_page.dart';
 import 'package:app/features/wallet/views/pages/wallet.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,7 +18,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   int currentPage = 0;
-  List<Widget> pages = [OrdersTab(), WalletPage(), ProfilePage()];
+  List<Widget> pages = [OrdersTab(), WalletPage(), SettingsPage()];
 
   _bootstrap() async {
     await Provider.of<ProfileProvider>(
@@ -56,7 +56,7 @@ class HomePageState extends State<HomePage> {
           }
         },
         backgroundColor: Colors.white,
-        indicatorColor: Colors.blue,
+        indicatorColor: Colors.blue.withOpacity(0.1),
         indicatorShape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
@@ -67,24 +67,30 @@ class HomePageState extends State<HomePage> {
         destinations: [
           NavigationDestination(
             icon: Icon(
-              Icons.account_balance_wallet,
-              color: currentPage == 0 ? Colors.white : Colors.black,
+              Icons.dashboard_outlined,
+              color: currentPage == 0 ? Colors.blue : Colors.black54,
             ),
-            label: 'Orders',
+            selectedIcon: const Icon(Icons.dashboard, color: Colors.blue),
+            label: 'Home',
           ),
           NavigationDestination(
             icon: Icon(
-              Icons.savings,
-              color: currentPage == 1 ? Colors.white : Colors.black,
+              Icons.account_balance_wallet_outlined,
+              color: currentPage == 1 ? Colors.blue : Colors.black54,
+            ),
+            selectedIcon: const Icon(
+              Icons.account_balance_wallet,
+              color: Colors.blue,
             ),
             label: 'Wallet',
           ),
           NavigationDestination(
             icon: Icon(
-              Icons.person,
-              color: currentPage == 2 ? Colors.white : Colors.black,
+              Icons.settings_outlined,
+              color: currentPage == 2 ? Colors.blue : Colors.black54,
             ),
-            label: 'Profile',
+            selectedIcon: const Icon(Icons.settings, color: Colors.blue),
+            label: 'Settings',
           ),
         ],
       ),

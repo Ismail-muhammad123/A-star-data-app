@@ -20,7 +20,7 @@ class WalletService {
     );
 
     if (response.statusCode == 200) {
-      return response.data['balance'];
+      return response.data['balance'].toString();
     } else {
       throw Exception('Failed to load wallet balance');
     }
@@ -131,6 +131,43 @@ class WalletService {
       return VirtualAccount.fromJson(response.data);
     } else {
       throw Exception('Failed to load virtual wallet');
+    }
+  }
+
+  Future<Map<String, dynamic>> requestWithdrawal(
+    String authToken,
+    double amount,
+    String bankName,
+    String accountNumber,
+    String accountName, {
+    String? reason = "",
+    String? bankCode = "",
+  }) async {
+    var response = await _dio.post(
+      _endpoints.withdraw,
+      data: {
+        "amount": amount.toString(),
+        "bank_name": bankName,
+        "account_number": accountNumber,
+        "account_name": accountName,
+        "reason": reason,
+        "bank_code": bankCode,
+      },
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          "Authorization": "Bearer $authToken",
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+    print(response.data);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return response.data;
+    } else {
+      throw Exception(
+        response.data['message'] ?? 'Failed to request withdrawal',
+      );
     }
   }
 }

@@ -11,10 +11,7 @@ class TransactionHistoryList extends StatelessWidget {
     return Column(
       children:
           transactions
-              .map(
-                (transaction) =>
-                    TransactionHistoryTile(transaction: transaction),
-              )
+              .map((tx) => TransactionHistoryTile(transaction: tx))
               .toList(),
     );
   }

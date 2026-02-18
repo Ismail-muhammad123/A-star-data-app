@@ -18,13 +18,51 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
   final _phoneController = TextEditingController();
 
   bool _isLoading = false;
-  DataBundle? _selectedSmileVoicePlan;
+  SmilePackage? _selectedSmileVoicePlan;
+  String _packageType = 'data'; // 'data' or 'smilevoice'
+  bool _isVerified = false;
+  String? _customerName;
+
+  _verifyNumber() async {
+    if (_phoneController.text.trim().isEmpty ||
+        _phoneController.text.trim().length < 10) {
+      return;
+    }
+    if (_selectedSmileVoicePlan == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await OrderServices().verifyCustomer(
+        authToken: context.read<AuthProvider>().authToken ?? "",
+        serviceId: "smile-direct",
+        variationId: _selectedSmileVoicePlan!.variationId,
+        customerId: _phoneController.text.trim(),
+      );
+      setState(() {
+        _isVerified = true;
+        _customerName = result['Customer_Name'] ?? result['name'] ?? "Unknown";
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Verification failed: ${e.toString().split(":").last}'),
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   _purchasePlan() async {
     if (_selectedSmileVoicePlan == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select a Smile Voice Plan')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please select a Smile Plan')));
       return;
     }
 
@@ -36,18 +74,25 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
       return;
     }
 
+    if (!_isVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please verify the phone number first')),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
     try {
-      await OrderServices().purchaseDataBundle(
+      await OrderServices().purchaseSmileSubscription(
         authToken: context.read<AuthProvider>().authToken ?? "",
         bundleId: _selectedSmileVoicePlan?.id ?? 0,
         phoneNumber: _phoneController.text.trim(),
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Smile Voice Plan was purchase successful'),
+          content: Text('Smile Plan purchase was successful'),
           backgroundColor: Colors.green,
         ),
       );
@@ -73,7 +118,7 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Buy Data Plan", style: TextStyle(color: Colors.white)),
+        title: Text("Buy Smile", style: TextStyle(color: Colors.white)),
         elevation: 4,
         backgroundColor: Colors.lightBlue,
         surfaceTintColor: Colors.lightBlue,
@@ -92,13 +137,37 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                 ),
               ),
               SizedBox(height: 20),
-              Text("Select Smile Voice Plan"),
+              Text("Select Package Type"),
+              SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: 'data', label: Text('Smile Data')),
+                    ButtonSegment(
+                      value: 'smilevoice',
+                      label: Text('Smile Voice'),
+                    ),
+                  ],
+                  selected: {_packageType},
+                  onSelectionChanged: (Set<String> newSelection) {
+                    setState(() {
+                      _packageType = newSelection.first;
+                      _selectedSmileVoicePlan = null;
+                      _isVerified = false;
+                      _customerName = null;
+                    });
+                  },
+                ),
+              ),
+              SizedBox(height: 20),
+              Text("Select Smile Plan"),
               GestureDetector(
                 onTap:
                     _isLoading
                         ? null
                         : () async {
-                          DataBundle? bundle = await showDialog(
+                          SmilePackage? bundle = await showDialog(
                             context: context,
                             builder:
                                 (context) => Dialog(
@@ -125,7 +194,7 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                                                 icon: Icon(Icons.close),
                                               ),
                                               Text(
-                                                'Pick Smile Voice Plan',
+                                                'Pick Smile Plan',
                                                 style: TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.bold,
@@ -137,10 +206,10 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                                         Divider(),
                                         Expanded(
                                           child: FutureBuilder<
-                                            List<DataBundle>
+                                            List<SmilePackage>
                                           >(
                                             future: OrderServices()
-                                                .fetchDataBundles(
+                                                .fetchSmilePackages(
                                                   context
                                                           .read<AuthProvider>()
                                                           .authToken ??
@@ -163,11 +232,42 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                                               }
                                               final bundles =
                                                   snapshot.data ?? [];
-                                              bundles.retainWhere(
-                                                (b) => b.name
-                                                    .toLowerCase()
-                                                    .contains("voice"),
+                                              if (_packageType ==
+                                                  'smilevoice') {
+                                                bundles.retainWhere(
+                                                  (b) => b.name
+                                                      .toLowerCase()
+                                                      .contains("voice"),
+                                                );
+                                              } else {
+                                                bundles.retainWhere(
+                                                  (b) =>
+                                                      !b.name
+                                                          .toLowerCase()
+                                                          .contains("voice"),
+                                                );
+                                              }
+                                              bundles.sort(
+                                                (a, b) => a.sellingPrice
+                                                    .compareTo(b.sellingPrice),
                                               );
+                                              if (bundles.isEmpty) {
+                                                return Center(
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          20.0,
+                                                        ),
+                                                    child: Text(
+                                                      'No packages found for this type',
+                                                      style: TextStyle(
+                                                        color: Colors.grey[600],
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }
                                               return ListView.builder(
                                                 itemCount: bundles.length,
                                                 itemBuilder: (context, index) {
@@ -190,6 +290,9 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                                                           setState(() {
                                                             _selectedSmileVoicePlan =
                                                                 bundle;
+                                                            _isVerified = false;
+                                                            _customerName =
+                                                                null;
                                                           });
                                                           Navigator.pop(
                                                             context,
@@ -212,6 +315,8 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                           if (bundle != null) {
                             setState(() {
                               _selectedSmileVoicePlan = bundle;
+                              _isVerified = false;
+                              _customerName = null;
                             });
                           }
                         },
@@ -233,7 +338,7 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                           child: Text(
                             _selectedSmileVoicePlan != null
                                 ? _selectedSmileVoicePlan!.name
-                                : ("Tap to select Smile Voice Plan"),
+                                : ("Tap to select Smile Plan"),
                             style: TextStyle(
                               color:
                                   _selectedSmileVoicePlan != null
@@ -270,13 +375,49 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
               TextFormField(
                 enabled: !_isLoading,
                 controller: _phoneController,
+                onChanged: (value) {
+                  if (_isVerified) {
+                    setState(() {
+                      _isVerified = false;
+                      _customerName = null;
+                    });
+                  }
+                  if (value.length >= 10 && _selectedSmileVoicePlan != null) {
+                    _verifyNumber();
+                  }
+                },
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: "Enter phone number",
+                  suffixIcon:
+                      _isLoading
+                          ? Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                          : IconButton(
+                            onPressed: _verifyNumber,
+                            icon: Icon(Icons.verified, color: Colors.blue),
+                          ),
                 ),
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
+              if (_isVerified && _customerName != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    "Customer Name: $_customerName",
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               SizedBox(height: 50),
               Center(
                 child: MaterialButton(

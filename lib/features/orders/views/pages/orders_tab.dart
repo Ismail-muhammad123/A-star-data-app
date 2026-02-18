@@ -271,7 +271,7 @@ class _OrdersTabState extends State<OrdersTab> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            "Buy SmileVoice",
+                            "Buy Smile Subscription",
                             style: TextStyle(
                               fontStyle: FontStyle.italic,
                               fontSize: 18,

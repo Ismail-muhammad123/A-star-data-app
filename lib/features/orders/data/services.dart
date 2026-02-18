@@ -155,6 +155,54 @@ class OrderServices {
     }
   }
 
+  Future<List<SmilePackage>> fetchSmilePackages(String authToken) async {
+    var response = await _dio.get(
+      _endpoints.getSmilePackages,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data;
+      return data
+          .map((item) => SmilePackage.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception('Failed to load smile packages');
+    }
+  }
+
+  Future<void> purchaseSmileSubscription({
+    required String authToken,
+    required int bundleId,
+    required String phoneNumber,
+  }) async {
+    var response = await _dio.post(
+      _endpoints.purchaseSmileSubscription,
+      data: {'plan_id': bundleId, 'phone_number': phoneNumber},
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return;
+    } else {
+      throw Exception(
+        response.data['error'] ?? 'Failed to purchase smile subscription',
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> verifyCustomer({
     required String authToken,
     required String serviceId,
@@ -176,6 +224,8 @@ class OrderServices {
         },
       ),
     );
+
+    print(response.data);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       // Purchase successful

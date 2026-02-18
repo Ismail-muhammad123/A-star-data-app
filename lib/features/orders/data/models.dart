@@ -229,6 +229,43 @@ class DataBundle {
   }
 }
 
+// SMILE PACKAGES
+class SmilePackage {
+  final int id;
+  final String name;
+  final String variationId;
+  final double sellingPrice;
+  final bool isActive;
+
+  SmilePackage({
+    required this.id,
+    required this.name,
+    required this.variationId,
+    required this.sellingPrice,
+    required this.isActive,
+  });
+
+  factory SmilePackage.fromJson(Map<String, dynamic> json) {
+    return SmilePackage(
+      id: json['id'],
+      name: json['name'],
+      variationId: json['variation_id'].toString(),
+      sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
+      isActive: json['is_active'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'variation_id': variationId,
+      'selling_price': sellingPrice,
+      'is_active': isActive,
+    };
+  }
+}
+
 // ORDER HISTORY
 class OrderHistory {
   int id;

@@ -1,3 +1,5 @@
+import 'package:app/core/services/biometric_service.dart';
+import 'package:app/features/settings/data/repositories/profile_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/features/auth/data/repository/auth_repo.dart';
@@ -8,11 +10,35 @@ class AuthProvider extends ChangeNotifier {
   String? authToken;
 
   final AuthService _authService = AuthService();
+  final BiometricService _biometricService = BiometricService();
+
+  bool _isBiometricEnabled = false;
+  bool get isBiometricEnabled => _isBiometricEnabled;
 
   Future<String?> get token async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
     return token;
+  }
+
+  Future<String?> get lastPhoneNumber async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('last_phone_number');
+  }
+
+  Future<String?> get lastUserName async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('last_user_name');
+  }
+
+  Future<bool> get isFirstTime async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('is_first_time') ?? true;
+  }
+
+  Future<void> markFirstTimeSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_first_time', false);
   }
 
   Future<void> checkAuth() async {
@@ -23,6 +49,9 @@ class AuthProvider extends ChangeNotifier {
 
     authToken = token;
     _isAuthenticated = token != null;
+
+    _isBiometricEnabled = await _biometricService.isBiometricLoginEnabled();
+
     notifyListeners();
   }
 
@@ -72,12 +101,32 @@ class AuthProvider extends ChangeNotifier {
     }
     try {
       var res = await _authService.login(phoneNumber, pin);
+      print(res);
+
       var token = res['access'];
       var refresh = res['refresh'];
       if (token != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', token);
         await prefs.setString('refresh_token', refresh);
+        await prefs.setString('last_phone_number', phoneNumber);
+
+        // Fetch profile to save name
+        try {
+          final profile = await ProfileService().fetchUserProfile(token);
+          if (profile != null) {
+            final firstName = profile.firstName ?? "";
+            final lastName = profile.lastName ?? "";
+            final fullName = "$firstName $lastName".trim();
+            if (fullName.isNotEmpty) {
+              await prefs.setString('last_user_name', fullName);
+            }
+          }
+        } catch (e) {
+          debugPrint(
+            "AuthProvider: Error fetching profile for name retention: $e",
+          );
+        }
 
         authToken = token;
         _isAuthenticated = true;
@@ -87,6 +136,7 @@ class AuthProvider extends ChangeNotifier {
         return {"success": false, "message": "Invalid Phone Number or Pin"};
       }
     } catch (e) {
+      print(e);
       return {"success": false, "message": e.toString()};
     }
   }
@@ -135,7 +185,82 @@ class AuthProvider extends ChangeNotifier {
     }
     await prefs.remove('auth_token');
     await prefs.remove('refresh_token');
+    await _biometricService.disableBiometricLogin();
     _isAuthenticated = false;
     notifyListeners();
+  }
+
+  // Biometric methods
+  Future<bool> enableBiometrics() async {
+    final bool canBiometric = await _biometricService.isBiometricAvailable();
+    if (!canBiometric) return false;
+
+    final bool authenticated = await _biometricService.authenticate(
+      reason: 'Confirm biometrics to enable login',
+    );
+
+    if (authenticated) {
+      final prefs = await SharedPreferences.getInstance();
+      final refreshToken = prefs.getString('refresh_token');
+      if (refreshToken != null) {
+        await _biometricService.saveRefreshTokenSecurely(refreshToken);
+        await _biometricService.enableBiometricLogin();
+        _isBiometricEnabled = true;
+        notifyListeners();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> disableBiometrics() async {
+    await _biometricService.disableBiometricLogin();
+    _isBiometricEnabled = false;
+    notifyListeners();
+  }
+
+  Future<Map<String, dynamic>?> loginWithBiometrics() async {
+    final bool hasSetup = await _biometricService.hasBiometricSetup();
+    if (!hasSetup) {
+      return {"success": false, "message": "Biometric login not set up"};
+    }
+
+    final bool authenticated = await _biometricService.authenticate(
+      reason: 'Login with biometrics',
+    );
+
+    if (!authenticated) {
+      return {"success": false, "message": "Biometric authentication failed"};
+    }
+
+    final String? refreshToken =
+        await _biometricService.getSecureRefreshToken();
+    if (refreshToken == null) {
+      return {"success": false, "message": "No secure token found"};
+    }
+
+    try {
+      var res = await _authService.refreshToken(refreshToken);
+      var token = res['access'];
+      var newRefresh = res['refresh'];
+
+      if (token != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+        await prefs.setString('refresh_token', newRefresh);
+
+        // Update securely saved refresh token
+        await _biometricService.saveRefreshTokenSecurely(newRefresh);
+
+        authToken = token;
+        _isAuthenticated = true;
+        notifyListeners();
+        return {"success": true, "message": ""};
+      } else {
+        return {"success": false, "message": "Failed to refresh token"};
+      }
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
   }
 }

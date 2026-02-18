@@ -52,22 +52,72 @@ class _WalletHistoryPageState extends State<WalletHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        title: const Text(
+          "Transaction History",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        backgroundColor: Colors.blueAccent,
         leading: BackButton(
           color: Colors.white,
           onPressed:
               () => context.canPop() ? context.pop() : context.go("/wallet"),
         ),
-        title: Text("Wallet History", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.lightBlue,
-        surfaceTintColor: Colors.lightBlue,
+        elevation: 0,
       ),
-      body:
-          _isLoading
-              ? Center(child: CircularProgressIndicator())
-              : _transactions.isEmpty
-              ? Center(child: Text("No Transactions Found"))
-              : TransactionHistoryList(transactions: _transactions),
+      body: RefreshIndicator(
+        onRefresh: () => _fetctWalletTransactions(),
+        color: Colors.blueAccent,
+        child:
+            _isLoading && _transactions.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : _transactions.isEmpty
+                ? ListView(
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                    Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.history_rounded,
+                            size: 80,
+                            color: Colors.grey[300],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            "No transactions yet",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Your transaction history will appear here.",
+                            style: TextStyle(color: Colors.grey[400]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+                : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Column(
+                    children: [
+                      TransactionHistoryList(transactions: _transactions),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+      ),
     );
   }
 }

@@ -1,7 +1,8 @@
 <manifest
-    package="ng.com.stardata.app"
+    package="com.astardata.app"
  xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <application
         android:label="A-Star - Data and Airtime"
         android:name="${applicationName}"

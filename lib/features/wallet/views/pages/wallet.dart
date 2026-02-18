@@ -21,50 +21,59 @@ class _WalletPageState extends State<WalletPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("My Wallet", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.lightBlue,
-        surfaceTintColor: Colors.lightBlue,
-        actions: [
-          IconButton(
-            onPressed:
-                () => setState(() {
-                  // Refresh the wallet page
-                }),
-            icon: Icon(Icons.refresh, color: Colors.white),
-          ),
-        ],
-      ),
       backgroundColor: Colors.grey[50],
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
+      appBar: AppBar(
+        title: const Text(
+          "My Wallet",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          setState(() {});
+        },
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Balance Card
               Container(
-                width: double.maxFinite,
-                padding: EdgeInsets.all(10.0),
+                width: double.infinity,
+                padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.blueAccent, Colors.lightBlue],
+                  ),
+                  borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color.fromARGB(88, 158, 158, 158),
-                      blurRadius: 10,
-                      offset: Offset(2, 2),
+                      color: Colors.blueAccent.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "Available balance",
-                        style: TextStyle(color: Colors.grey),
+                    Text(
+                      "Available Balance",
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.9),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
+                    const SizedBox(height: 12),
                     FutureBuilder<String>(
                       future: WalletService().getBalance(
                         context.read<AuthProvider>().authToken ?? "",
@@ -72,142 +81,62 @@ class _WalletPageState extends State<WalletPage> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return CircularProgressIndicator();
-                        }
-                        if (!snapshot.hasData || snapshot.hasError) {
-                          return Text(
-                            "Error",
-                            style: TextStyle(
-                              fontSize: 30,
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
+                          return const SizedBox(
+                            height: 40,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
                             ),
                           );
                         }
-                        // if (snapshot.data != null) {
-                        var balance = double.tryParse(snapshot.data!);
+
+                        double balance = 0;
+                        if (snapshot.hasData) {
+                          balance = double.tryParse(snapshot.data!) ?? 0;
+                        }
 
                         return Text(
                           NumberFormat.currency(
                             locale: 'en_NG',
                             symbol: '₦',
-                          ).format(balance ?? 0).toString(),
-                          style: TextStyle(fontSize: 28, color: Colors.black),
+                          ).format(balance),
+                          style: const TextStyle(
+                            fontSize: 36,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
                         );
                       },
                     ),
-                    SizedBox(height: 10),
-
-                    FutureBuilder<VirtualAccount>(
-                      future: WalletService().getVirtualAccount(
-                        context.read<AuthProvider>().authToken ?? "",
-                      ),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return SizedBox();
-                        }
-                        if (!snapshot.hasData || snapshot.hasError) {
-                          return GestureDetector(
-                            onTap: () => context.push("/profile/update"),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.yellow[50],
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                  color: Colors.orange[200]!,
-                                  width: 1,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    blurRadius: 4,
-                                    offset: Offset(2, 2),
-                                  ),
-                                ],
-                              ),
-                              padding: EdgeInsets.all(8.0),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.info,
-                                    size: 30,
-                                    color: Colors.orange[200]!,
-                                  ),
-                                  SizedBox(width: 8.0),
-                                  Flexible(
-                                    child: Text(
-                                      "Complete your profile to get a permanent virtual account",
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Icon(
-                                      Icons.arrow_forward_ios,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }
-                        var account = snapshot.data!;
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Fund your wallet",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 6.0),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: TransferDepositAccountInfoCard(
-                                accountName: account.accountName,
-                                accountNumber: account.accountNumber,
-                                bankName: account.bankName,
-                                color: Colors.lightBlue[50],
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
+                    const SizedBox(height: 24),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Expanded(
-                          child: MaterialButton(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            height: 40,
-                            color: Colors.blue,
-                            onPressed:
+                          child: _buildActionButton(
+                            label: "Fund",
+                            icon: Icons.add_circle_outline,
+                            color: Colors.white,
+                            textColor: Colors.blueAccent,
+                            onTap:
                                 () => context
                                     .push("/wallet/fund")
                                     .then((_) => setState(() {})),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.payment, color: Colors.white),
-                                SizedBox(width: 10),
-                                Text(
-                                  "Fund Wallet",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildActionButton(
+                            label: "Withdraw",
+                            icon: Icons.account_balance_wallet_outlined,
+                            color: Colors.white.withOpacity(0.2),
+                            textColor: Colors.white,
+                            onTap:
+                                () => context
+                                    .push("/wallet/withdraw")
+                                    .then((_) => setState(() {})),
                           ),
                         ),
                       ],
@@ -215,78 +144,214 @@ class _WalletPageState extends State<WalletPage> {
                   ],
                 ),
               ),
-              SizedBox(height: 6),
-              Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.lightBlue.shade50,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(6),
-                    ),
-                    border: Border(
-                      top: BorderSide(color: Colors.grey.withOpacity(0.2)),
+
+              const SizedBox(height: 32),
+
+              // Virtual Account Section
+              FutureBuilder<VirtualAccount>(
+                future: WalletService().getVirtualAccount(
+                  context.read<AuthProvider>().authToken ?? "",
+                ),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox();
+                  }
+
+                  if (!snapshot.hasData || snapshot.hasError) {
+                    return _buildIncompleteProfileNotice(context);
+                  }
+
+                  final account = snapshot.data!;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Bank Transfer Deposit",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TransferDepositAccountInfoCard(
+                        accountName: account.accountName,
+                        accountNumber: account.accountNumber,
+                        bankName: account.bankName,
+                        color: Colors.white,
+                      ),
+                    ],
+                  );
+                },
+              ),
+
+              const SizedBox(height: 32),
+
+              // Transaction History Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Recent Transactions",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Recent Transactions",
-                          style: TextStyle(fontSize: 14, color: Colors.black),
-                        ),
-                        GestureDetector(
-                          onTap: () => context.push("/wallet/history"),
-                          child: Text(
-                            "view all",
-                            style: TextStyle(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
+                  TextButton(
+                    onPressed: () => context.push("/wallet/history"),
+                    child: const Text(
+                      "See All",
+                      style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              FutureBuilder<List<WalletTransaction>>(
+                future: WalletService().getTransactions(
+                  context.read<AuthProvider>().authToken ?? "",
+                ),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(40.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text("Error loading transactions"),
+                    );
+                  }
+
+                  final transactions = snapshot.data ?? [];
+                  if (transactions.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.history,
+                              size: 48,
+                              color: Colors.grey[300],
                             ),
-                          ),
+                            const SizedBox(height: 16),
+                            Text(
+                              "No transactions yet",
+                              style: TextStyle(color: Colors.grey[400]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  final displayList = [...transactions];
+                  displayList.sort(
+                    (a, b) => b.timestamp.compareTo(a.timestamp),
+                  );
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
-                  ),
-                ),
+                    child: TransactionHistoryList(
+                      transactions: displayList.take(10).toList(),
+                    ),
+                  );
+                },
               ),
-              Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: FutureBuilder<List<WalletTransaction>>(
-                  future: WalletService().getTransactions(
-                    Provider.of<AuthProvider>(
-                      context,
-                      listen: false,
-                    ).authToken!,
-                  ),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError) {
-                      return Center(child: Text("Error loading transactions"));
-                    }
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-                    var transactions = snapshot.data!;
-                    if (transactions.isEmpty) {
-                      return Center(child: Text("No transactions found"));
-                    }
-                    transactions.sort(
-                      (a, b) => b.timestamp.compareTo(a.timestamp),
-                    );
-                    transactions =
-                        transactions.length > 10
-                            ? transactions.sublist(0, 10)
-                            : transactions;
-                    return TransactionHistoryList(transactions: transactions);
-                  },
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required Color textColor,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: textColor, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIncompleteProfileNotice(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push("/profile/update"),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.orange[50],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.orange.shade100),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline, color: Colors.orange[400], size: 28),
+            const SizedBox(width: 16),
+            const Expanded(
+              child: Text(
+                "Complete your profile to unlock a permanent virtual account for instant funding.",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.orange),
+          ],
         ),
       ),
     );

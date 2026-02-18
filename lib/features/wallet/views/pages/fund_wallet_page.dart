@@ -1,5 +1,5 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
-import 'package:app/features/profile/providers/profile_provider.dart';
+import 'package:app/features/settings/providers/profile_provider.dart';
 import 'package:app/features/wallet/data/repository/wallet_repo.dart';
 import 'package:app/features/wallet/views/pages/funding_guide_page.dart';
 import 'package:app/features/wallet/views/pages/webview_payment_page.dart';
@@ -21,17 +21,24 @@ class FundWalletFormPage extends StatefulWidget {
 class _FundWalletFormPageState extends State<FundWalletFormPage> {
   final TextEditingController _amountController = TextEditingController();
   bool _isLoading = false;
-
   String paymentMethod = "transfer";
-
   Map<String, dynamic>? paymentInfo;
 
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
+  }
+
   _initCardPayment() async {
-    if (_amountController.text.isEmpty ||
-        double.tryParse(_amountController.text) == null ||
-        double.parse(_amountController.text) < 100) {
+    final amountText = _amountController.text.trim();
+    final amount = double.tryParse(amountText);
+
+    if (amount == null || amount < 100) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter a valid amount (Min. of N100)")),
+        const SnackBar(
+          content: Text("Please enter a valid amount (Min. ₦100)"),
+        ),
       );
       return;
     }
@@ -43,100 +50,85 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
 
     try {
       var res = await WalletService().fundWithCard(
-        Provider.of<AuthProvider>(context, listen: false).authToken ?? '',
-        double.parse(_amountController.text),
+        context.read<AuthProvider>().authToken ?? '',
+        amount,
       );
-      if (res == null) {
-        throw Exception('Failed to fetch payment info');
-      }
-
-      // print(res);
+      if (res == null) throw Exception('Failed to fetch payment info');
 
       var checkoutUrl = res['authorization_url'];
 
       if (!kIsWeb) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PaymentWebViewPage(paymentUrl: checkoutUrl),
-          ),
-        );
+        if (mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PaymentWebViewPage(paymentUrl: checkoutUrl),
+            ),
+          );
+        }
       } else {
         var uri = Uri.parse(checkoutUrl);
         if (await canLaunchUrl(uri)) {
           await launchUrl(uri);
-        } else {
-          print("can't launch payment URL");
         }
 
         if (mounted) {
-          showDialog(
-            context: context,
-            builder:
-                (context) => AlertDialog(
-                  title: Text("Payment Initiated"),
-                  content: Text(
-                    "Your card payment has been initiated. If the payment page did not open, tap the button below to open it manually in your browser.",
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () async {
-                        var checkoutUrl = res['responseBody']['checkoutUrl'];
-                        var uri = Uri.parse(checkoutUrl);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(
-                            uri,
-                            mode: LaunchMode.externalApplication,
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Could not launch payment link"),
-                            ),
-                          );
-                        }
-                      },
-                      child: Text("Open Payment Link"),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        setState(() {
-                          _amountController.clear();
-                        });
-                        context.canPop()
-                            ? context.pop()
-                            : context.go("/wallet");
-                      },
-                      child: Text("Done"),
-                    ),
-                  ],
-                ),
-          );
+          _showPaymentInitiatedDialog(res);
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Failed to load payment info! ${e.toString()}"),
-          ),
+          SnackBar(content: Text("Payment failed: ${e.toString()}")),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
+  void _showPaymentInitiatedDialog(dynamic res) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Payment Initiated"),
+            content: const Text(
+              "Your card payment has been initiated. If the payment page did not open, you can manually open it.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  var checkoutUrl =
+                      res['responseBody']?['checkoutUrl'] ??
+                      res['authorization_url'];
+                  var uri = Uri.parse(checkoutUrl);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: const Text("Open Manually"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context.pop();
+                },
+                child: const Text("Done"),
+              ),
+            ],
+          ),
+    );
+  }
+
   _getPaymentInfo() async {
-    if (_amountController.text.isEmpty ||
-        double.tryParse(_amountController.text) == null ||
-        double.parse(_amountController.text) < 100) {
+    final amountText = _amountController.text.trim();
+    final amount = double.tryParse(amountText);
+
+    if (amount == null || amount < 100) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter a valid amount (Min. of N100)")),
+        const SnackBar(
+          content: Text("Please enter a valid amount (Min. ₦100)"),
+        ),
       );
       return;
     }
@@ -145,14 +137,13 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
       _isLoading = true;
       paymentInfo = null;
     });
+
     try {
       var res = await WalletService().fundWithTransfer(
-        Provider.of<AuthProvider>(context, listen: false).authToken ?? '',
-        double.parse(_amountController.text),
+        context.read<AuthProvider>().authToken ?? '',
+        amount,
       );
-      if (res == null) {
-        throw Exception('Failed to fetch payment info');
-      }
+      if (res == null) throw Exception('Failed to fetch payment info');
 
       setState(() {
         paymentInfo = (res['responseBody'] as Map<String, dynamic>);
@@ -160,264 +151,263 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Failed to load payment info! ${e.toString()}"),
-          ),
+          SnackBar(content: Text("Failed to load: ${e.toString()}")),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // Future<void> _launchInBrowser(String url) async {
-  //   final uri = Uri.parse(url);
-  //   if (await canLaunchUrl(uri)) {
-  //     await launchUrl(uri, mode: LaunchMode.externalApplication);
-  //   } else {
-  //     throw 'Could not launch payment link';
-  //   }
-  // }
-
-  // _initiateFunding() async {
-  //   setState(() => _isLoading = true);
-
-  //   try {
-  //     var res = await WalletService().addFunds(
-  //       Provider.of<AuthProvider>(context, listen: false).authToken ?? '',
-  //       double.parse(_amountController.text),
-  //     );
-  //     if (res == null) {
-  //       throw Exception('Failed to initiate deposit into wallet');
-  //     }
-
-  //     var paymentUrl = res['data']['authorization_url'];
-
-  //     if (kIsWeb) {
-  //       Future.microtask(() async {
-  //         await _launchInBrowser(paymentUrl);
-  //       });
-  //     } else {
-  //       await Navigator.push(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (_) => PaymentWebViewPage(paymentUrl: paymentUrl),
-  //         ),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       showDialog(
-  //         context: context,
-  //         builder:
-  //             (context) => AlertDialog(
-  //               title: Text("Error"),
-  //               content: Text(e.toString()),
-  //               actions: [
-  //                 TextButton(
-  //                   onPressed: () => Navigator.of(context).pop(),
-  //                   child: Text("OK"),
-  //                 ),
-  //               ],
-  //             ),
-  //       );
-  //     }
-  //   }
-  //   if (mounted) {
-  //     setState(() => _isLoading = false);
-  //     context.canPop() ? context.pop() : context.go("/home");
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
-    var profileRef = context.watch<ProfileProvider>().profile;
+    final profile = context.watch<ProfileProvider>().profile;
+    final isTier2 = profile?.tier == 2;
+
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        title: const Text(
+          "Fund Wallet",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        backgroundColor: Colors.blueAccent,
         leading: BackButton(
           color: Colors.white,
-          onPressed:
-              () => context.canPop() ? context.pop() : context.go("/wallet"),
-        ),
-        title: Text(
-          "Fund Wallet",
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        backgroundColor: Colors.lightBlue,
-        surfaceTintColor: Colors.lightBlue,
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 8.0),
-        child: MaterialButton(
-          minWidth: double.maxFinite,
-          onPressed:
-              _isLoading
-                  ? null
-                  : profileRef?.tier == 2 || paymentMethod == "card"
-                  ? _initCardPayment
-                  : paymentInfo == null
-                  ? _getPaymentInfo
-                  : () =>
-                      context.canPop() ? context.pop() : context.go("/wallet"),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          height: 50,
-          color: Colors.lightBlue,
-          child:
-              _isLoading
-                  ? CircularProgressIndicator()
-                  : Text(
-                    paymentInfo == null ? "Proceed" : "Finish",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+          onPressed: () => context.pop(),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
+            // Header Info
+            const Text(
+              "Add Funds",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Choose your preferred method to add money to your wallet.",
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+            ),
+            const SizedBox(height: 32),
+
+            // Funding Guide Link
+            InkWell(
               onTap:
                   () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const FundingGuidePage()),
                   ),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: EdgeInsets.all(14),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  border: Border.all(color: Colors.blue),
-                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.blueAccent.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blueAccent.withOpacity(0.2)),
                 ),
-                alignment: Alignment.center,
-                child: Row(
+                child: const Row(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(Icons.help, color: Colors.blue),
+                    Icon(Icons.help_outline, color: Colors.blueAccent),
+                    SizedBox(width: 12),
+                    Text(
+                      "Need help? View funding guide",
+                      style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    Text("How to fund wallet."),
+                    Spacer(),
+                    Icon(
+                      Icons.chevron_right,
+                      color: Colors.blueAccent,
+                      size: 20,
+                    ),
                   ],
                 ),
               ),
             ),
+            const SizedBox(height: 32),
 
-            profileRef?.tier == 2 ? SizedBox() : Text("Payment Method:"),
-            profileRef?.tier == 2
-                ? SizedBox()
-                : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: GestureDetector(
-                        onTap:
-                            _isLoading
-                                ? null
-                                : () {
-                                  setState(() => paymentMethod = "transfer");
-                                },
-                        child: Container(
-                          padding: EdgeInsets.all(6.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              width: paymentMethod == "transfer" ? 2 : 1,
-                              color:
-                                  paymentMethod == "transfer"
-                                      ? Colors.blue
-                                      : Colors.lightBlue[100]!,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.send),
-                              SizedBox(width: 10),
-                              Text("Bank Transfer"),
-                            ],
-                          ),
-                        ),
-                      ),
+            // Payment Method Selection (If not Tier 2)
+            if (!isTier2) ...[
+              const Text(
+                "Payment Method",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMethodCard(
+                      id: "transfer",
+                      label: "Transfer",
+                      icon: Icons.account_balance_outlined,
+                      isSelected: paymentMethod == "transfer",
                     ),
-                    SizedBox(width: 10),
-                    Flexible(
-                      child: GestureDetector(
-                        onTap:
-                            _isLoading
-                                ? null
-                                : () {
-                                  setState(() => paymentMethod = "card");
-                                },
-                        child: Container(
-                          padding: EdgeInsets.all(6.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              width: paymentMethod == "card" ? 2 : 1,
-                              color:
-                                  paymentMethod == "card"
-                                      ? Colors.blue
-                                      : Colors.lightBlue[100]!,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.credit_card),
-                              SizedBox(width: 4),
-                              Text("Card Payment"),
-                            ],
-                          ),
-                        ),
-                      ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildMethodCard(
+                      id: "card",
+                      label: "Card",
+                      icon: Icons.credit_card_outlined,
+                      isSelected: paymentMethod == "card",
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+            ],
 
-            SizedBox(height: 20),
-            Text("Amount:"),
-            SizedBox(height: 5.0),
+            // Amount Input
+            const Text(
+              "How much would you like to add?",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _amountController,
               keyboardType: TextInputType.number,
               enabled: !_isLoading,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              validator:
-                  (value) =>
-                      value == null || value.isEmpty
-                          ? 'Please enter an amount'
-                          : double.tryParse(value) == null
-                          ? 'Please enter a valid number'
-                          : double.tryParse(value) == null ||
-                              double.parse(value) < 100
-                          ? 'Amount must be at least N100'
-                          : null,
-              enableSuggestions: true,
               decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: "Min. of N100",
-                contentPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                hintText: "Enter amount",
+                prefixText: "₦ ",
+                prefixStyle: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 18,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
               ),
             ),
 
-            SizedBox(height: 20),
-            paymentInfo == null
-                ? SizedBox()
-                : TransferDepositAccountInfoCard(
-                  accountName: paymentInfo!['accountName'],
-                  accountNumber: paymentInfo!['accountNumber'],
-                  bankName: paymentInfo!['bankName'],
-                  amount: double.tryParse(_amountController.text) ?? 0,
+            if (paymentInfo != null) ...[
+              const SizedBox(height: 32),
+              const Text(
+                "Transfer Details",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              TransferDepositAccountInfoCard(
+                accountName: paymentInfo!['accountName'],
+                accountNumber: paymentInfo!['accountNumber'],
+                bankName: paymentInfo!['bankName'],
+                amount: double.tryParse(_amountController.text) ?? 0,
+              ),
+            ],
+
+            const SizedBox(height: 48),
+
+            // Action Button
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed:
+                    _isLoading
+                        ? null
+                        : (isTier2 || paymentMethod == "card"
+                            ? _initCardPayment
+                            : (paymentInfo == null
+                                ? _getPaymentInfo
+                                : () => context.pop())),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 0,
                 ),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : Text(
+                          paymentInfo == null ? "Continue" : "Done",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+              ),
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMethodCard({
+    required String id,
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+  }) {
+    return GestureDetector(
+      onTap: _isLoading ? null : () => setState(() => paymentMethod = id),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blueAccent : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? Colors.blueAccent : Colors.grey.shade200,
+          ),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: Colors.blueAccent.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: isSelected ? Colors.white : Colors.blueAccent),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black87,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),

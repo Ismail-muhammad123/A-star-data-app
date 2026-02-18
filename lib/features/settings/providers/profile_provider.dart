@@ -1,5 +1,5 @@
-import 'package:app/features/profile/data/models/profile_model.dart';
-import 'package:app/features/profile/data/repositories/profile_repo.dart';
+import 'package:app/features/settings/data/models/profile_model.dart';
+import 'package:app/features/settings/data/repositories/profile_repo.dart';
 import 'package:flutter/widgets.dart';
 
 class ProfileProvider extends ChangeNotifier {

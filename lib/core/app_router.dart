@@ -2,7 +2,7 @@ import 'package:app/features/auth/views/pages/confirm_pin_reset.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/views/pages/airtime/buy_airtime.dart';
 import 'package:app/features/orders/views/pages/data/buy_data.dart';
-import 'package:app/features/orders/views/pages/data/buy_smile_voice.dart';
+import 'package:app/features/orders/views/pages/smile/buy_smile_subscription.dart';
 import 'package:app/features/orders/views/pages/electricity/buy_electricity_page.dart';
 import 'package:app/features/orders/views/pages/electricity/list_electricity_providers.dart';
 import 'package:app/features/orders/views/pages/history/order_details.dart';
@@ -10,8 +10,9 @@ import 'package:app/features/orders/views/pages/history/order_history.dart';
 import 'package:app/features/orders/views/pages/tv/buy_tv_page.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_pachage.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_service.dart';
-import 'package:app/features/profile/views/pages/tier/upgrade_tier.dart';
-import 'package:app/features/profile/views/pages/personal/change_pin_form_page.dart';
+import 'package:app/features/settings/views/pages/bank_information/bank_info_form_page.dart';
+import 'package:app/features/settings/views/pages/tier/upgrade_tier.dart';
+import 'package:app/features/settings/views/pages/personal/change_pin_form_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -21,11 +22,11 @@ import 'package:app/features/auth/views/pages/account_activation_page.dart';
 import 'package:app/features/auth/views/pages/forget_pin.dart';
 import 'package:app/features/auth/views/pages/login.dart';
 import 'package:app/features/auth/views/pages/sign_up.dart';
-import 'package:app/features/profile/views/pages/personal/profile_form_page.dart';
+import 'package:app/features/settings/views/pages/personal/profile_form_page.dart';
 import 'package:app/features/wallet/views/pages/fund_wallet_page.dart';
 import 'package:app/features/wallet/views/pages/transaction_details_page.dart';
 import 'package:app/features/wallet/views/pages/wallet_history_page.dart';
-// import 'package:app/features/wallet/views/pages/withdrawal_form_page.dart';
+import 'package:app/features/wallet/views/pages/withdrawal_page.dart';
 import 'package:app/home.dart';
 
 final GoRouter router = GoRouter(
@@ -194,10 +195,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) => FundWalletFormPage(),
     ),
 
-    // GoRoute(
-    //   path: '/wallet/withdraw',
-    //   builder: (context, state) => WithdrawalFormPage(),
-    // ),
+    GoRoute(
+      path: '/wallet/withdraw',
+      builder: (context, state) => const WithdrawalPage(),
+    ),
 
     // ===================== Profile Routes =====================
     GoRoute(
@@ -211,6 +212,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/profile/change-pin',
       builder: (context, state) => const ChangePasswordPage(),
+    ),
+    GoRoute(
+      path: '/profile/bank-info',
+      builder: (context, state) => const BankInfoFormPage(),
     ),
     GoRoute(
       path: '/profile/tier',

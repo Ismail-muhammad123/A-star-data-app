@@ -9,47 +9,91 @@ class TransactionHistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        dense: true,
-        onTap:
-            () => context.push(
-              "/wallet/history/${transaction.id}",
-              extra: transaction,
-            ),
-        tileColor: Colors.white,
-        leading: CircleAvatar(
-          backgroundColor: const Color.fromARGB(37, 164, 164, 164),
-          child: Icon(Icons.history, size: 30),
-        ),
-        title: Text(
-          transaction.transactionType.toUpperCase(),
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(
-          NumberFormat.currency(
-            locale: 'en_NG',
-            symbol: '₦',
-            decimalDigits: 2,
-          ).format(transaction.amount),
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey,
+    final isCredit =
+        transaction.transactionType.toLowerCase() == 'credit' ||
+        transaction.transactionType.toLowerCase().contains('fund');
+    final amountColor = isCredit ? Colors.green[600] : Colors.red[600];
+    final amountPrefix = isCredit ? "+" : "-";
+
+    return InkWell(
+      onTap:
+          () => context.push(
+            "/wallet/history/${transaction.id}",
+            extra: transaction,
           ),
-        ),
-        trailing: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.center,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: Row(
           children: [
-            Text(
-              DateFormat.yMMMd().format(transaction.timestamp),
-              style: TextStyle(fontSize: 11, color: Colors.grey),
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: (isCredit ? Colors.green : Colors.blueAccent)
+                    .withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isCredit ? Icons.add_rounded : Icons.remove_rounded,
+                color: isCredit ? Colors.green : Colors.blueAccent,
+                size: 24,
+              ),
             ),
-            // Text(
-            //   transaction.status,
-            //   style: TextStyle(fontSize: 14, color: Colors.orange),
-            // ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.transactionType
+                        .replaceAll("_", " ")
+                        .toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat.yMMMd().add_jm().format(transaction.timestamp),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  "$amountPrefix${NumberFormat.currency(locale: 'en_NG', symbol: '₦', decimalDigits: 0).format(transaction.amount)}",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: amountColor,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    "Success", // Typically successful if in history, or add status field
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

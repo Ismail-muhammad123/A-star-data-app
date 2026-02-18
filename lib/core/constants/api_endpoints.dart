@@ -1,5 +1,5 @@
-// const baseUrl = "https://backend.stardata.com.ng/api";
-const baseUrl = "https://0663225b3ddb.ngrok-free.app/api";
+const baseUrl = "https://backend.stardata.com.ng/api";
+// const baseUrl = "https://0663225b3ddb.ngrok-free.app/api";
 
 // AUTH
 class AuthEndpoints {
@@ -21,24 +21,27 @@ class ProfileEndpoints {
   final String changePin = "$baseUrl/account/change-pin/";
   final String upgradeAccountTier = "$baseUrl/account/upgrade-account/";
 
-  // final String bankInfoSubmit = "$baseUrl/account/bank-details/create/";
-  // final String bankInfoUpdate = "$baseUrl/account/bank-details/update/";
-  // final String bankInfoRetrive = "$baseUrl/account/bank-details/";
-  // final String getNigerianBanks = "$baseUrl/account/list-nigerian-banks";
+  final String bankInfoSubmit = "$baseUrl/account/bank-details/create/";
+  final String bankInfoUpdate = "$baseUrl/account/bank-details/update/";
+  final String bankInfoRetrive = "$baseUrl/account/bank-details/";
+  final String getNigerianBanks = "$baseUrl/account/list-nigerian-banks";
 }
 
 class WalletEndpoints {
   final String getWallet = "$baseUrl/wallet/";
   final String getVirtualAccount = "$baseUrl/wallet/virtual-account/";
   final String fundWallet = "$baseUrl/wallet/deposit/";
-  final String withdraw = "$baseUrl/wallet/withdraw/";
   final String walletTransactions = "$baseUrl/wallet/transactions/";
+  final String withdraw = "$baseUrl/payment/withdrawal-request/";
 }
 
 class OrderEndpoints {
   final String getDataNetworks = "$baseUrl/orders/data-networks/";
   final String getDataBundles = "$baseUrl/orders/data-plans/";
+  final String getSmilePackages = "$baseUrl/orders/smile-packages/";
   final String purchaseDataBundle = "$baseUrl/orders/buy-data/";
+  final String purchaseSmileSubscription =
+      "$baseUrl/orders/buy-smile-subscription/";
 
   final String getAirtimeNetworks = "$baseUrl/orders/airtime-networks/";
   final String purchaseAirtime = "$baseUrl/orders/buy-airtime/";

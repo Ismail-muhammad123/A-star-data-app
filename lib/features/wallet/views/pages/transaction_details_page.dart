@@ -58,92 +58,161 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        title: const Text(
+          "Transaction Details",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        backgroundColor: Colors.blueAccent,
         leading: BackButton(
           color: Colors.white,
           onPressed:
-              () => context.canPop() ? context.pop() : context.go("/home"),
+              () => context.canPop() ? context.pop() : context.go("/wallet"),
         ),
-        title: const Text(
-          'Transaction Details',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.lightBlue,
-        surfaceTintColor: Colors.lightBlue,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child:
-            _isLoading
-                ? Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                  child: Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withAlpha(100),
-                          blurRadius: 12,
-                          offset: Offset(2, 2),
-                        ),
-                      ],
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : transaction == null
+              ? const Center(child: Text("Transaction not found"))
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(32.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check_circle_rounded,
+                              color: Colors.green,
+                              size: 48,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Transaction Successful",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            NumberFormat.currency(
+                              locale: 'en_NG',
+                              symbol: '₦',
+                              decimalDigits: 2,
+                            ).format(transaction!.amount),
+                            style: const TextStyle(
+                              fontSize: 28,
+
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          const Divider(),
+                          const SizedBox(height: 24),
+                          _buildInfoRow(
+                            "Transaction ID",
+                            "#${transaction!.id.toString().padLeft(7, '0')}",
+                          ),
+                          _buildInfoRow(
+                            "Type",
+                            transaction!.transactionType
+                                .replaceAll("_", " ")
+                                .toUpperCase(),
+                          ),
+                          _buildInfoRow(
+                            "Date & Time",
+                            DateFormat.yMMMEd().add_jm().format(
+                              transaction!.timestamp,
+                            ),
+                          ),
+                          _buildInfoRow("Status", "SUCCESSFUL"),
+                          const SizedBox(height: 24),
+                          const Divider(),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                // Share or Download logic could go here
+                              },
+                              icon: const Icon(Icons.share_outlined, size: 20),
+                              label: const Text("Share Receipt"),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                side: BorderSide(color: Colors.grey.shade300),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // cahnge to get the values from Transaction Obj
-                        _buildDetailRow(
-                          'Transaction ID',
-                          "#${transaction?.id != null ? transaction!.id.toString().padLeft(7, '0') : ''}",
-                        ),
-                        Divider(),
-                        _buildDetailRow(
-                          'Amount',
-                          transaction != null
-                              ? '₦${transaction?.amount.toStringAsFixed(2)}'
-                              : '',
-                        ),
-                        Divider(),
-                        _buildDetailRow(
-                          'Type',
-                          (transaction?.transactionType ?? '').toUpperCase(),
-                        ),
-                        Divider(),
-                        _buildDetailRow(
-                          'Date',
-                          DateFormat.yMMMEd().format(transaction!.timestamp),
-                        ),
-                        // _buildDetailRow(
-                        //   'Description',
-                        //   transaction?.description ?? '',
-                        // ),
-                      ],
+                    const SizedBox(height: 32),
+                    const Text(
+                      "If you have any issues with this transaction, please contact our support team.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-      ),
+              ),
     );
   }
 
-  _buildDetailRow(String name, value) {
+  Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.all(2.0),
+      padding: const EdgeInsets.only(bottom: 20.0),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            name,
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-          SizedBox(width: 14.0),
-          Spacer(),
-          SizedBox(
-            width: 150,
+          Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 14)),
+          SizedBox(width: 8.0),
+          Flexible(
             child: Text(
-              value.toString(),
-              softWrap: true,
-              style: TextStyle(fontSize: 16),
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

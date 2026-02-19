@@ -382,7 +382,7 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                       _customerName = null;
                     });
                   }
-                  if (value.length >= 10 && _selectedSmileVoicePlan != null) {
+                  if (value.length >= 11 && _selectedSmileVoicePlan != null) {
                     _verifyNumber();
                   }
                 },

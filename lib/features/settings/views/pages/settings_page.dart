@@ -261,17 +261,23 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ),
                             ),
                   ),
-                  SettingsTile(
-                    title: "Bank Information",
-                    subTitle: "Setup your payout bank",
-                    leadingIcon: Icons.account_balance_outlined,
-                    onTap: () => context.push("/profile/bank-info"),
-                  ),
+                  // SettingsTile(
+                  //   title: "Bank Information",
+                  //   subTitle: "Setup your payout bank",
+                  //   leadingIcon: Icons.account_balance_outlined,
+                  //   onTap: () => context.push("/profile/bank-info"),
+                  // ),
                   SettingsTile(
                     title: "Upgrade Tier",
                     subTitle: "Increase your transaction limits",
                     leadingIcon: Icons.trending_up,
                     onTap: () => context.push("/profile/tier"),
+                  ),
+                  SettingsTile(
+                    title: "Withdrawal Account",
+                    subTitle: "Link your payout bank account",
+                    leadingIcon: Icons.account_balance_wallet_outlined,
+                    onTap: () => context.push("/wallet/withdrawal-account"),
                   ),
 
                   const SizedBox(height: 24),

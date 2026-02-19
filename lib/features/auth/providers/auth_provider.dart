@@ -241,16 +241,17 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       var res = await _authService.refreshToken(refreshToken);
+      print(res);
       var token = res['access'];
-      var newRefresh = res['refresh'];
+      // var newRefresh = res['refresh'];
 
       if (token != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', token);
-        await prefs.setString('refresh_token', newRefresh);
+        // await prefs.setString('refresh_token', newRefresh);
 
         // Update securely saved refresh token
-        await _biometricService.saveRefreshTokenSecurely(newRefresh);
+        // await _biometricService.saveRefreshTokenSecurely(newRefresh);
 
         authToken = token;
         _isAuthenticated = true;
@@ -260,7 +261,8 @@ class AuthProvider extends ChangeNotifier {
         return {"success": false, "message": "Failed to refresh token"};
       }
     } catch (e) {
-      return {"success": false, "message": e.toString()};
+      print(e);
+      return {"success": false, "message": "Failed to authenticate"};
     }
   }
 }

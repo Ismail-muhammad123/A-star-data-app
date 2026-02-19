@@ -55,12 +55,13 @@ class _PurchaseElectricityFormPageState
         serviceId: widget.service.serviceId,
         customerId: _meterNumberController.text,
         variationId: _meterType!,
+        meterType: _meterType,
       );
       setState(() {
         minimumAmount = meterInfo['minimum_amount'] ?? 500;
         maximumAmount = meterInfo['maximum_amount'] ?? 100000;
 
-        meterDetails = meterInfo;
+        meterDetails = meterInfo..remove("status");
         _isVerified = true;
         _isLoading = false;
       });
@@ -200,8 +201,8 @@ class _PurchaseElectricityFormPageState
               Text("Meter type"),
               DropdownButtonFormField(
                 items: [
-                  DropdownMenuItem(value: "prepaid", child: Text("Prepaid")),
-                  DropdownMenuItem(value: "postpaid", child: Text("Postpaid")),
+                  DropdownMenuItem(value: "01", child: Text("Prepaid")),
+                  DropdownMenuItem(value: "02", child: Text("Postpaid")),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -292,7 +293,10 @@ class _PurchaseElectricityFormPageState
                     children: [
                       ElevatedButton(
                         onPressed: _isLoading ? null : _verifyMeter,
-                        child: Text("Verify Meter"),
+                        child:
+                            _isLoading
+                                ? CircularProgressIndicator()
+                                : Text("Verify Meter"),
                       ),
                     ],
                   ),

@@ -1,16 +1,16 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
-import 'package:app/features/settings/data/repositories/profile_repo.dart';
+import 'package:app/features/wallet/data/repository/wallet_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class BankPicker extends StatefulWidget {
-  const BankPicker({super.key});
+class WalletBankPicker extends StatefulWidget {
+  const WalletBankPicker({super.key});
 
   @override
-  State<BankPicker> createState() => _BankPickerState();
+  State<WalletBankPicker> createState() => _WalletBankPickerState();
 }
 
-class _BankPickerState extends State<BankPicker> {
+class _WalletBankPickerState extends State<WalletBankPicker> {
   String _searchQuery = "";
 
   @override
@@ -49,9 +49,8 @@ class _BankPickerState extends State<BankPicker> {
           ),
         ),
       ),
-
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: ProfileService().fetchNigerianBanks(
+        future: WalletService().fetchBanks(
           context.read<AuthProvider>().authToken ?? "",
         ),
         builder: (context, snapshot) {
@@ -76,15 +75,19 @@ class _BankPickerState extends State<BankPicker> {
               itemCount: banks.length,
               separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
-                var bank = banks[index]['name'] ?? 'Unknown Bank';
+                var bankName = banks[index]['name'] ?? 'Unknown Bank';
+                var bankCode = banks[index]['code'] ?? '';
                 return ListTile(
                   title: Text(
-                    bank,
+                    bankName,
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () {
-                    Navigator.pop(context, bank);
+                    Navigator.pop(context, {
+                      'name': bankName,
+                      'code': bankCode,
+                    });
                   },
                 );
               },

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:app/core/constants/api_endpoints.dart';
 import 'package:app/features/wallet/data/models/wallet.dart';
+import 'package:app/features/wallet/data/models/withdrawal_account_model.dart';
 import 'package:dio/dio.dart';
 
 class WalletService {
@@ -168,6 +169,115 @@ class WalletService {
       throw Exception(
         response.data['message'] ?? 'Failed to request withdrawal',
       );
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchBanks(String authToken) async {
+    try {
+      final response = await _dio.get(
+        _endpoints.banks,
+        options: Options(
+          validateStatus: (status) => true,
+          headers: {
+            'Authorization': "Bearer $authToken",
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      print(response.data);
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(response.data as List);
+      } else {
+        throw Exception(response.data['message'] ?? 'Failed to load banks');
+      }
+    } catch (e) {
+      throw Exception('Error fetching banks: $e');
+    }
+  }
+
+  Future<String> resolveAccount(
+    String authToken,
+    String bankCode,
+    String accountNumber,
+  ) async {
+    try {
+      final response = await _dio.post(
+        _endpoints.resolveAccount,
+        data: {'bank_code': bankCode, 'account_number': accountNumber},
+        options: Options(
+          validateStatus: (status) => true,
+          headers: {
+            'Authorization': "Bearer $authToken",
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      print(response.data);
+      if (response.statusCode == 200) {
+        return response.data['account_name'] ?? '';
+      } else {
+        throw Exception(
+          response.data['message'] ?? 'Failed to resolve account',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error resolving account: $e');
+    }
+  }
+
+  Future<WithdrawalAccount?> getWithdrawalAccount(String authToken) async {
+    try {
+      final response = await _dio.get(
+        _endpoints.withdrawalAccount,
+        options: Options(
+          validateStatus: (status) => true,
+          headers: {
+            'Authorization': "Bearer $authToken",
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        if (response.data == null || (response.data as Map).isEmpty)
+          return null;
+        return WithdrawalAccount.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<WithdrawalAccount> saveWithdrawalAccount(
+    String authToken,
+    WithdrawalAccount accountData,
+  ) async {
+    try {
+      final response = await _dio.put(
+        _endpoints.withdrawalAccount,
+        data: jsonEncode(accountData.toJson()),
+        options: Options(
+          validateStatus: (status) => true,
+          headers: {
+            'Authorization': "Bearer $authToken",
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return WithdrawalAccount.fromJson(
+          response.data as Map<String, dynamic>,
+        );
+      } else {
+        throw Exception(
+          response.data['message'] ?? 'Failed to save withdrawal account',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error saving withdrawal account: $e');
     }
   }
 }

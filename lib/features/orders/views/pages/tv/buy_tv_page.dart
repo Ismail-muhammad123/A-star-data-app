@@ -68,7 +68,7 @@ class _PurchaseTVSubscriptionFormPageState
         minimumAmount = meterInfo['minimum_amount'] ?? 500;
         maximumAmount = meterInfo['maximum_amount'] ?? 100000;
 
-        smartCardDetails = meterInfo;
+        smartCardDetails = {"customer_name": meterInfo['customer_name']};
         _isVerified = true;
         _isLoading = false;
       });

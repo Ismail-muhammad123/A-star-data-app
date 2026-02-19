@@ -95,8 +95,9 @@ class AuthService {
       ),
       data: jsonEncode({"identifier": phoneNumber}),
     );
+    print(response.data);
     if (response.statusCode != 200) {
-      throw Exception('Failed to request confirmation email');
+      throw Exception('Failed to request reset otp');
     }
   }
 

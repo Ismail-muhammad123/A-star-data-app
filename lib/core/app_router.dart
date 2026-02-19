@@ -10,7 +10,6 @@ import 'package:app/features/orders/views/pages/history/order_history.dart';
 import 'package:app/features/orders/views/pages/tv/buy_tv_page.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_pachage.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_service.dart';
-import 'package:app/features/settings/views/pages/bank_information/bank_info_form_page.dart';
 import 'package:app/features/settings/views/pages/tier/upgrade_tier.dart';
 import 'package:app/features/settings/views/pages/personal/change_pin_form_page.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +25,7 @@ import 'package:app/features/settings/views/pages/personal/profile_form_page.dar
 import 'package:app/features/wallet/views/pages/fund_wallet_page.dart';
 import 'package:app/features/wallet/views/pages/transaction_details_page.dart';
 import 'package:app/features/wallet/views/pages/wallet_history_page.dart';
+import 'package:app/features/settings/views/pages/bank_information/withdrawal_account_page.dart';
 import 'package:app/features/wallet/views/pages/withdrawal_page.dart';
 import 'package:app/home.dart';
 
@@ -199,6 +199,10 @@ final GoRouter router = GoRouter(
       path: '/wallet/withdraw',
       builder: (context, state) => const WithdrawalPage(),
     ),
+    GoRoute(
+      path: '/wallet/withdrawal-account',
+      builder: (context, state) => const WithdrawalAccountPage(),
+    ),
 
     // ===================== Profile Routes =====================
     GoRoute(
@@ -212,10 +216,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/profile/change-pin',
       builder: (context, state) => const ChangePasswordPage(),
-    ),
-    GoRoute(
-      path: '/profile/bank-info',
-      builder: (context, state) => const BankInfoFormPage(),
     ),
     GoRoute(
       path: '/profile/tier',

@@ -24,7 +24,7 @@ class ProfileEndpoints {
   final String bankInfoSubmit = "$baseUrl/account/bank-details/create/";
   final String bankInfoUpdate = "$baseUrl/account/bank-details/update/";
   final String bankInfoRetrive = "$baseUrl/account/bank-details/";
-  final String getNigerianBanks = "$baseUrl/account/list-nigerian-banks";
+  // final String getNigerianBanks = "$baseUrl/account/list-nigerian-banks";
 }
 
 class WalletEndpoints {
@@ -33,6 +33,9 @@ class WalletEndpoints {
   final String fundWallet = "$baseUrl/wallet/deposit/";
   final String walletTransactions = "$baseUrl/wallet/transactions/";
   final String withdraw = "$baseUrl/payment/withdrawal-request/";
+  final String banks = "$baseUrl/wallet/banks/";
+  final String resolveAccount = "$baseUrl/wallet/resolve-account/";
+  final String withdrawalAccount = "$baseUrl/wallet/withdrawal-account/";
 }
 
 class OrderEndpoints {

@@ -200,7 +200,7 @@ class ProfileService {
   ) async {
     try {
       final response = await _dio.get(
-        profileEndpoints.getNigerianBanks,
+        WalletEndpoints().banks,
         options: Options(
           validateStatus: (status) => true,
           headers: {

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
-// import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,13 +12,14 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneNumberController = TextEditingController();
-  final List<String> _pinDigits = [];
+  final TextEditingController _pinController = TextEditingController();
+
   String? _lastUserName;
   String? _lastPhoneNumber;
   bool _isLoading = false;
-  bool _showKeypad = false;
-  final FocusNode _phoneFocusNode = FocusNode();
+  bool _obscurePin = true;
 
   @override
   void initState() {
@@ -27,9 +27,6 @@ class _LoginPageState extends State<LoginPage> {
     _loadLastUser();
     Provider.of<AuthProvider>(context, listen: false).checkAuth().then((_) {
       final auth = Provider.of<AuthProvider>(context, listen: false);
-      debugPrint(
-        "Login: checkAuth completed. isAuthenticated=${auth.isAuthenticated}",
-      );
       if (auth.isAuthenticated) {
         _navigateToHome();
       }
@@ -38,18 +35,15 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loadLastUser() async {
     try {
-      debugPrint("Login: Loading last user info...");
       final auth = Provider.of<AuthProvider>(context, listen: false);
       final phone = await auth.lastPhoneNumber;
       final name = await auth.lastUserName;
-      debugPrint("Login: lastPhone=$phone, lastName=$name");
       if (mounted) {
         setState(() {
           _lastPhoneNumber = phone;
           _lastUserName = name;
           if (phone != null) {
             _phoneNumberController.text = phone;
-            _showKeypad = true;
           }
         });
       }
@@ -68,45 +62,36 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void handleLogin() async {
-    if (_phoneNumberController.text.isEmpty || _pinDigits.length < 6) {
-      _showError("Please enter both phone number and a 6-digit pin.");
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final pin = _pinDigits.join();
       var res = await authProvider.login(
         _phoneNumberController.text.trim(),
-        pin,
+        _pinController.text.trim(),
       );
-      setState(() {
-        _isLoading = false;
-      });
 
-      if (res!['success'] == true) {
+      if (res?['success'] == true) {
         if (mounted) _navigateToHome();
       } else {
-        _showError(res['message'] ?? "Invalid Phone Number or Pin!");
-        setState(() {
-          _pinDigits.clear();
-        });
+        if (mounted) {
+          _showError(res?['message'] ?? "Invalid Phone Number or PIN!");
+          _pinController.clear();
+        }
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _pinDigits.clear();
-      });
-      _showError(e.toString().split(":").last);
+      if (mounted) {
+        _showError(e.toString().split(":").last);
+        _pinController.clear();
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   void _showError(String message) {
-    if (!mounted) return;
     showDialog(
       context: context,
       builder:
@@ -123,32 +108,24 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _onKeyTap(String key) {
-    if (_isLoading) return;
-    if (_pinDigits.length < 6) {
-      setState(() {
-        _pinDigits.add(key);
-      });
-      if (_pinDigits.length == 6) {
-        handleLogin();
+  Future<void> _handleBiometricLogin() async {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    setState(() => _isLoading = true);
+    try {
+      final res = await auth.loginWithBiometrics();
+      if (res != null && res['success'] == true) {
+        if (mounted) _navigateToHome();
+      } else if (res != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['message'] ?? "Biometric login failed"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
-    }
-  }
-
-  void _onPinAreaTap() {
-    setState(() {
-      _showKeypad = true;
-    });
-    // Dismiss system keyboard if open
-    FocusScope.of(context).unfocus();
-  }
-
-  void _onBackspace() {
-    if (_isLoading) return;
-    if (_pinDigits.isNotEmpty) {
-      setState(() {
-        _pinDigits.removeLast();
-      });
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -158,7 +135,6 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.grey[50],
       body: Stack(
         children: [
-          // Header Background
           Container(
             height: 300,
             width: double.infinity,
@@ -177,328 +153,335 @@ class _LoginPageState extends State<LoginPage> {
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 40),
-                  // Logo Card
-                  Hero(
-                    tag: "logo",
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    const SizedBox(height: 40),
+                    Hero(
+                      tag: "logo",
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Image.asset(
+                          "assets/images/logo/a-star_app_logo.png",
+                          height: 60,
+                          width: 60,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: Colors.black.withOpacity(0.05),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
                         ],
                       ),
-                      child: Image.asset(
-                        "assets/images/logo/a-star_app_logo.png",
-                        height: 60,
-                        width: 60,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_lastUserName != null &&
+                              _lastUserName!.isNotEmpty) ...[
+                            Center(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Welcome Back,",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[500],
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _lastUserName!.toUpperCase(),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.blue,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _lastUserName = null;
+                                        _lastPhoneNumber = null;
+                                        _phoneNumberController.clear();
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.05),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Text(
+                                        "Switch Account",
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ] else ...[
+                            const Text(
+                              "Login to Account",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            Text(
+                              "Please enter your details to continue",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 32),
 
-                  // Main Content Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        if (_lastUserName != null &&
-                            _lastUserName!.isNotEmpty) ...[
-                          Text(
-                            "Welcome Back,",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _lastUserName!.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.blue,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _lastUserName = null;
-                                _lastPhoneNumber = null;
-                                _phoneNumberController.clear();
-                                _showKeypad = false;
-                              });
-                            },
-                            child: Container(
+                          // Phone Number
+                          _buildLabel("Phone Number"),
+                          const SizedBox(height: 8),
+                          if (_lastUserName == null || _lastUserName!.isEmpty)
+                            TextFormField(
+                              enabled: !_isLoading,
+                              controller: _phoneNumberController,
+                              keyboardType: TextInputType.phone,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              decoration: _inputDecoration(
+                                hint: "e.g. 08012345678",
+                                icon: Icons.phone_android,
+                              ),
+                              validator:
+                                  (v) =>
+                                      (v == null || v.isEmpty)
+                                          ? "Required"
+                                          : null,
+                            )
+                          else
+                            Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
+                                vertical: 16,
+                                horizontal: 20,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.05),
-                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.grey.shade200),
                               ),
-                              child: const Text(
-                                "Switch Account",
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.phone_android,
+                                    color: Colors.blue,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    _lastPhoneNumber ?? "",
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ] else ...[
-                          const Text(
-                            "Login to Account",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          Text(
-                            "Please enter your details to continue",
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 32),
 
-                        // Input Section
-                        if (_lastUserName == null || _lastUserName!.isEmpty)
+                          const SizedBox(height: 24),
+
+                          // PIN
+                          _buildLabel("6-Digit PIN"),
+                          const SizedBox(height: 8),
                           TextFormField(
-                            enabled: !_isLoading,
-                            controller: _phoneNumberController,
-                            focusNode: _phoneFocusNode,
-                            keyboardType: TextInputType.phone,
+                            controller: _pinController,
+                            obscureText: _obscurePin,
+                            keyboardType: TextInputType.number,
+                            maxLength: 6,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            textAlign: TextAlign.center,
                             style: const TextStyle(
+                              letterSpacing: 8,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 1.5,
                             ),
-                            onTap: () => setState(() => _showKeypad = false),
-                            decoration: InputDecoration(
-                              labelText: "Phone Number",
-                              hintText: "e.g. 08012345678",
-                              prefixIcon: const Icon(
-                                Icons.phone_android,
-                                color: Colors.blue,
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(
-                                  color: Colors.blue,
-                                  width: 1.5,
+                            decoration: _inputDecoration(
+                              hint: "******",
+                              icon: Icons.lock_outline,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePin
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.grey,
                                 ),
+                                onPressed:
+                                    () => setState(
+                                      () => _obscurePin = !_obscurePin,
+                                    ),
                               ),
+                              counterText: "",
                             ),
-                          )
-                        else
-                          // Read-only Phone Display
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 16,
-                              horizontal: 20,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.phone_android,
-                                  color: Colors.blue,
-                                  size: 20,
+                            validator: (v) {
+                              if (v == null || v.isEmpty) return "Required";
+                              if (v.length != 6) return "Must be 6 digits";
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Login Button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : handleLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueAccent,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  _lastPhoneNumber ?? "",
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 2,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ],
+                                elevation: 0,
+                              ),
+                              child:
+                                  _isLoading
+                                      ? const CircularProgressIndicator(
+                                        color: Colors.white,
+                                      )
+                                      : const Text(
+                                        "Login",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                             ),
                           ),
 
-                        const SizedBox(height: 32),
+                          const SizedBox(height: 16),
 
-                        // PIN Section
-                        GestureDetector(
-                          onTap: _onPinAreaTap,
-                          child: Column(
-                            children: [
-                              Text(
-                                "ENTER 6-DIGIT PIN",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[500],
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 1.5,
+                          // Biometric Login Text Button
+                          Consumer<AuthProvider>(
+                            builder: (context, auth, child) {
+                              if (!auth.isBiometricEnabled)
+                                return const SizedBox.shrink();
+                              return Center(
+                                child: TextButton.icon(
+                                  onPressed:
+                                      _isLoading ? null : _handleBiometricLogin,
+                                  icon: const Icon(Icons.fingerprint, size: 20),
+                                  label: const Text(
+                                    "LOGIN WITH BIOMETRICS",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.blue.shade800,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 20),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(6, (index) {
-                                  bool isActive = index < _pinDigits.length;
-                                  return AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    width: 16,
-                                    height: 16,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          isActive ? Colors.blue : Colors.white,
-                                      border: Border.all(
-                                        color:
-                                            isActive
-                                                ? Colors.blue
-                                                : Colors.grey[300]!,
-                                        width: 2.5,
-                                      ),
-                                      boxShadow:
-                                          isActive
-                                              ? [
-                                                BoxShadow(
-                                                  color: Colors.blue
-                                                      .withOpacity(0.3),
-                                                  blurRadius: 10,
-                                                  spreadRadius: 2,
-                                                ),
-                                              ]
-                                              : [],
-                                    ),
-                                  );
-                                }),
-                              ),
-                            ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Bottom Links
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: () => context.push('/forgot-pin'),
+                          child: Text(
+                            "FORGOT PIN?",
+                            style: TextStyle(
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 12,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          height: 15,
+                          width: 1,
+                          color: Colors.grey[300],
+                        ),
+                        TextButton(
+                          onPressed: () => context.go('/register'),
+                          child: Text(
+                            "CREATE ACCOUNT",
+                            style: TextStyle(
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 12,
+                              letterSpacing: 1,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Keypad or Loading Section
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child:
-                        _isLoading
-                            ? const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 80),
-                              child: CircularProgressIndicator(),
-                            )
-                            : _showKeypad
-                            ? _buildKeypad()
-                            : SizedBox(
-                              height: 350,
-                              child: Center(
-                                child: Text(
-                                  "Tap PIN dots to show keypad",
-                                  style: TextStyle(
-                                    color: Colors.grey[400],
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                              ),
-                            ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Bottom Links
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: () => context.push('/forgot-pin'),
-                        child: Text(
-                          "FORGOT PIN?",
-                          style: TextStyle(
-                            color: Colors.blue.shade700,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 12,
-                            letterSpacing: 1,
-                          ),
+                    TextButton(
+                      onPressed: () => context.push('/activate-account'),
+                      child: Text(
+                        "ACTIVATE MY ACCOUNT",
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                          letterSpacing: 0.5,
                         ),
-                      ),
-                      Container(height: 15, width: 1, color: Colors.grey[300]),
-                      TextButton(
-                        onPressed: () => context.go('/register'),
-                        child: Text(
-                          "CREATE ACCOUNT",
-                          style: TextStyle(
-                            color: Colors.blue.shade700,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 12,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TextButton(
-                    onPressed: () => context.push('/activate-account'),
-                    child: Text(
-                      "ACTIVATE MY ACCOUNT",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                        letterSpacing: 0.5,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
           ),
@@ -507,110 +490,41 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildKeypad() {
-    return Consumer<AuthProvider>(
-      builder: (context, auth, child) {
-        return Column(
-          children: [
-            for (var row in [
-              ['1', '2', '3'],
-              ['4', '5', '6'],
-              ['7', '8', '9'],
-            ])
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: row.map((key) => _buildKey(key)).toList(),
-                ),
-              ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                if (auth.isBiometricEnabled)
-                  _buildBiometricKey(auth)
-                else
-                  const SizedBox(width: 80),
-                _buildKey('0'),
-                _buildBackspaceKey(),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildBiometricKey(AuthProvider auth) {
-    return Container(
-      width: 72,
-      height: 72,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.blue.withOpacity(0.1)),
-      ),
-      child: IconButton(
-        onPressed: () async {
-          setState(() => _isLoading = true);
-          final res = await auth.loginWithBiometrics();
-          setState(() => _isLoading = false);
-          if (res != null && res['success'] == true) {
-            if (mounted) _navigateToHome();
-          } else if (res != null && mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(res['message'] ?? "Biometric login failed"),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-        icon: const Icon(Icons.fingerprint, color: Colors.blue, size: 36),
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: Colors.black54,
       ),
     );
   }
 
-  Widget _buildKey(String label) {
-    return SizedBox(
-      width: 72,
-      height: 72,
-      child: ElevatedButton(
-        onPressed: () => _onKeyTap(label),
-        style: ElevatedButton.styleFrom(
-          shape: const CircleBorder(),
-          padding: EdgeInsets.zero,
-          foregroundColor: Colors.blue.shade900,
-          backgroundColor: Colors.white,
-          elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.2),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-        ),
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData icon,
+    Widget? suffixIcon,
+    String? counterText,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon, color: Colors.blue, size: 20),
+      suffixIcon: suffixIcon,
+      counterText: counterText,
+      filled: true,
+      fillColor: Colors.grey[50],
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
       ),
-    );
-  }
-
-  Widget _buildBackspaceKey() {
-    return SizedBox(
-      width: 72,
-      height: 72,
-      child: IconButton(
-        onPressed: _onBackspace,
-        icon: Icon(
-          Icons.backspace_outlined,
-          color: Colors.red.shade400,
-          size: 24,
-        ),
-        style: IconButton.styleFrom(
-          shape: const CircleBorder(),
-          backgroundColor: Colors.white,
-          elevation: 2,
-          shadowColor: Colors.black.withOpacity(0.2),
-        ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: Colors.grey.shade200),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.blue, width: 1.5),
       ),
     );
   }

@@ -119,6 +119,7 @@ class OrderServices {
         },
       ),
     );
+    print(response.data);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       // Purchase successful
@@ -208,6 +209,7 @@ class OrderServices {
     required String serviceId,
     required String variationId,
     required String customerId,
+    String? meterType,
   }) async {
     var response = await _dio.post(
       _endpoints.verifyCustomer,
@@ -215,6 +217,7 @@ class OrderServices {
         'service_id': serviceId,
         'variation_id': variationId,
         'customer_id': customerId,
+        if (meterType != null) 'meter_type': meterType,
       },
       options: Options(
         validateStatus: (status) => true,

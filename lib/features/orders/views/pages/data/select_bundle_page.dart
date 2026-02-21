@@ -80,11 +80,12 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
       appBar: AppBar(
         title: const Text(
           'Select Data Plan',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.lightBlue,
-        surfaceTintColor: Colors.lightBlue,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: FutureBuilder<List<DataBundle>>(
         future: _bundlesFuture,
         builder: (context, snapshot) {
@@ -100,10 +101,19 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   controller: _searchController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Search bundles...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.blueAccent,
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).cardColor,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
                   onChanged: _onSearchChanged,
                 ),
@@ -122,9 +132,11 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
                                 horizontal: 2,
                               ),
                               child: Card(
+                                color: Theme.of(context).cardColor,
                                 child: ListTile(
                                   leading: CircleAvatar(
-                                    backgroundColor: Colors.lightBlue,
+                                    backgroundColor: Colors.blueAccent
+                                        .withOpacity(0.1),
                                     radius: 20,
                                     child: Image.network(
                                       bundle.service.imageUrl,
@@ -133,14 +145,35 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
                                           WebHtmlElementStrategy.prefer,
                                     ),
                                   ),
-                                  tileColor: Colors.white,
-                                  title: Text(bundle.name),
-                                  subtitle: Text(bundle.service.serviceName),
+                                  title: Text(
+                                    bundle.name,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    bundle.service.serviceName,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.color
+                                          ?.withOpacity(0.7),
+                                    ),
+                                  ),
                                   trailing: Text(
                                     NumberFormat.currency(
                                       symbol: '₦',
                                       decimalDigits: 0,
                                     ).format(bundle.sellingPrice),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueAccent,
+                                    ),
                                   ),
                                   onTap: () => _onBundleSelected(bundle),
                                 ),

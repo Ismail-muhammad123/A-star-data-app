@@ -2,8 +2,10 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/settings/data/models/profile_model.dart';
 import 'package:app/features/settings/providers/profile_provider.dart';
 import 'package:app/features/settings/views/widgets/settings_tile.dart';
+import 'package:app/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:app/core/themes/theme_provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -94,7 +96,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final completion = _calculateProfileCompletion(profile);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -102,21 +104,17 @@ class _SettingsPageState extends State<SettingsPage> {
             floating: false,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              title: const Text(
+              title: Text(
                 "Settings",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).appBarTheme.foregroundColor,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
               ),
               background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Colors.blueAccent, Colors.lightBlue],
-                  ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).appBarTheme.backgroundColor,
                 ),
                 child: Stack(
                   children: [
@@ -125,7 +123,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       top: -50,
                       child: CircleAvatar(
                         radius: 100,
-                        backgroundColor: Colors.white.withOpacity(0.1),
+                        backgroundColor: Colors.white.withOpacity(0.05),
                       ),
                     ),
                     SafeArea(
@@ -139,43 +137,96 @@ class _SettingsPageState extends State<SettingsPage> {
                               children: [
                                 CircleAvatar(
                                   radius: 35,
-                                  backgroundColor: Colors.white,
+                                  backgroundColor:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.grey[800]
+                                          : Colors.white,
                                   child: Icon(
                                     Icons.person,
                                     size: 40,
-                                    color: Colors.blue[700],
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                                 const SizedBox(width: 15),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      profile?.phoneNumber ?? "User",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          profile == null
+                                              ? "Loading..."
+                                              : (profile.fullName.isNotEmpty)
+                                              ? profile.fullName.capitalize()
+                                              : profile.phoneNumber,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        if (profile?.isVerified ?? false) ...[
+                                          const SizedBox(width: 8),
+                                          const Icon(
+                                            Icons.verified,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                     const SizedBox(height: 4),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        "Tier ${profile?.tier ?? "1"}",
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                            vertical: 4,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withOpacity(
+                                              0.2,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            "Tier ${profile?.tier ?? "1"}",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        if (profile != null &&
+                                            !profile.isVerified) ...[
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.redAccent
+                                                  .withOpacity(0.8),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: const Text(
+                                              "Unverified",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -196,15 +247,92 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Verification Prompts
+                  if (profile != null && !profile.isVerified) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.orange.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.warning_amber_rounded,
+                                color: Colors.orange,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                "Verify Your Account",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.orange[300]
+                                          : Colors.orange[800],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "Complete your verification to enjoy full access and increased security.",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.color?.withOpacity(0.8),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Center(
+                            child: ElevatedButton.icon(
+                              onPressed:
+                                  () => context.push(
+                                    '/activate-account',
+                                    extra: profile.phoneNumber,
+                                  ),
+                              icon: Icon(Icons.phone_android, size: 18),
+                              label: Text("Verify Now"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 10,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
                   // Profile Completion Section
                   if (completion < 1.0) ...[
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.blue[50],
+                        color:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? const Color(0xFF1E1E1E)
+                                : Colors.blue.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Colors.blueAccent.withOpacity(0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.2),
                         ),
                       ),
                       child: Column(
@@ -213,18 +341,18 @@ class _SettingsPageState extends State<SettingsPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 "Profile Completion",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blueAccent,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               Text(
                                 "${(completion * 100).toInt()}%",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blueAccent,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                             ],
@@ -232,9 +360,12 @@ class _SettingsPageState extends State<SettingsPage> {
                           const SizedBox(height: 10),
                           LinearProgressIndicator(
                             value: completion,
-                            backgroundColor: Colors.white,
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              Colors.blueAccent,
+                            backgroundColor:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.grey[800]
+                                    : Colors.white,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(context).colorScheme.primary,
                             ),
                             borderRadius: BorderRadius.circular(10),
                             minHeight: 8,
@@ -318,6 +449,17 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       );
                     },
+                  ),
+
+                  const SizedBox(height: 24),
+                  _buildSectionHeader("Appearance"),
+                  SettingsTile(
+                    title: "App Theme",
+                    subTitle: _getThemeName(
+                      context.watch<ThemeProvider>().themeMode,
+                    ),
+                    leadingIcon: Icons.brightness_6_outlined,
+                    onTap: () => _showThemeDialog(context),
                   ),
 
                   const SizedBox(height: 24),
@@ -412,6 +554,60 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: const Text("Close Permanently"),
               ),
             ],
+          ),
+    );
+  }
+
+  String _getThemeName(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return "Light";
+      case ThemeMode.dark:
+        return "Dark";
+      case ThemeMode.system:
+        return "System Default";
+    }
+  }
+
+  void _showThemeDialog(BuildContext context) {
+    final themeProvider = context.read<ThemeProvider>();
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text("Select Theme"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<ThemeMode>(
+                  value: ThemeMode.system,
+                  groupValue: themeProvider.themeMode,
+                  onChanged: (val) {
+                    themeProvider.setThemeMode(val!);
+                    Navigator.of(ctx).pop();
+                  },
+                  title: const Text("System Default"),
+                ),
+                RadioListTile<ThemeMode>(
+                  value: ThemeMode.light,
+                  groupValue: themeProvider.themeMode,
+                  onChanged: (val) {
+                    themeProvider.setThemeMode(val!);
+                    Navigator.of(ctx).pop();
+                  },
+                  title: const Text("Light"),
+                ),
+                RadioListTile<ThemeMode>(
+                  value: ThemeMode.dark,
+                  groupValue: themeProvider.themeMode,
+                  onChanged: (val) {
+                    themeProvider.setThemeMode(val!);
+                    Navigator.of(ctx).pop();
+                  },
+                  title: const Text("Dark"),
+                ),
+              ],
+            ),
           ),
     );
   }

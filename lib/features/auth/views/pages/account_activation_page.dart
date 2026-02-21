@@ -3,6 +3,9 @@ import 'package:app/core/widgets/otp_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:app/features/auth/providers/auth_provider.dart';
+import 'package:app/features/settings/providers/profile_provider.dart';
 
 class AccountActivationPage extends StatefulWidget {
   const AccountActivationPage({super.key, this.phoneNumber});
@@ -41,13 +44,29 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
         _codeController.text.trim(),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          backgroundColor: Colors.green,
-          content: Text("Account Activated Successfully! Please Login"),
-        ),
-      );
-      context.go('/login');
+
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.isAuthenticated && authProvider.authToken != null) {
+        await context.read<ProfileProvider>().loadProfile(
+          authProvider.authToken!,
+        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text("Account Verified Successfully!"),
+          ),
+        );
+        context.go('/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text("Account Activated Successfully! Please Login"),
+          ),
+        );
+        context.go('/login');
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -69,22 +88,24 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Account Activation",
           style: TextStyle(
-            color: Colors.white,
+            color: theme.appBarTheme.foregroundColor,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         elevation: 0,
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         leading: BackButton(
-          color: Colors.white,
+          color: theme.appBarTheme.foregroundColor,
           onPressed:
               () => context.canPop() ? context.pop() : context.go("/login"),
         ),
@@ -95,9 +116,9 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
             Container(
               height: 150,
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.blueAccent,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: theme.appBarTheme.backgroundColor,
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(40),
                   bottomRight: Radius.circular(40),
                 ),
@@ -109,8 +130,11 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
                     tag: "logo",
                     child: Container(
                       padding: const EdgeInsets.all(12),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color:
+                            theme.brightness == Brightness.dark
+                                ? theme.cardColor
+                                : Colors.white,
                         shape: BoxShape.circle,
                       ),
                       child: Image.asset(
@@ -128,60 +152,57 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Verify your account",
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: theme.textTheme.headlineSmall?.color,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "A 6-digit one-time password has been sent to your WhatsApp and SMS. Please enter it below to verify your account.",
+                    "A 6-digit one-time password has been sent to your SMS and Email. Please enter it below to verify your account.",
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
                       height: 1.5,
                     ),
                   ),
                   const SizedBox(height: 32),
 
                   // Phone Number Field
-                  Text(
-                    "Phone Number",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[700],
-                    ),
-                  ),
+                  _buildLabel("Phone Number"),
                   const SizedBox(height: 8),
                   TextFormField(
-                    enabled: !_isLoading,
+                    enabled: false,
                     controller: _phoneNumberController,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     keyboardType: TextInputType.phone,
+                    style: TextStyle(color: theme.textTheme.bodyLarge?.color),
                     decoration: InputDecoration(
                       hintText: "Enter phone number",
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.phone_android,
-                        color: Colors.blueAccent,
+                        color: theme.colorScheme.primary,
                       ),
                       filled: true,
-                      fillColor: Colors.grey[50],
+                      fillColor:
+                          theme.brightness == Brightness.dark
+                              ? theme.colorScheme.surface
+                              : Colors.grey[50],
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide: BorderSide(color: theme.dividerColor),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide: BorderSide(color: theme.dividerColor),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Colors.blueAccent,
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.primary,
                           width: 2,
                         ),
                       ),
@@ -190,14 +211,7 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
                   const SizedBox(height: 24),
 
                   // OTP Input
-                  Text(
-                    "Verification Code",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[700],
-                    ),
-                  ),
+                  _buildLabel("Verification Code"),
                   const SizedBox(height: 12),
                   OtpInput(
                     controller: _codeController,
@@ -214,7 +228,7 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _activateAccount,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
+                        backgroundColor: theme.colorScheme.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
@@ -244,7 +258,8 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
                         Text(
                           "Didn't receive the code?",
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: theme.textTheme.bodySmall?.color
+                                ?.withOpacity(0.6),
                             fontSize: 14,
                           ),
                         ),
@@ -254,11 +269,14 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
                                 .add(const Duration(seconds: 60))
                                 .isBefore(DateTime.now()))
                           TextButton(
-                            onPressed: _isLoading ? null : _resendOtp,
-                            child: const Text(
+                            onPressed:
+                                _isLoading
+                                    ? null
+                                    : () => _showResendOptions(context),
+                            child: Text(
                               "Resend Code",
                               style: TextStyle(
-                                color: Colors.blueAccent,
+                                color: theme.colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -268,13 +286,38 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Text(
                               "Resend in ${_lastResend!.add(const Duration(seconds: 60)).difference(DateTime.now()).inSeconds}s",
-                              style: const TextStyle(
-                                color: Colors.grey,
+                              style: TextStyle(
+                                color: theme.textTheme.bodySmall?.color
+                                    ?.withOpacity(0.4),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
                       ],
+                    ),
+                  ), // Closing Center
+                  const SizedBox(height: 24),
+
+                  // Skip Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: () => context.go('/login'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: theme.colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        side: BorderSide(color: theme.colorScheme.primary),
+                      ),
+                      child: const Text(
+                        "Skip for now",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -286,7 +329,60 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
     );
   }
 
-  Future<void> _resendOtp() async {
+  void _showResendOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Resend Code Via",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.headlineSmall?.color,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ListTile(
+                leading: const Icon(Icons.sms_outlined),
+                title: const Text("SMS Only"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _resendOtp("sms");
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.email_outlined),
+                title: const Text("Email Only"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _resendOtp("email");
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.all_inclusive),
+                title: const Text("SMS & Email"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _resendOtp(null);
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _resendOtp(String? channel) async {
     if (_phoneNumberController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter your phone number first")),
@@ -300,6 +396,7 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
       });
       await AuthService().requestConfirmationOTP(
         _phoneNumberController.text.trim(),
+        channel: channel,
       );
       setState(() {
         _lastResend = DateTime.now();
@@ -307,9 +404,13 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           backgroundColor: Colors.green,
-          content: Text("OTP resent successfully!"),
+          content: Text(
+            channel == null
+                ? "OTP resent successfully via all channels!"
+                : "OTP resent successfully via ${channel.toUpperCase()}!",
+          ),
         ),
       );
     } catch (e) {
@@ -329,5 +430,17 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
         });
       }
     }
+  }
+
+  Widget _buildLabel(String text) {
+    final theme = Theme.of(context);
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: theme.textTheme.bodySmall?.color?.withOpacity(0.8),
+      ),
+    );
   }
 }

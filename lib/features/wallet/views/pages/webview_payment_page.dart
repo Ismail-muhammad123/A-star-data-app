@@ -57,7 +57,14 @@ class _PaymentWebViewPageState extends State<PaymentWebViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Complete Payment")),
+      appBar: AppBar(
+        title: const Text(
+          "Complete Payment",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),

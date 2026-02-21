@@ -22,6 +22,9 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   bool _isLoadingData = true;
   WithdrawalAccount? _withdrawalAccount;
 
+  double _withdrawalCharge = 0.0;
+  bool _isChargePercentage = false;
+
   @override
   void initState() {
     super.initState();
@@ -35,24 +38,35 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
       if (token != null) {
         final balString = await WalletService().getBalance(token);
         final account = await WalletService().getWithdrawalAccount(token);
+        final config = await WalletService().getChargesConfig(token);
         setState(() {
           _balance = double.tryParse(balString) ?? 0.0;
           _withdrawalAccount = account;
+          _isChargePercentage =
+              config['withdrawal_charge_type'] == 'percentage';
+          _withdrawalCharge =
+              double.tryParse(
+                config['withdrawal_charge']?.toString() ?? '0.0',
+              ) ??
+              0.0;
         });
       }
     } catch (e) {
       // Handle error cleanly
     } finally {
-      setState(() => _isLoadingData = false);
+      if (mounted) setState(() => _isLoadingData = false);
     }
   }
 
   Future<void> _submitWithdrawal() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_withdrawalAccount == null) {
+    if (_withdrawalAccount == null ||
+        _withdrawalAccount!.accountNumber.isEmpty ||
+        _withdrawalAccount!.bankName.isEmpty ||
+        _withdrawalAccount!.accountName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Please link a withdrawal account first"),
+          content: Text("Please link a valid withdrawal account first"),
           backgroundColor: Colors.orange,
         ),
       );
@@ -117,7 +131,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "Withdraw Funds",
@@ -127,7 +141,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: BackButton(
           color: Colors.white,
           onPressed: () => context.pop(),
@@ -150,14 +164,16 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).cardColor,
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
+                              if (Theme.of(context).brightness ==
+                                  Brightness.light)
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
                             ],
                           ),
                           child: Row(
@@ -191,10 +207,13 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                                       locale: 'en_NG',
                                       symbol: '₦',
                                     ).format(_balance),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
                                     ),
                                   ),
                                 ],
@@ -204,12 +223,12 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                         ),
                         const SizedBox(height: 32),
 
-                        const Text(
+                        Text(
                           "Withdrawal Amount",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -218,9 +237,10 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                           decoration: InputDecoration(
                             prefixIcon: const Icon(
@@ -229,17 +249,20 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                             ),
                             hintText: "0.00",
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Theme.of(context).cardColor,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Colors.grey.shade300,
-                              ),
+                              borderSide: BorderSide.none,
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: Colors.grey.shade300,
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Colors.blueAccent,
+                                width: 2,
                               ),
                             ),
                           ),
@@ -251,24 +274,117 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                             if (amount == null || amount <= 0) {
                               return "Please enter a valid amount";
                             }
+                            if (amount < (100 + _withdrawalCharge)) {
+                              return "Minimum is ₦${(100 + _withdrawalCharge).toStringAsFixed(0)}";
+                            }
                             if (amount > _balance) {
                               return "Amount exceeds balance";
                             }
                             return null;
                           },
+                          onChanged: (val) {
+                            setState(
+                              () {},
+                            ); // trigger rebuild to update calculation
+                          },
                         ),
+
+                        // Calculate Charge
+                        if (_amountController.text.isNotEmpty &&
+                            (double.tryParse(_amountController.text) ?? 0) > 0)
+                          Builder(
+                            builder: (context) {
+                              final amt =
+                                  double.tryParse(_amountController.text) ??
+                                  0.0;
+                              final charge =
+                                  _isChargePercentage
+                                      ? (amt * _withdrawalCharge / 100)
+                                      : _withdrawalCharge;
+                              final receiveAmt = amt - charge;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blueAccent.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.blueAccent.withOpacity(0.2),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Text(
+                                            "Withdrawal Charge",
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          Text(
+                                            "₦${charge.toStringAsFixed(2)}",
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.redAccent,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Divider(),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "You Will Receive",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color:
+                                                  Theme.of(
+                                                    context,
+                                                  ).textTheme.bodyLarge?.color,
+                                            ),
+                                          ),
+                                          Text(
+                                            "₦${(receiveAmt > 0 ? receiveAmt : 0).toStringAsFixed(2)}",
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
 
                         const SizedBox(height: 32),
 
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Destination Account",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color,
                               ),
                             ),
                             TextButton(
@@ -368,14 +484,15 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+          if (Theme.of(context).brightness == Brightness.light)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
         ],
       ),
       child: Column(
@@ -387,9 +504,10 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
               const SizedBox(width: 8),
               Text(
                 _withdrawalAccount!.bankName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ],
@@ -397,10 +515,11 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
           const SizedBox(height: 16),
           Text(
             _withdrawalAccount!.accountNumber,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
           const SizedBox(height: 4),

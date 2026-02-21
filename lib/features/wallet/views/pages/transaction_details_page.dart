@@ -58,7 +58,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "Transaction Details",
@@ -68,7 +68,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: BackButton(
           color: Colors.white,
           onPressed:
@@ -89,14 +89,15 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(32.0),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
+                          if (Theme.of(context).brightness == Brightness.light)
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
                         ],
                       ),
                       child: Column(
@@ -129,10 +130,11 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                               symbol: '₦',
                               decimalDigits: 2,
                             ).format(transaction!.amount),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 28,
-
-                              color: Colors.black87,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge?.color,
                             ),
                           ),
                           const SizedBox(height: 32),
@@ -170,7 +172,9 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 16,
                                 ),
-                                side: BorderSide(color: Colors.grey.shade300),
+                                side: BorderSide(
+                                  color: Theme.of(context).dividerColor,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -208,8 +212,8 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(
-                color: Colors.black87,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),

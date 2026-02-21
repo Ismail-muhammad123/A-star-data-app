@@ -37,7 +37,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueAccent.shade100,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentPage,
         onDestinationSelected: (index) {
@@ -55,46 +55,65 @@ class HomePageState extends State<HomePage> {
               context.go("/home");
           }
         },
-        backgroundColor: Colors.white,
-        indicatorColor: Colors.blue.withOpacity(0.1),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        indicatorColor: Colors.blueAccent.withOpacity(0.1),
         indicatorShape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
-        labelTextStyle: WidgetStateProperty.all(
-          TextStyle(color: Colors.black, fontSize: 14),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            color:
+                states.contains(WidgetState.selected)
+                    ? Colors.blueAccent
+                    : Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 14,
+            fontWeight:
+                states.contains(WidgetState.selected)
+                    ? FontWeight.bold
+                    : FontWeight.normal,
+          ),
         ),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: [
           NavigationDestination(
             icon: Icon(
               Icons.dashboard_outlined,
-              color: currentPage == 0 ? Colors.blue : Colors.black54,
+              color:
+                  currentPage == 0
+                      ? Colors.blueAccent
+                      : Theme.of(context).iconTheme.color?.withOpacity(0.6),
             ),
-            selectedIcon: const Icon(Icons.dashboard, color: Colors.blue),
+            selectedIcon: const Icon(Icons.dashboard, color: Colors.blueAccent),
             label: 'Home',
           ),
           NavigationDestination(
             icon: Icon(
               Icons.account_balance_wallet_outlined,
-              color: currentPage == 1 ? Colors.blue : Colors.black54,
+              color:
+                  currentPage == 1
+                      ? Colors.blueAccent
+                      : Theme.of(context).iconTheme.color?.withOpacity(0.6),
             ),
             selectedIcon: const Icon(
               Icons.account_balance_wallet,
-              color: Colors.blue,
+              color: Colors.blueAccent,
             ),
             label: 'Wallet',
           ),
           NavigationDestination(
             icon: Icon(
               Icons.settings_outlined,
-              color: currentPage == 2 ? Colors.blue : Colors.black54,
+              color:
+                  currentPage == 2
+                      ? Colors.blueAccent
+                      : Theme.of(context).iconTheme.color?.withOpacity(0.6),
             ),
-            selectedIcon: const Icon(Icons.settings, color: Colors.blue),
+            selectedIcon: const Icon(Icons.settings, color: Colors.blueAccent),
             label: 'Settings',
           ),
         ],
       ),
-      body: SafeArea(child: pages[currentPage]),
+      body: pages[currentPage],
     );
   }
 }

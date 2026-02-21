@@ -14,6 +14,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _phoneNumberController = TextEditingController();
   bool _isLoading = false;
+  String _selectedChannel = 'sms';
 
   void _handlePinReset() async {
     if (!_formKey.currentState!.validate()) return;
@@ -24,7 +25,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
       if (phone.startsWith("0")) {
         phone = phone.substring(1);
       }
-      await AuthService().resetPin(phone);
+      await AuthService().resetPin(phone, channel: _selectedChannel);
 
       if (!mounted) return;
 
@@ -48,7 +49,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "A reset OTP has been sent to your WhatsApp and SMS. Use it to create a new PIN.",
+                    "A reset OTP has been sent to your selected channel. Use it to create a new PIN.",
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey),
                   ),
@@ -59,7 +60,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                       onPressed: () {
                         Navigator.pop(context);
                         context.go(
-                          "/confirm-pin-reset?phone=${_phoneNumberController.text.trim()}",
+                          "/confirm-pin-reset?phone=${_phoneNumberController.text.trim()}&channel=$_selectedChannel",
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -96,22 +97,24 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Recover PIN",
           style: TextStyle(
-            color: Colors.white,
+            color: theme.appBarTheme.foregroundColor,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
         centerTitle: true,
         leading: BackButton(
-          color: Colors.white,
+          color: theme.appBarTheme.foregroundColor,
           onPressed: () => context.go('/login'),
         ),
       ),
@@ -120,9 +123,9 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
           Container(
             height: 100,
             width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Colors.blueAccent,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: theme.appBarTheme.backgroundColor,
+              borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(40),
                 bottomRight: Radius.circular(40),
               ),
@@ -140,7 +143,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
@@ -153,12 +156,12 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "Forgot PIN?",
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
-                              color: Colors.black87,
+                              color: theme.textTheme.headlineSmall?.color,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -166,19 +169,13 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                             "Enter the phone number associated with your account to receive a reset code.",
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[500],
+                              color: theme.textTheme.bodySmall?.color
+                                  ?.withOpacity(0.6),
                             ),
                           ),
                           const SizedBox(height: 32),
 
-                          Text(
-                            "Phone Number",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[700],
-                            ),
-                          ),
+                          _buildLabel("Phone Number", theme),
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _phoneNumberController,
@@ -186,37 +183,57 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
-                            decoration: InputDecoration(
-                              hintText: "e.g. 08012345678",
-                              prefixIcon: const Icon(
-                                Icons.phone_android,
-                                color: Colors.blueAccent,
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[50],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.shade200,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(
-                                  color: Colors.blueAccent,
-                                  width: 2,
-                                ),
-                              ),
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                            decoration: _inputDecoration(
+                              theme: theme,
+                              hint: "e.g. 08012345678",
+                              icon: Icons.phone_android,
                             ),
                             validator:
                                 (v) =>
                                     (v == null || v.isEmpty)
                                         ? "Required"
                                         : null,
+                          ),
+                          const SizedBox(height: 24),
+                          _buildLabel("Delivery Channel", theme),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            value: _selectedChannel,
+                            dropdownColor: theme.cardColor,
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                            decoration: _inputDecoration(
+                              theme: theme,
+                              hint: "Select Channel",
+                              icon: Icons.send_rounded,
+                            ),
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'sms',
+                                child: Text("SMS"),
+                              ),
+                              DropdownMenuItem(
+                                value: 'email',
+                                child: Text("Email"),
+                              ),
+                              DropdownMenuItem(
+                                value: 'whatsapp',
+                                enabled: false,
+                                child: Text(
+                                  "WhatsApp (Coming Soon)",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() => _selectedChannel = value);
+                              }
+                            },
                           ),
                           const SizedBox(height: 40),
 
@@ -226,7 +243,7 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _handlePinReset,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
+                                backgroundColor: theme.colorScheme.primary,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -253,10 +270,10 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                     const SizedBox(height: 32),
                     TextButton(
                       onPressed: () => context.go('/login'),
-                      child: const Text(
+                      child: Text(
                         "Back to Login",
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -267,6 +284,45 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text, ThemeData theme) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: theme.textTheme.bodySmall?.color?.withOpacity(0.8),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required ThemeData theme,
+    required String hint,
+    required IconData icon,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon, color: theme.colorScheme.primary, size: 20),
+      filled: true,
+      fillColor:
+          theme.brightness == Brightness.dark
+              ? theme.colorScheme.surface
+              : Colors.grey[50],
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: theme.dividerColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
       ),
     );
   }

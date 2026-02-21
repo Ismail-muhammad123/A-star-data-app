@@ -88,16 +88,20 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: BackButton(
           color: Colors.white,
           onPressed: () => context.pop(),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         title: const Text(
           'Personal Information',
-          style: TextStyle(color: Colors.white, fontSize: 18),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -105,39 +109,48 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Account Details",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               "Keep your personal information up to date.",
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                fontSize: 14,
+              ),
             ),
             const SizedBox(height: 30),
             _buildTextField(
+              context,
               controller: _firstNameController,
               label: "First Name",
               icon: Icons.person_outline,
             ),
             const SizedBox(height: 20),
             _buildTextField(
+              context,
               controller: _lastNameController,
               label: "Last Name",
               icon: Icons.person_outline,
             ),
             const SizedBox(height: 20),
             _buildTextField(
+              context,
               controller: _middleNameController,
               label: "Middle Name",
               icon: Icons.person_outline,
             ),
             const SizedBox(height: 20),
             _buildTextField(
+              context,
               controller: _emailController,
               label: "Email Address",
               icon: Icons.email_outlined,
@@ -145,6 +158,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
             ),
             const SizedBox(height: 20),
             _buildTextField(
+              context,
               controller: _bvnController,
               label: "BVN (Optional)",
               icon: Icons.security_outlined,
@@ -181,7 +195,8 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildTextField(
+    BuildContext context, {
     required TextEditingController controller,
     required String label,
     required IconData icon,
@@ -195,9 +210,20 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: Colors.blueAccent),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+        ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).cardColor,
       ),
     );
   }

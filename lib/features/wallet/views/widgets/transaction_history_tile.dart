@@ -48,10 +48,10 @@ class TransactionHistoryTile extends StatelessWidget {
                     transaction.transactionType
                         .replaceAll("_", " ")
                         .toUpperCase(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -80,7 +80,7 @@ class TransactionHistoryTile extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
@@ -88,7 +88,9 @@ class TransactionHistoryTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[600],
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.color?.withOpacity(0.6),
                     ),
                   ),
                 ),

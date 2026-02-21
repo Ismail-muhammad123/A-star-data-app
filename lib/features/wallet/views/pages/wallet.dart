@@ -21,7 +21,7 @@ class _WalletPageState extends State<WalletPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "My Wallet",
@@ -31,7 +31,7 @@ class _WalletPageState extends State<WalletPage> {
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
       ),
       body: RefreshIndicator(
@@ -49,10 +49,17 @@ class _WalletPageState extends State<WalletPage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Colors.blueAccent, Colors.lightBlue],
+                    colors:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? const [
+                              Color(0xFF0F2027),
+                              Color(0xFF203A43),
+                              Color(0xFF2C5364),
+                            ]
+                            : const [Colors.blueAccent, Colors.lightBlue],
                   ),
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
@@ -165,12 +172,12 @@ class _WalletPageState extends State<WalletPage> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         "Bank Transfer Deposit",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -178,7 +185,7 @@ class _WalletPageState extends State<WalletPage> {
                         accountName: account.accountName,
                         accountNumber: account.accountNumber,
                         bankName: account.bankName,
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                       ),
                     ],
                   );
@@ -191,12 +198,12 @@ class _WalletPageState extends State<WalletPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     "Recent Transactions",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   TextButton(
@@ -264,7 +271,7 @@ class _WalletPageState extends State<WalletPage> {
 
                   return Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(

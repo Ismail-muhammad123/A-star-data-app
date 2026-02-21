@@ -165,7 +165,7 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
     final isTier2 = profile?.tier == 2;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "Fund Wallet",
@@ -175,7 +175,7 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: BackButton(
           color: Colors.white,
           onPressed: () => context.pop(),
@@ -187,18 +187,23 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Info
-            const Text(
+            Text(
               "Add Funds",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               "Choose your preferred method to add money to your wallet.",
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                fontSize: 14,
+              ),
             ),
             const SizedBox(height: 32),
 
@@ -242,9 +247,13 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
 
             // Payment Method Selection (If not Tier 2)
             if (!isTier2) ...[
-              const Text(
+              Text(
                 "Payment Method",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
               ),
               const SizedBox(height: 12),
               Row(
@@ -272,16 +281,24 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
             ],
 
             // Amount Input
-            const Text(
+            Text(
               "How much would you like to add?",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _amountController,
               keyboardType: TextInputType.number,
               enabled: !_isLoading,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
                 hintText: "Enter amount",
@@ -292,27 +309,38 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
                   color: Colors.blueAccent,
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).cardColor,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 18,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(
+                    color: Colors.blueAccent,
+                    width: 2,
+                  ),
                 ),
               ),
             ),
 
             if (paymentInfo != null) ...[
               const SizedBox(height: 32),
-              const Text(
+              Text(
                 "Transfer Details",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
               ),
               const SizedBox(height: 12),
               TransferDepositAccountInfoCard(
@@ -383,10 +411,15 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blueAccent : Colors.white,
+          color: isSelected ? Colors.blueAccent : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.blueAccent : Colors.grey.shade200,
+            color:
+                isSelected
+                    ? Colors.blueAccent
+                    : (Theme.of(context).brightness == Brightness.light
+                        ? Colors.grey.shade200
+                        : Colors.transparent),
           ),
           boxShadow: [
             if (isSelected)
@@ -404,7 +437,10 @@ class _FundWalletFormPageState extends State<FundWalletFormPage> {
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
+                color:
+                    isSelected
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyLarge?.color,
                 fontWeight: FontWeight.bold,
               ),
             ),

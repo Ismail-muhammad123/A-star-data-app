@@ -78,13 +78,13 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/confirm-pin-reset',
-
       builder: (context, state) {
         var phoneNumber = state.uri.queryParameters['phone'];
+        var channel = state.uri.queryParameters['channel'] ?? 'sms';
         if (phoneNumber != null) {
-          return ConfirmPinReset(phoneNumber: phoneNumber);
+          return ConfirmPinReset(phoneNumber: phoneNumber, channel: channel);
         }
-        return const ConfirmPinReset(phoneNumber: '');
+        return const ConfirmPinReset(phoneNumber: '', channel: 'sms');
       },
     ),
 
@@ -171,7 +171,7 @@ final GoRouter router = GoRouter(
 
     // ===================== Wallet Routes =====================
     GoRoute(
-      path: "/orders/buy-smile-voice",
+      path: "/orders/buy-smile",
       builder: (context, state) => SmileVoicePurchasePage(),
     ),
     GoRoute(

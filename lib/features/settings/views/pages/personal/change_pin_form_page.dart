@@ -67,13 +67,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "Change Transaction PIN",
-          style: TextStyle(color: Colors.white, fontSize: 18),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: BackButton(
           color: Colors.white,
           onPressed: () => context.pop(),
@@ -86,12 +90,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "Secure Your PIN",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 12),
@@ -99,18 +103,22 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 "Keep your transaction PIN confidential. Change it regularly for better security.",
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.color?.withOpacity(0.6),
                   height: 1.5,
                 ),
               ),
               const SizedBox(height: 40),
 
-              const Text(
+              Text(
                 "Current PIN",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black54,
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.color?.withOpacity(0.6),
                 ),
               ),
               const SizedBox(height: 8),
@@ -127,6 +135,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         (value?.length ?? 0) < 4
                             ? "Enter 4-digit current PIN"
                             : null,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
                 decoration: InputDecoration(
                   hintText: "••••",
                   prefixIcon: const Icon(
@@ -142,20 +153,34 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: Colors.blueAccent,
+                      width: 2,
+                    ),
                   ),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).cardColor,
                 ),
               ),
 
               const SizedBox(height: 24),
 
-              const Text(
+              Text(
                 "New 4-Digit PIN",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black54,
+                  color: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.color?.withOpacity(0.6),
                 ),
               ),
               const SizedBox(height: 8),
@@ -172,6 +197,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         (value?.length ?? 0) < 4
                             ? "Enter 4-digit new PIN"
                             : null,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
                 decoration: InputDecoration(
                   hintText: "••••",
                   prefixIcon: const Icon(
@@ -187,9 +215,21 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: Colors.blueAccent,
+                      width: 2,
+                    ),
                   ),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).cardColor,
                 ),
               ),
 

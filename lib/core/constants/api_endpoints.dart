@@ -36,6 +36,7 @@ class WalletEndpoints {
   final String banks = "$baseUrl/wallet/banks/";
   final String resolveAccount = "$baseUrl/wallet/resolve-account/";
   final String withdrawalAccount = "$baseUrl/wallet/withdrawal-account/";
+  final String chargesConfig = "$baseUrl/payment/charges-config/";
 }
 
 class OrderEndpoints {

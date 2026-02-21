@@ -6,7 +6,7 @@ class FundingGuidePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "Funding Guide",
@@ -16,7 +16,7 @@ class FundingGuidePage extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: BackButton(
           color: Colors.white,
           onPressed: () => Navigator.of(context).pop(),
@@ -28,12 +28,12 @@ class FundingGuidePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "How to Fund Your Wallet",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 12),
@@ -41,13 +41,16 @@ class FundingGuidePage extends StatelessWidget {
               "Choose the method that works best for you. Most methods are instant and automatic.",
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.grey[600],
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.6),
                 height: 1.5,
               ),
             ),
             const SizedBox(height: 32),
 
             _buildGuideCard(
+              context: context,
               index: "1",
               title: "Instant Bank Transfer",
               description:
@@ -65,6 +68,7 @@ class FundingGuidePage extends StatelessWidget {
             const SizedBox(height: 24),
 
             _buildGuideCard(
+              context: context,
               index: "2",
               title: "Card Payment",
               description:
@@ -82,6 +86,7 @@ class FundingGuidePage extends StatelessWidget {
             const SizedBox(height: 24),
 
             _buildGuideCard(
+              context: context,
               index: "3",
               title: "Direct Support Transfer",
               description:
@@ -134,6 +139,7 @@ class FundingGuidePage extends StatelessWidget {
   }
 
   Widget _buildGuideCard({
+    required BuildContext context,
     required String index,
     required String title,
     required String description,
@@ -144,14 +150,15 @@ class FundingGuidePage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+          if (Theme.of(context).brightness == Brightness.light)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
         ],
       ),
       child: Column(
@@ -183,10 +190,10 @@ class FundingGuidePage extends StatelessWidget {
                     ),
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                   ],
@@ -199,7 +206,9 @@ class FundingGuidePage extends StatelessWidget {
             description,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.color?.withOpacity(0.6),
               height: 1.4,
             ),
           ),
@@ -225,9 +234,9 @@ class FundingGuidePage extends StatelessWidget {
                   Expanded(
                     child: Text(
                       step,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Colors.black87,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                         height: 1.4,
                       ),
                     ),

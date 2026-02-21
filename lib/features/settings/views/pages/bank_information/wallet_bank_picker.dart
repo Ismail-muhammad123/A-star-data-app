@@ -16,7 +16,7 @@ class _WalletBankPickerState extends State<WalletBankPicker> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: BackButton(
           color: Colors.white,
@@ -24,9 +24,13 @@ class _WalletBankPickerState extends State<WalletBankPicker> {
         ),
         title: const Text(
           'Select Bank',
-          style: TextStyle(color: Colors.white, fontSize: 18),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
@@ -38,7 +42,7 @@ class _WalletBankPickerState extends State<WalletBankPicker> {
                 hintText: "Search bank...",
                 prefixIcon: const Icon(Icons.search, color: Colors.blueAccent),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).cardColor,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -80,7 +84,10 @@ class _WalletBankPickerState extends State<WalletBankPicker> {
                 return ListTile(
                   title: Text(
                     bankName,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () {

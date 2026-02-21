@@ -5,8 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 class ConfirmPinReset extends StatefulWidget {
-  const ConfirmPinReset({super.key, required this.phoneNumber});
+  const ConfirmPinReset({
+    super.key,
+    required this.phoneNumber,
+    required this.channel,
+  });
   final String phoneNumber;
+  final String channel;
 
   @override
   State<ConfirmPinReset> createState() => _ConfirmPinResetState();
@@ -78,22 +83,25 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Set New PIN",
           style: TextStyle(
-            color: Colors.white,
+            color: theme.appBarTheme.foregroundColor,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         elevation: 0,
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         leading: BackButton(
-          color: Colors.white,
+          color: theme.appBarTheme.foregroundColor,
           onPressed: () => context.go("/forgot-pin"),
         ),
       ),
@@ -103,9 +111,9 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
             Container(
               height: 120,
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.blueAccent,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: theme.appBarTheme.backgroundColor,
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(40),
                   bottomRight: Radius.circular(40),
                 ),
@@ -123,12 +131,12 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "Reset your PIN",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: theme.textTheme.headlineSmall?.color,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -136,7 +144,9 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
                       "Enter the 6-digit code sent to your device and your new preferred 6-digit PIN.",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: theme.textTheme.bodySmall?.color?.withOpacity(
+                          0.6,
+                        ),
                         height: 1.5,
                       ),
                     ),
@@ -148,10 +158,19 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
                     TextFormField(
                       enabled: false,
                       controller: _phoneNumberController,
+                      style: TextStyle(
+                        color: theme.textTheme.bodyLarge?.color?.withOpacity(
+                          0.7,
+                        ),
+                      ),
                       decoration: _inputDecoration(
+                        theme: theme,
                         hint: "",
                         icon: Icons.phone_android,
-                        fillColor: Colors.grey[50],
+                        fillColor:
+                            isDark
+                                ? theme.colorScheme.surface.withOpacity(0.5)
+                                : Colors.grey[100],
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -174,12 +193,14 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
                       keyboardType: TextInputType.number,
                       maxLength: 6,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         letterSpacing: 8,
                         fontWeight: FontWeight.bold,
+                        color: theme.textTheme.bodyLarge?.color,
                       ),
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: _inputDecoration(
+                        theme: theme,
                         hint: "******",
                         icon: Icons.vpn_key_outlined,
                         suffixIcon: IconButton(
@@ -187,7 +208,7 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
                             _obscurePin
                                 ? Icons.visibility
                                 : Icons.visibility_off,
-                            color: Colors.grey,
+                            color: theme.textTheme.bodySmall?.color,
                           ),
                           onPressed:
                               () => setState(() => _obscurePin = !_obscurePin),
@@ -209,7 +230,7 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _handleChangePin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
+                          backgroundColor: theme.colorScheme.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -239,7 +260,8 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
                           Text(
                             "Didn't receive the code?",
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: theme.textTheme.bodySmall?.color
+                                  ?.withOpacity(0.6),
                               fontSize: 14,
                             ),
                           ),
@@ -250,10 +272,10 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
                                   .isBefore(DateTime.now()))
                             TextButton(
                               onPressed: _isLoading ? null : _resendOtp,
-                              child: const Text(
+                              child: Text(
                                 "Resend Code",
                                 style: TextStyle(
-                                  color: Colors.blueAccent,
+                                  color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -263,8 +285,9 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               child: Text(
                                 "Resend in ${_lastResend!.add(const Duration(seconds: 60)).difference(DateTime.now()).inSeconds}s",
-                                style: const TextStyle(
-                                  color: Colors.grey,
+                                style: TextStyle(
+                                  color: theme.textTheme.bodySmall?.color
+                                      ?.withOpacity(0.4),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -283,17 +306,19 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
   }
 
   Widget _buildLabel(String text) {
+    final theme = Theme.of(context);
     return Text(
       text,
       style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: Colors.grey[700],
+        color: theme.textTheme.bodySmall?.color?.withOpacity(0.8),
       ),
     );
   }
 
   InputDecoration _inputDecoration({
+    required ThemeData theme,
     required String hint,
     required IconData icon,
     Widget? suffixIcon,
@@ -302,22 +327,26 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
   }) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Icon(icon, color: Colors.blueAccent, size: 20),
+      prefixIcon: Icon(icon, color: theme.colorScheme.primary, size: 20),
       suffixIcon: suffixIcon,
       counterText: counterText,
       filled: true,
-      fillColor: fillColor ?? Colors.grey[50],
+      fillColor:
+          fillColor ??
+          (theme.brightness == Brightness.dark
+              ? theme.colorScheme.surface
+              : Colors.grey[50]),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: theme.dividerColor),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
       ),
     );
   }
@@ -325,7 +354,7 @@ class _ConfirmPinResetState extends State<ConfirmPinReset> {
   Future<void> _resendOtp() async {
     try {
       setState(() => _isLoading = true);
-      await AuthService().resetPin(widget.phoneNumber);
+      await AuthService().resetPin(widget.phoneNumber, channel: widget.channel);
       setState(() {
         _lastResend = DateTime.now();
         _isLoading = false;

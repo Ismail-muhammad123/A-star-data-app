@@ -76,13 +76,17 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
     final currentTier = profile?.tier ?? 1;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           'Upgrade Account',
-          style: TextStyle(color: Colors.white, fontSize: 18),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: BackButton(
           color: Colors.white,
           onPressed: () => context.pop(),
@@ -93,12 +97,12 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Account Limits",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 12),
@@ -106,7 +110,9 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
               "Upgrade your account to enjoy higher transaction limits and permanent virtual accounts.",
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.6),
                 height: 1.5,
               ),
             ),
@@ -170,7 +176,7 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green[50],
+                  color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.green.withOpacity(0.2)),
                 ),
@@ -182,7 +188,7 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
                       child: Text(
                         "You are already on the highest tier available.",
                         style: TextStyle(
-                          color: Colors.green[800],
+                          color: Colors.green,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -212,18 +218,24 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.blueAccent : Colors.grey.shade200,
+            color:
+                isSelected
+                    ? Colors.blueAccent
+                    : (Theme.of(context).brightness == Brightness.light
+                        ? Colors.grey.shade200
+                        : Colors.transparent),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
+            if (Theme.of(context).brightness == Brightness.light)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
           ],
         ),
         child: Row(
@@ -236,9 +248,10 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       if (isCurrent) ...[
@@ -269,7 +282,9 @@ class _AccountTierUpgradePageState extends State<AccountTierUpgradePage> {
                     description,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey[600],
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.color?.withOpacity(0.6),
                       height: 1.4,
                     ),
                   ),

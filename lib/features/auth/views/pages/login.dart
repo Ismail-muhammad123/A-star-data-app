@@ -131,8 +131,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           Container(
@@ -140,7 +143,13 @@ class _LoginPageState extends State<LoginPage> {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.blue.shade800, Colors.blue.shade600],
+                colors:
+                    isDark
+                        ? [
+                          theme.colorScheme.surface,
+                          theme.colorScheme.surface.withOpacity(0.8),
+                        ]
+                        : [Colors.blue.shade800, Colors.blue.shade600],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -163,7 +172,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? theme.cardColor : Colors.white,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -186,7 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
@@ -208,7 +217,8 @@ class _LoginPageState extends State<LoginPage> {
                                     "Welcome Back,",
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.grey[500],
+                                      color: theme.textTheme.bodySmall?.color
+                                          ?.withOpacity(0.6),
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 1,
                                     ),
@@ -217,10 +227,10 @@ class _LoginPageState extends State<LoginPage> {
                                   Text(
                                     _lastUserName!.toUpperCase(),
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.w900,
-                                      color: Colors.blue,
+                                      color: theme.colorScheme.primary,
                                       letterSpacing: 0.5,
                                     ),
                                   ),
@@ -239,13 +249,14 @@ class _LoginPageState extends State<LoginPage> {
                                         vertical: 6,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.05),
+                                        color: theme.colorScheme.primary
+                                            .withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(20),
                                       ),
-                                      child: const Text(
+                                      child: Text(
                                         "Switch Account",
                                         style: TextStyle(
-                                          color: Colors.blue,
+                                          color: theme.colorScheme.primary,
                                           fontWeight: FontWeight.bold,
                                           fontSize: 12,
                                         ),
@@ -256,26 +267,27 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ] else ...[
-                            const Text(
+                            Text(
                               "Login to Account",
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: Colors.black87,
+                                color: theme.textTheme.headlineSmall?.color,
                               ),
                             ),
                             Text(
                               "Please enter your details to continue",
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey[500],
+                                color: theme.textTheme.bodySmall?.color
+                                    ?.withOpacity(0.6),
                               ),
                             ),
                           ],
                           const SizedBox(height: 32),
 
                           // Phone Number
-                          _buildLabel("Phone Number"),
+                          _buildLabel("Phone Number", theme),
                           const SizedBox(height: 8),
                           if (_lastUserName == null || _lastUserName!.isEmpty)
                             TextFormField(
@@ -286,6 +298,7 @@ class _LoginPageState extends State<LoginPage> {
                                 FilteringTextInputFormatter.digitsOnly,
                               ],
                               decoration: _inputDecoration(
+                                theme: theme,
                                 hint: "e.g. 08012345678",
                                 icon: Icons.phone_android,
                               ),
@@ -302,26 +315,34 @@ class _LoginPageState extends State<LoginPage> {
                                 horizontal: 20,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.grey[50],
+                                color:
+                                    isDark
+                                        ? theme.colorScheme.surface
+                                        : Colors.grey[50],
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.grey.shade200),
+                                border: Border.all(
+                                  color:
+                                      isDark
+                                          ? theme.dividerColor
+                                          : Colors.grey.shade200,
+                                ),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.phone_android,
-                                    color: Colors.blue,
+                                    color: theme.colorScheme.primary,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
                                     _lastPhoneNumber ?? "",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 2,
-                                      color: Colors.black87,
+                                      color: theme.textTheme.bodyLarge?.color,
                                     ),
                                   ),
                                 ],
@@ -331,7 +352,7 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 24),
 
                           // PIN
-                          _buildLabel("6-Digit PIN"),
+                          _buildLabel("6-Digit PIN", theme),
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _pinController,
@@ -342,11 +363,13 @@ class _LoginPageState extends State<LoginPage> {
                               FilteringTextInputFormatter.digitsOnly,
                             ],
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               letterSpacing: 8,
                               fontWeight: FontWeight.bold,
+                              color: theme.textTheme.bodyLarge?.color,
                             ),
                             decoration: _inputDecoration(
+                              theme: theme,
                               hint: "******",
                               icon: Icons.lock_outline,
                               suffixIcon: IconButton(
@@ -354,7 +377,7 @@ class _LoginPageState extends State<LoginPage> {
                                   _obscurePin
                                       ? Icons.visibility
                                       : Icons.visibility_off,
-                                  color: Colors.grey,
+                                  color: theme.textTheme.bodySmall?.color,
                                 ),
                                 onPressed:
                                     () => setState(
@@ -378,7 +401,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : handleLogin,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
+                                backgroundColor: theme.colorScheme.primary,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -421,7 +444,7 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   ),
                                   style: TextButton.styleFrom(
-                                    foregroundColor: Colors.blue.shade800,
+                                    foregroundColor: theme.colorScheme.primary,
                                   ),
                                 ),
                               );
@@ -441,7 +464,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             "FORGOT PIN?",
                             style: TextStyle(
-                              color: Colors.blue.shade700,
+                              color: theme.colorScheme.primary,
                               fontWeight: FontWeight.w900,
                               fontSize: 12,
                               letterSpacing: 1,
@@ -451,14 +474,14 @@ class _LoginPageState extends State<LoginPage> {
                         Container(
                           height: 15,
                           width: 1,
-                          color: Colors.grey[300],
+                          color: theme.dividerColor,
                         ),
                         TextButton(
                           onPressed: () => context.go('/register'),
                           child: Text(
                             "CREATE ACCOUNT",
                             style: TextStyle(
-                              color: Colors.blue.shade700,
+                              color: theme.colorScheme.primary,
                               fontWeight: FontWeight.w900,
                               fontSize: 12,
                               letterSpacing: 1,
@@ -472,7 +495,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         "ACTIVATE MY ACCOUNT",
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: theme.textTheme.bodySmall?.color,
                           fontWeight: FontWeight.w700,
                           fontSize: 11,
                           letterSpacing: 0.5,
@@ -490,18 +513,19 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, ThemeData theme) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w700,
-        color: Colors.black54,
+        color: theme.textTheme.bodySmall?.color?.withOpacity(0.8),
       ),
     );
   }
 
   InputDecoration _inputDecoration({
+    required ThemeData theme,
     required String hint,
     required IconData icon,
     Widget? suffixIcon,
@@ -509,22 +533,25 @@ class _LoginPageState extends State<LoginPage> {
   }) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Icon(icon, color: Colors.blue, size: 20),
+      prefixIcon: Icon(icon, color: theme.colorScheme.primary, size: 20),
       suffixIcon: suffixIcon,
       counterText: counterText,
       filled: true,
-      fillColor: Colors.grey[50],
+      fillColor:
+          theme.brightness == Brightness.dark
+              ? theme.colorScheme.surface
+              : Colors.grey[50],
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: theme.dividerColor),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
       ),
     );
   }

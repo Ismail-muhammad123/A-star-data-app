@@ -146,26 +146,39 @@ class AuthProvider extends ChangeNotifier {
     String pin, {
     String countryCode = "+234",
     String email = "",
+    dynamic channel,
   }) async {
     if (phone.startsWith("0")) {
       phone = phone.substring(1);
     }
 
-    var res = await _authService.register(
-      phone,
-      pin,
-      countryCode: countryCode,
-      email: email,
-    );
-    // var token = res['token'];
-    if (res != null) {
-      // final prefs = await SharedPreferences.getInstance();
-      // await prefs.setString('auth_token', token);
-      // _isAuthenticated = true;
-      // notifyListeners();
-      return {"success": true, "message": ""};
-    } else {
-      return {"success": false, "message": "Registration failed"};
+    try {
+      var res = await _authService.register(
+        phone,
+        pin,
+        countryCode: countryCode,
+        email: email,
+        channel: channel,
+      );
+      if (res != null) {
+        return {"success": true, "message": ""};
+      } else {
+        return {"success": false, "message": "Registration failed"};
+      }
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> resendConfirmationOTP(
+    String identifier, {
+    dynamic channel,
+  }) async {
+    try {
+      await _authService.requestConfirmationOTP(identifier, channel: channel);
+      return {"success": true, "message": "OTP sent successfully"};
+    } catch (e) {
+      return {"success": false, "message": e.toString()};
     }
   }
 

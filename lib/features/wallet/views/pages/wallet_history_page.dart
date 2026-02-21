@@ -52,7 +52,7 @@ class _WalletHistoryPageState extends State<WalletHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "Transaction History",
@@ -62,7 +62,7 @@ class _WalletHistoryPageState extends State<WalletHistoryPage> {
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: BackButton(
           color: Colors.white,
           onPressed:
@@ -93,7 +93,9 @@ class _WalletHistoryPageState extends State<WalletHistoryPage> {
                             "No transactions yet",
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.grey[600],
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color?.withOpacity(0.6),
                               fontWeight: FontWeight.bold,
                             ),
                           ),

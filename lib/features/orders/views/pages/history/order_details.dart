@@ -50,174 +50,267 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: BackButton(
           onPressed:
               () => context.canPop() ? context.pop() : context.go("/wallet"),
           color: Colors.white,
         ),
-        title: Text(
+        title: const Text(
           "Purchase Details",
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        elevation: 4,
-        backgroundColor: Colors.lightBlue,
-      ),
-      backgroundColor: Colors.grey[100],
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Container(
-              width: double.maxFinite,
-              // height: 100,
-              padding: EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.lightBlueAccent,
-                    child: Icon(
-                      transactionDetails?.purchaseType == "airtime"
-                          ? Icons.phone_android
-                          : Icons.wifi,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "${transactionDetails?.purchaseType ?? ""} Purchase"
-                            .toUpperCase(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                      SizedBox(height: 6),
-                      Text(
-                        "To: ${transactionDetails?.beneficiary ?? '-'}",
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        NumberFormat.currency(
-                          symbol: "₦",
-                        ).format(transactionDetails?.amount ?? 0),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Container(
-                        padding: EdgeInsets.all(4.0),
-                        decoration: BoxDecoration(
-                          color:
-                              transactionDetails?.status.toLowerCase() ==
-                                      "success"
-                                  ? Colors.green
-                                  : Colors.orange,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: Text(
-                          (transactionDetails?.status ?? '').toUpperCase(),
-                          style: TextStyle(fontSize: 10),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-          SizedBox(height: 14),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+        ),
+        elevation: 0,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
             child: Container(
-              width: double.maxFinite,
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child:
-                  isLoading
-                      ? Center(child: CircularProgressIndicator())
-                      : transactionDetails == null
-                      ? Center(child: Text("No details available"))
-                      : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // DetailRow(
-                          //   label: "Transaction ID",
-                          //   value: transactionDetails!..toString(),
-                          // ),
-                          DetailRow(
-                            label: "Amount",
-                            value: NumberFormat.currency(
-                              symbol: "₦",
-                            ).format(transactionDetails!.amount),
-                          ),
-                          Divider(),
-                          // DetailRow(
-                          //   label: "Network",
-                          //   value: transactionDetails!.network,
-                          // ),
-                          DetailRow(
-                            label: "Phone Number",
-                            value: transactionDetails!.beneficiary,
-                          ),
-                          Divider(),
-                          DetailRow(
-                            label: "Date",
-                            value: DateFormat.yMMMd().add_jm().format(
-                              transactionDetails!.time,
+              color: Theme.of(context).appBarTheme.backgroundColor,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 24.0,
+                  ),
+                  child: Column(
+                    children: [
+                      // Header Card
+                      Container(
+                        width: double.maxFinite,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                          ),
-                          Divider(),
-                          DetailRow(
-                            label: "Status",
-                            value: transactionDetails!.status.toUpperCase(),
-                          ),
-                          Divider(),
-                          DetailRow(
-                            label: "Reference",
-                            value: transactionDetails!.reference,
-                          ),
-                        ],
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.blueAccent.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                _getIconForType(
+                                  transactionDetails?.purchaseType,
+                                ),
+                                color: Colors.blueAccent,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${transactionDetails?.purchaseType ?? ""} Purchase"
+                                        .toUpperCase(),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "To: ${transactionDetails?.beneficiary ?? '-'}",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  NumberFormat.currency(
+                                    symbol: "₦",
+                                    decimalDigits: 0,
+                                  ).format(transactionDetails?.amount ?? 0),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blueAccent,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        (transactionDetails?.status
+                                                    .toLowerCase() ==
+                                                "success")
+                                            ? Colors.green.withOpacity(0.1)
+                                            : Colors.orange.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                  child: Text(
+                                    (transactionDetails?.status ?? '')
+                                        .toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          (transactionDetails?.status
+                                                      .toLowerCase() ==
+                                                  "success")
+                                              ? Colors.green
+                                              : Colors.orange,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(height: 20),
+
+                      // Details Card
+                      Container(
+                        width: double.maxFinite,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child:
+                            isLoading
+                                ? const Padding(
+                                  padding: EdgeInsets.all(40.0),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.blueAccent,
+                                    ),
+                                  ),
+                                )
+                                : transactionDetails == null
+                                ? const Padding(
+                                  padding: EdgeInsets.all(40.0),
+                                  child: Center(
+                                    child: Text(
+                                      "No details available",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ),
+                                )
+                                : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Transaction Info",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.bodyLarge?.color,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    _buildDetailRow(
+                                      "Amount",
+                                      NumberFormat.currency(
+                                        symbol: "₦",
+                                        decimalDigits: 0,
+                                      ).format(transactionDetails!.amount),
+                                    ),
+                                    _buildDivider(),
+                                    _buildDetailRow(
+                                      "Phone Number",
+                                      transactionDetails!.beneficiary,
+                                    ),
+                                    _buildDivider(),
+                                    _buildDetailRow(
+                                      "Date",
+                                      DateFormat(
+                                        'MMM dd, yyyy \u2022 hh:mm a',
+                                      ).format(transactionDetails!.time),
+                                    ),
+                                    _buildDivider(),
+                                    _buildDetailRow(
+                                      "Status",
+                                      transactionDetails!.status.toUpperCase(),
+                                      isStatus: true,
+                                    ),
+                                    _buildDivider(),
+                                    _buildDetailRow(
+                                      "Reference",
+                                      transactionDetails!.reference,
+                                    ),
+                                  ],
+                                ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
   }
-}
 
-class DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
+  IconData _getIconForType(String? type) {
+    if (type == null) return Icons.receipt;
+    final lower = type.toLowerCase();
+    if (lower.contains('airtime')) return Icons.phone_android;
+    if (lower.contains('data')) return Icons.wifi;
+    if (lower.contains('electricity')) return Icons.electric_bolt;
+    if (lower.contains('tv')) return Icons.tv;
+    return Icons.receipt;
+  }
 
-  const DetailRow({super.key, required this.label, required this.value});
+  Widget _buildDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Divider(thickness: 0.5, color: Theme.of(context).dividerColor),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildDetailRow(String label, String value, {bool isStatus = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -226,15 +319,41 @@ class DetailRow extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[600],
+              fontSize: 14,
             ),
           ),
-
-          Text(
-            value,
-            style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
-          ),
+          isStatus
+              ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color:
+                      value == "SUCCESS"
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: value == "SUCCESS" ? Colors.green : Colors.orange,
+                  ),
+                ),
+              )
+              : Flexible(
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    fontSize: 14,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
         ],
       ),
     );

@@ -9,6 +9,13 @@ class UserProfile {
   final String phoneNumber;
   final DateTime createdAt;
   final bool isActive;
+  final bool isVerified;
+  final bool emailVerified;
+  final bool phoneVerified;
+
+  String get fullName {
+    return '$firstName $lastName';
+  }
 
   UserProfile({
     required this.firstName,
@@ -21,6 +28,9 @@ class UserProfile {
     this.tier = 1,
     this.isActive = false,
     this.phoneCountryCode = '+234',
+    this.isVerified = false,
+    this.emailVerified = false,
+    this.phoneVerified = false,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -34,6 +44,9 @@ class UserProfile {
       phoneNumber: json['phone_number'],
       phoneCountryCode: json['phone_country_code'] ?? '+234',
       isActive: json['is_active'] ?? false,
+      isVerified: json['is_verified'] ?? false,
+      emailVerified: json['email_verified'] ?? false,
+      phoneVerified: json['phone_verified'] ?? false,
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -49,6 +62,9 @@ class UserProfile {
       'tier': tier,
       'phone_country_code': phoneCountryCode,
       'is_active': isActive,
+      'is_verified': isVerified,
+      'email_verified': emailVerified,
+      'phone_verified': phoneVerified,
       'created_at': createdAt.toIso8601String(),
     };
   }

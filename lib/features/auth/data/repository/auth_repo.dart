@@ -29,19 +29,25 @@ class AuthService {
     String pin, {
     String countryCode = "+234",
     String email = "",
+    dynamic channel,
   }) async {
+    final Map<String, dynamic> data = {
+      "phone_country_code": countryCode,
+      "phone_number": phone,
+      "pin": pin,
+      "email": email,
+    };
+    if (channel != null) {
+      data["channel"] = channel;
+    }
+
     final response = await _dio.post(
       endpoints.register,
       options: Options(
         validateStatus: (status) => true,
         headers: {'Content-Type': 'application/json'},
       ),
-      data: jsonEncode({
-        "phone_country_code": countryCode,
-        "phone_number": phone,
-        "pin": pin,
-        "email": email,
-      }),
+      data: jsonEncode(data),
     );
     print(response.data);
     if (response.statusCode == 201 || response.statusCode == 200) {
@@ -86,14 +92,23 @@ class AuthService {
   }
 
   // // Reset password
-  Future<void> resetPin(String phoneNumber) async {
+  Future<void> resetPin(String phoneNumber, {String? channel}) async {
+    print(phoneNumber);
+    if (phoneNumber.startsWith("0")) {
+      phoneNumber = phoneNumber.substring(1, phoneNumber.length);
+    }
+    print(phoneNumber);
+    var data = {"identifier": phoneNumber};
+    if (channel != null) {
+      data["channel"] = channel;
+    }
     var response = await _dio.post(
       endpoints.resetPin,
       options: Options(
         validateStatus: (status) => true,
         headers: {'Content-Type': 'application/json'},
       ),
-      data: jsonEncode({"identifier": phoneNumber}),
+      data: jsonEncode(data),
     );
     print(response.data);
     if (response.statusCode != 200) {
@@ -124,17 +139,29 @@ class AuthService {
   }
 
   // // Request confirmation email
-  Future<void> requestConfirmationOTP(String phoneNumber) async {
+  Future<void> requestConfirmationOTP(
+    String identifier, {
+    dynamic channel,
+  }) async {
+    final Map<String, dynamic> data = {"identifier": identifier};
+    if (channel != null) {
+      data["channel"] = channel;
+    }
+
     var response = await _dio.post(
       endpoints.resendConfirmationOTP,
       options: Options(
         validateStatus: (status) => true,
         headers: {'Content-Type': 'application/json'},
       ),
-      data: jsonEncode({"identifier": phoneNumber}),
+      data: jsonEncode(data),
     );
+
+    print(response.data);
     if (response.statusCode != 200) {
-      throw Exception('Failed to request confirmation email');
+      throw Exception(
+        response.data['error'] ?? 'Failed to request confirmation OTP',
+      );
     }
   }
 

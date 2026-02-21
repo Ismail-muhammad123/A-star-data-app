@@ -21,6 +21,9 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoading = false;
   bool _obscurePin = true;
 
+  bool _sendSms = true;
+  bool _sendEmail = true;
+
   final Map<String, String> countryPhoneCodes = {
     "Nigeria": "+234",
     "Ghana": "+233",
@@ -42,11 +45,24 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+      dynamic selectedChannel;
+      if (_sendSms && _sendEmail && _emailController.text.isNotEmpty) {
+        selectedChannel = null; // Backend handles both when null
+      } else if (_sendSms) {
+        selectedChannel = 'sms';
+      } else if (_sendEmail && _emailController.text.isNotEmpty) {
+        selectedChannel = 'email';
+      } else {
+        selectedChannel = 'sms'; // Fallback
+      }
+
       var res = await authProvider.register(
         phone,
         _pinController.text.trim(),
         countryCode: _countryCode,
         email: _emailController.text.trim(),
+        channel: selectedChannel,
       );
 
       if (res?['success'] == true) {
@@ -90,8 +106,11 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
           Container(
@@ -99,7 +118,13 @@ class _SignUpPageState extends State<SignUpPage> {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.blue.shade800, Colors.blue.shade600],
+                colors:
+                    isDark
+                        ? [
+                          theme.colorScheme.surface,
+                          theme.colorScheme.surface.withOpacity(0.8),
+                        ]
+                        : [Colors.blue.shade800, Colors.blue.shade600],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -121,8 +146,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       tag: "logo",
                       child: Container(
                         padding: const EdgeInsets.all(16),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
+                        decoration: BoxDecoration(
+                          color: isDark ? theme.cardColor : Colors.white,
                           shape: BoxShape.circle,
                         ),
                         child: Image.asset(
@@ -137,7 +162,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
@@ -150,12 +175,12 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "Create Account",
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
-                              color: Colors.black87,
+                              color: theme.textTheme.headlineSmall?.color,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -163,17 +188,23 @@ class _SignUpPageState extends State<SignUpPage> {
                             "Fill in your details to get started",
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[500],
+                              color: theme.textTheme.bodySmall?.color
+                                  ?.withOpacity(0.6),
                             ),
                           ),
                           const SizedBox(height: 32),
 
                           // Country Code
-                          _buildLabel("Country"),
+                          _buildLabel("Country", theme),
                           const SizedBox(height: 8),
                           DropdownButtonFormField<String>(
                             value: _countryCode,
+                            dropdownColor: theme.cardColor,
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
                             decoration: _inputDecoration(
+                              theme: theme,
                               hint: "Select Country",
                               icon: Icons.public,
                             ),
@@ -194,7 +225,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(height: 20),
 
                           // Phone Number
-                          _buildLabel("Phone Number"),
+                          _buildLabel("Phone Number", theme),
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _phoneController,
@@ -202,7 +233,11 @@ class _SignUpPageState extends State<SignUpPage> {
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
                             decoration: _inputDecoration(
+                              theme: theme,
                               hint: "08012345678",
                               icon: Icons.phone_android,
                             ),
@@ -215,12 +250,16 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(height: 20),
 
                           // Email (Optional)
-                          _buildLabel("Email Address (Optional)"),
+                          _buildLabel("Email Address (Optional)", theme),
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
                             decoration: _inputDecoration(
+                              theme: theme,
                               hint: "you@example.com",
                               icon: Icons.email_outlined,
                             ),
@@ -228,7 +267,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(height: 20),
 
                           // PIN
-                          _buildLabel("6-Digit PIN"),
+                          _buildLabel("6-Digit PIN", theme),
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _pinController,
@@ -239,11 +278,13 @@ class _SignUpPageState extends State<SignUpPage> {
                               FilteringTextInputFormatter.digitsOnly,
                             ],
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
+                            style: TextStyle(
                               letterSpacing: 8,
                               fontWeight: FontWeight.bold,
+                              color: theme.textTheme.bodyLarge?.color,
                             ),
                             decoration: _inputDecoration(
+                              theme: theme,
                               hint: "******",
                               icon: Icons.lock_outline,
                               suffixIcon: IconButton(
@@ -251,7 +292,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                   _obscurePin
                                       ? Icons.visibility
                                       : Icons.visibility_off,
-                                  color: Colors.grey,
+                                  color: theme.textTheme.bodySmall?.color,
                                 ),
                                 onPressed:
                                     () => setState(
@@ -266,6 +307,148 @@ class _SignUpPageState extends State<SignUpPage> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 24),
+
+                          // Verification Channel
+                          _buildLabel("Receive Verification Code Via:", theme),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap:
+                                      () =>
+                                          setState(() => _sendSms = !_sendSms),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          _sendSms
+                                              ? theme.colorScheme.primary
+                                                  .withOpacity(0.1)
+                                              : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color:
+                                            _sendSms
+                                                ? theme.colorScheme.primary
+                                                : theme.dividerColor,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.sms_outlined,
+                                          size: 18,
+                                          color:
+                                              _sendSms
+                                                  ? theme.colorScheme.primary
+                                                  : theme
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.color,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "SMS",
+                                          style: TextStyle(
+                                            fontWeight:
+                                                _sendSms
+                                                    ? FontWeight.bold
+                                                    : FontWeight.normal,
+                                            color:
+                                                _sendSms
+                                                    ? theme.colorScheme.primary
+                                                    : theme
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.color,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    if (_emailController.text.isEmpty) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Please enter an email address first",
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    setState(() => _sendEmail = !_sendEmail);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          _sendEmail
+                                              ? theme.colorScheme.primary
+                                                  .withOpacity(0.1)
+                                              : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color:
+                                            _sendEmail
+                                                ? theme.colorScheme.primary
+                                                : theme.dividerColor,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.email_outlined,
+                                          size: 18,
+                                          color:
+                                              _sendEmail
+                                                  ? theme.colorScheme.primary
+                                                  : theme
+                                                      .textTheme
+                                                      .bodySmall
+                                                      ?.color,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "Email",
+                                          style: TextStyle(
+                                            fontWeight:
+                                                _sendEmail
+                                                    ? FontWeight.bold
+                                                    : FontWeight.normal,
+                                            color:
+                                                _sendEmail
+                                                    ? theme.colorScheme.primary
+                                                    : theme
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.color,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 40),
 
                           // Signup Button
@@ -275,7 +458,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _handleSignUp,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
+                                backgroundColor: theme.colorScheme.primary,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
@@ -305,14 +488,16 @@ class _SignUpPageState extends State<SignUpPage> {
                       children: [
                         Text(
                           "Already have an account? ",
-                          style: TextStyle(color: Colors.grey[600]),
+                          style: TextStyle(
+                            color: theme.textTheme.bodySmall?.color,
+                          ),
                         ),
                         TextButton(
                           onPressed: () => context.go('/login'),
-                          child: const Text(
+                          child: Text(
                             "Login",
                             style: TextStyle(
-                              color: Colors.blue,
+                              color: theme.colorScheme.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -330,18 +515,19 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(String text, ThemeData theme) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w700,
-        color: Colors.black54,
+        color: theme.textTheme.bodySmall?.color?.withOpacity(0.8),
       ),
     );
   }
 
   InputDecoration _inputDecoration({
+    required ThemeData theme,
     required String hint,
     required IconData icon,
     Widget? suffixIcon,
@@ -349,22 +535,25 @@ class _SignUpPageState extends State<SignUpPage> {
   }) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Icon(icon, color: Colors.blue, size: 20),
+      prefixIcon: Icon(icon, color: theme.colorScheme.primary, size: 20),
       suffixIcon: suffixIcon,
       counterText: counterText,
       filled: true,
-      fillColor: Colors.grey[50],
+      fillColor:
+          theme.brightness == Brightness.dark
+              ? theme.colorScheme.surface
+              : Colors.grey[50],
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: BorderSide(color: theme.dividerColor),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 1.5),
       ),
     );
   }

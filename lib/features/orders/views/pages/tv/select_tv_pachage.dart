@@ -18,11 +18,15 @@ class SelectTvPackagePageState extends State<SelectTvPackagePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        title: Text('Select TV Package', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blueAccent,
-        surfaceTintColor: Colors.blueAccent,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text(
+          'Select TV Package',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        elevation: 0,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,7 +35,11 @@ class SelectTvPackagePageState extends State<SelectTvPackagePage> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               "Select a package for ${widget.provider.serviceName}",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
             ),
           ),
           Expanded(
@@ -56,19 +64,41 @@ class SelectTvPackagePageState extends State<SelectTvPackagePage> {
                       itemBuilder: (context, index) {
                         final package = packages[index];
                         return Card(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           elevation: 1,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: ListTile(
                               leading: Icon(Icons.electrical_services),
-                              title: Text(package.name),
-                              subtitle: Text(package.service.serviceName),
+                              title: Text(
+                                package.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge?.color,
+                                ),
+                              ),
+                              subtitle: Text(
+                                package.service.serviceName,
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.color
+                                      ?.withOpacity(0.7),
+                                ),
+                              ),
                               trailing: Text(
                                 NumberFormat.currency(
                                   symbol: '₦',
                                   decimalDigits: 0,
                                 ).format(package.sellingPrice),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blueAccent,
+                                ),
                               ),
 
                               onTap: () {

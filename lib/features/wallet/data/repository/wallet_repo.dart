@@ -280,4 +280,26 @@ class WalletService {
       throw Exception('Error saving withdrawal account: $e');
     }
   }
+
+  Future<Map<String, dynamic>> getChargesConfig(String authToken) async {
+    try {
+      final response = await _dio.get(
+        _endpoints.chargesConfig,
+        options: Options(
+          validateStatus: (status) => true,
+          headers: {
+            'Authorization': "Bearer $authToken",
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
 }

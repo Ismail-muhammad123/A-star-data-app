@@ -20,18 +20,26 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: BackButton(
           color: Colors.white,
           onPressed:
               () => context.canPop() ? context.pop() : context.go("/home"),
         ),
-        title: Text("Purchase History", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.lightBlue,
-        surfaceTintColor: Colors.lightBlue,
+        title: const Text(
+          "Purchase History",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: Colors.white),
+            icon: const Icon(Icons.refresh, color: Colors.white),
             tooltip: "Clear Filters & refresh",
             onPressed: () {
               setState(() {
@@ -44,8 +52,21 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.only(
+              bottom: 20,
+              left: 16,
+              right: 16,
+              top: 8,
+            ),
+            decoration: BoxDecoration(
+              color: Theme.of(context).appBarTheme.backgroundColor,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
             child: Row(
               children: [
                 // Date filter
@@ -56,6 +77,22 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                         context: context,
                         firstDate: DateTime(2024),
                         lastDate: DateTime.now(),
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: ColorScheme.light(
+                                primary: Theme.of(context).primaryColor,
+                                onPrimary: Colors.white,
+                                onSurface:
+                                    Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color ??
+                                    Colors.black87,
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
                       );
                       if (picked != null) {
                         setState(() {
@@ -64,47 +101,111 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                       }
                     },
                     child: Container(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                         vertical: 12,
                         horizontal: 16,
                       ),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          if (Theme.of(context).brightness == Brightness.light)
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                        ],
                       ),
-                      child: Text(
-                        _selectedDate == null
-                            ? "Select Date"
-                            : _selectedDate!.toLocal().toString().split(' ')[0],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _selectedDate == null
+                                ? "Select Date"
+                                : _selectedDate!.toLocal().toString().split(
+                                  ' ',
+                                )[0],
+                            style: TextStyle(
+                              color:
+                                  _selectedDate == null
+                                      ? Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.color
+                                          ?.withOpacity(0.6)
+                                      : Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge?.color,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: Colors.blueAccent,
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 // Transaction type filter
                 Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedType,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 16,
-                      ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        if (Theme.of(context).brightness == Brightness.light)
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                      ],
                     ),
-                    items: [
-                      DropdownMenuItem(value: null, child: Text("All Types")),
-                      DropdownMenuItem(
-                        value: "airtime",
-                        child: Text("Airtime"),
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedType,
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.blueAccent,
                       ),
-                      DropdownMenuItem(value: "data", child: Text("Data")),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedType = value;
-                      });
-                    },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                      ),
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: null, child: Text("All Types")),
+                        DropdownMenuItem(
+                          value: "airtime",
+                          child: Text("Airtime"),
+                        ),
+                        DropdownMenuItem(value: "data", child: Text("Data")),
+                        DropdownMenuItem(
+                          value: "electricity",
+                          child: Text("Electricity"),
+                        ),
+                        DropdownMenuItem(value: "tv", child: Text("TV")),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedType = value;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -117,14 +218,48 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
               ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.blueAccent),
+                  );
                 }
                 if (!snapshot.hasData || snapshot.hasError) {
-                  return Center(child: Text("Error loading transactions"));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red[300],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "Error loading transactions",
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 var transactions = snapshot.data!;
                 if (transactions.isEmpty) {
-                  return Center(child: Text("No transactions found"));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.history, size: 64, color: Colors.grey[300]),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "No transactions found",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 transactions.sort((a, b) => b.time.compareTo(a.time));
                 // Apply filters
@@ -142,11 +277,39 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                         return tx.purchaseType == _selectedType;
                       }).toList();
                 }
+
+                if (transactions.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.filter_list_off,
+                          size: 64,
+                          color: Colors.grey[300],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "No matches for current filters",
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
                 return ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   itemCount: transactions.length,
                   itemBuilder:
-                      (context, index) => OrderTransactionTile(
-                        transaction: transactions[index],
+                      (context, index) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: OrderTransactionTile(
+                          transaction: transactions[index],
+                        ),
                       ),
                 );
               },

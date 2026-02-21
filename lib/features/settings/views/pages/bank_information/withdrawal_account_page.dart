@@ -24,7 +24,6 @@ class _WithdrawalAccountPageState extends State<WithdrawalAccountPage> {
   bool _isLoading = false;
   bool _isResolving = false;
   bool _isSaving = false;
-  bool _isEditing = false;
   WithdrawalAccount? _currentAccount;
 
   @override
@@ -61,7 +60,6 @@ class _WithdrawalAccountPageState extends State<WithdrawalAccountPage> {
             _bankNameController.text = account.bankName;
             _accountNameController.text = account.accountName;
             _bankCode = account.bankCode;
-            _isEditing = false;
           });
         }
       }
@@ -144,10 +142,10 @@ class _WithdrawalAccountPageState extends State<WithdrawalAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isReadOnly = _currentAccount != null && !_isEditing;
+    final bool isReadOnly = _isLoading || _isResolving || _isSaving;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "Withdrawal Account",
@@ -157,33 +155,11 @@ class _WithdrawalAccountPageState extends State<WithdrawalAccountPage> {
             fontSize: 18,
           ),
         ),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         leading: BackButton(
           color: Colors.white,
           onPressed: () => context.pop(),
         ),
-        actions: [
-          if (_currentAccount != null)
-            IconButton(
-              icon: Icon(
-                _isEditing ? Icons.cancel_outlined : Icons.edit_outlined,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isEditing = !_isEditing;
-                  if (!_isEditing) {
-                    // Reset to current
-                    _accountNumberController.text =
-                        _currentAccount!.accountNumber;
-                    _bankNameController.text = _currentAccount!.bankName;
-                    _accountNameController.text = _currentAccount!.accountName;
-                    _bankCode = _currentAccount!.bankCode;
-                  }
-                });
-              },
-            ),
-        ],
       ),
       body:
           _isLoading
@@ -195,18 +171,23 @@ class _WithdrawalAccountPageState extends State<WithdrawalAccountPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         "Linked Bank Account",
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         "This account will be used for all your withdrawals.",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                          fontSize: 14,
+                        ),
                       ),
                       const SizedBox(height: 32),
 
@@ -293,7 +274,9 @@ class _WithdrawalAccountPageState extends State<WithdrawalAccountPage> {
                       TextFormField(
                         controller: _accountNameController,
                         enabled: false,
-                        style: const TextStyle(color: Colors.black87),
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
                         decoration: _inputDecoration(
                           hint: "Account holder name",
                           icon: Icons.person,
@@ -317,42 +300,41 @@ class _WithdrawalAccountPageState extends State<WithdrawalAccountPage> {
 
                       const SizedBox(height: 48),
 
-                      if (!isReadOnly)
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed:
-                                _isSaving || _isResolving ? null : _saveAccount,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blueAccent,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed:
+                              _isSaving || _isResolving ? null : _saveAccount,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            child:
-                                _isSaving
-                                    ? const SizedBox(
-                                      height: 24,
-                                      width: 24,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                    : Text(
-                                      _currentAccount == null
-                                          ? "Link Account"
-                                          : "Update Account",
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                            elevation: 0,
                           ),
+                          child:
+                              _isSaving
+                                  ? const SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                  : Text(
+                                    _currentAccount == null
+                                        ? "Link Account"
+                                        : "Update Account",
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -363,10 +345,10 @@ class _WithdrawalAccountPageState extends State<WithdrawalAccountPage> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: Colors.black54,
+        color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.6),
       ),
     );
   }
@@ -383,19 +365,19 @@ class _WithdrawalAccountPageState extends State<WithdrawalAccountPage> {
       prefixIcon:
           prefixWidget ?? Icon(icon, color: Colors.blueAccent, size: 20),
       filled: true,
-      fillColor: fillColor ?? Colors.white,
+      fillColor: Theme.of(context).cardColor,
       counterText: counterText,
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade300),
+        borderSide: BorderSide.none,
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade300),
+        borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.grey.shade300),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

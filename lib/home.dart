@@ -21,10 +21,73 @@ class HomePageState extends State<HomePage> {
   List<Widget> pages = [OrdersTab(), WalletPage(), SettingsPage()];
 
   _bootstrap() async {
+    final authProvider = context.read<AuthProvider>();
     await Provider.of<ProfileProvider>(
       context,
       listen: false,
-    ).loadProfile(context.read<AuthProvider>().authToken ?? '');
+    ).loadProfile(authProvider.authToken ?? '');
+
+    if (await authProvider.isNewUser) {
+      if (!mounted) return;
+      _showWelcomeDialog();
+    }
+  }
+
+  void _showWelcomeDialog() {
+    final authProvider = context.read<AuthProvider>();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Row(
+              children: [
+                Icon(Icons.celebration, color: Colors.orange),
+                SizedBox(width: 10),
+                Text(
+                  "Welcome to A-Star!",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            content: const Text(
+              "We're excited to have you! To get your permanent virtual account details for easy funding, please complete your profile information.",
+              style: TextStyle(fontSize: 16),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  await authProvider.markNewUser(false);
+                  if (context.mounted) Navigator.pop(context);
+                },
+                child: const Text(
+                  "Later",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await authProvider.markNewUser(false);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    context.push("/profile/update");
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text("Complete Profile"),
+              ),
+            ],
+          ),
+    );
   }
 
   @override

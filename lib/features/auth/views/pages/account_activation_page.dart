@@ -47,6 +47,7 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
 
       final authProvider = context.read<AuthProvider>();
       if (authProvider.isAuthenticated && authProvider.authToken != null) {
+        await authProvider.markNewUser(true);
         await context.read<ProfileProvider>().loadProfile(
           authProvider.authToken!,
         );

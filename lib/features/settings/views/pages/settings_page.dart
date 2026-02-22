@@ -6,6 +6,7 @@ import 'package:app/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:app/core/themes/theme_provider.dart';
+import 'package:app/core/providers/balance_visibility_provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -21,16 +22,15 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   Future<void> openWhatsAppChat(
     BuildContext context,
-    String phoneNumber,
-  ) async {
-    final Uri whatsappUrl = Uri.parse("https://wa.me/$phoneNumber");
+    String phoneNumber, {
+    String message = "Hello, I need help with the A-Star Data app.",
+  }) async {
+    final Uri whatsappUrl = Uri.parse(
+      "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}",
+    );
 
     try {
-      if (await canLaunchUrl(whatsappUrl)) {
-        await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-      } else {
-        _showNumberDialog(context, phoneNumber);
-      }
+      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
     } catch (e) {
       _showNumberDialog(context, phoneNumber);
     }
@@ -460,6 +460,23 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     leadingIcon: Icons.brightness_6_outlined,
                     onTap: () => _showThemeDialog(context),
+                  ),
+                  Consumer<BalanceVisibilityProvider>(
+                    builder: (context, balanceVisibility, child) {
+                      return SettingsTile(
+                        title: "Hide Balance",
+                        subTitle: "Hide wallet balance on all pages",
+                        leadingIcon: Icons.visibility_off_outlined,
+                        showChevron: false,
+                        trailing: Switch.adaptive(
+                          value: balanceVisibility.isBalanceHidden,
+                          activeColor: Colors.blueAccent,
+                          onChanged: (value) async {
+                            await balanceVisibility.toggleBalanceVisibility();
+                          },
+                        ),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 24),

@@ -1,10 +1,13 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
+import 'package:app/core/widgets/balance_summary.dart';
+import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class AirtimePurchaseFormPage extends StatefulWidget {
   const AirtimePurchaseFormPage({super.key});
@@ -23,6 +26,9 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
   List<AirtimeNetwork> _networks = [];
 
   _purchaseAirtime() async {
+    final balance = context.read<WalletProvider>().balance;
+    final enteredAmount = double.tryParse(_amountController.text) ?? 0.0;
+
     if (_selectedNetworkId == null) {
       ScaffoldMessenger.of(
         context,
@@ -37,6 +43,19 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
       );
       return;
     }
+
+    if (enteredAmount > balance) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Insufficient balance. Your balance is ₦${NumberFormat("#,##0.00").format(balance)}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     if (_phoneController.text.isEmpty || _phoneController.text.length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter a valid phone number')),
@@ -51,9 +70,15 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
       await OrderServices().purchaseAirtime(
         authToken: context.read<AuthProvider>().authToken ?? "",
         serviceId: _selectedNetworkId!,
-        amount: double.parse(_amountController.text),
+        amount: enteredAmount,
         phoneNumber: _phoneController.text,
       );
+
+      // Update balance locally after success
+      if (mounted) {
+        context.read<WalletProvider>().updateBalance(balance - enteredAmount);
+      }
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Airtime purchase successful')));
@@ -136,6 +161,8 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const BalanceSummary(),
+                  const SizedBox(height: 24),
                   Text(
                     "Select Network",
                     style: TextStyle(

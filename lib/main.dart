@@ -5,6 +5,8 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/settings/providers/profile_provider.dart';
 import 'package:app/core/themes/theme_provider.dart';
 import 'package:app/core/themes/app_theme.dart';
+import 'package:app/core/providers/balance_visibility_provider.dart';
+import 'package:app/features/wallet/providers/wallet_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,12 +16,13 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => BalanceVisibilityProvider()),
+        ChangeNotifierProvider(create: (_) => WalletProvider()),
       ],
       child: const AStarDataApp(),
     ),
   );
 }
-
 
 class AStarDataApp extends StatelessWidget {
   const AStarDataApp({super.key});

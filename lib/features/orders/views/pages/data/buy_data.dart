@@ -2,9 +2,12 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
 import 'package:app/features/orders/views/pages/data/select_bundle_page.dart';
+import 'package:app/core/widgets/balance_summary.dart';
+import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class DataPurchaseFormPage extends StatefulWidget {
@@ -24,6 +27,9 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
   List<DataBundle> dataPlans = [];
 
   _purchaseData() async {
+    final balance = context.read<WalletProvider>().balance;
+    final bundleAmount = selectedBundle?.sellingPrice ?? 0.0;
+
     if (_selectedNetworkId == null) {
       ScaffoldMessenger.of(
         context,
@@ -34,6 +40,18 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Please select a Data Plan')));
+      return;
+    }
+
+    if (bundleAmount > balance) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Insufficient balance. This plan costs ₦${NumberFormat("#,##0.00").format(bundleAmount)}, but your balance is ₦${NumberFormat("#,##0.00").format(balance)}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -53,6 +71,12 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
         bundleId: selectedBundle?.id ?? 0,
         phoneNumber: _phoneController.text,
       );
+
+      // Update balance locally after success
+      if (mounted) {
+        context.read<WalletProvider>().updateBalance(balance - bundleAmount);
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Data purchase successful'),
@@ -137,6 +161,8 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const BalanceSummary(),
+                  const SizedBox(height: 24),
                   Text(
                     "Select Network",
                     style: TextStyle(

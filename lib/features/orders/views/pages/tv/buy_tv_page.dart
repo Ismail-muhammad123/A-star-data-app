@@ -2,10 +2,13 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
 import 'package:app/utils.dart';
+import 'package:app/core/widgets/balance_summary.dart';
+import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class PurchaseTVSubscriptionFormPage extends StatefulWidget {
@@ -86,6 +89,8 @@ class _PurchaseTVSubscriptionFormPageState
   }
 
   _purchase() async {
+    final balance = context.read<WalletProvider>().balance;
+
     if (!_isVerified) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please verify the smart card first')),
@@ -112,6 +117,18 @@ class _PurchaseTVSubscriptionFormPageState
       return;
     }
 
+    if (amount > balance) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Insufficient balance. Your balance is ₦${NumberFormat("#,##0.00").format(balance)}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -125,6 +142,12 @@ class _PurchaseTVSubscriptionFormPageState
         subscriptionType: _subscriptionType!,
         amount: amount,
       );
+
+      // Update balance locally after success
+      if (mounted) {
+        context.read<WalletProvider>().updateBalance(balance - amount);
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Cable TV subscription purchase successful'),
@@ -196,6 +219,8 @@ class _PurchaseTVSubscriptionFormPageState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const BalanceSummary(),
+                  const SizedBox(height: 24),
                   // Provider Info Card
                   Container(
                     width: double.infinity,

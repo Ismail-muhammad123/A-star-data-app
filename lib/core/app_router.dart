@@ -29,18 +29,22 @@ import 'package:app/features/settings/views/pages/bank_information/withdrawal_ac
 import 'package:app/features/wallet/views/pages/withdrawal_page.dart';
 import 'package:app/home.dart';
 
+import 'package:app/features/auth/views/pages/onboarding_page.dart';
+import 'package:app/features/auth/views/pages/splash_screen.dart';
+
 final GoRouter router = GoRouter(
   redirect: (context, state) {
     // List of public routes
     final publicRoutes = [
       '/',
+      '/splash',
+      '/onboarding',
       '/login',
       '/register',
       '/forgot-pin',
       '/activate-account',
       '/account-not-activated',
       '/confirm-pin-reset',
-      // '/account-activation-failure',
     ];
     // Allow product details as public
     // final isProductDetails =
@@ -63,11 +67,16 @@ final GoRouter router = GoRouter(
     // Otherwise, allow access
     return null;
   },
-  initialLocation: '/',
+  initialLocation: '/splash',
   errorBuilder: (context, state) {
     return Scaffold(body: Center(child: Text('Error: ${state.error}')));
   },
   routes: [
+    GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const OnboardingPage(),
+    ),
     GoRoute(path: '/', builder: (context, state) => const AuthorizationPage()),
     // ===================== Auth Routes =====================
     GoRoute(path: '/login', builder: (context, state) => const LoginPage()),

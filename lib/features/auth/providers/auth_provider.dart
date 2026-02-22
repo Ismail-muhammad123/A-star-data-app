@@ -41,6 +41,16 @@ class AuthProvider extends ChangeNotifier {
     await prefs.setBool('is_first_time', false);
   }
 
+  Future<bool> get hasLoggedInBefore async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('has_logged_in_before') ?? false;
+  }
+
+  Future<void> _markLoggedInBefore() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_logged_in_before', true);
+  }
+
   Future<void> checkAuth() async {
     // refresh token first
     await refreshToken();
@@ -130,6 +140,7 @@ class AuthProvider extends ChangeNotifier {
 
         authToken = token;
         _isAuthenticated = true;
+        await _markLoggedInBefore();
         notifyListeners();
         return {"success": true, "message": ""};
       } else {

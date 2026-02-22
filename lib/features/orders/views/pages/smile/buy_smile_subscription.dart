@@ -1,6 +1,8 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
+import 'package:app/core/widgets/balance_summary.dart';
+import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -59,6 +61,9 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
   }
 
   _purchasePlan() async {
+    final balance = context.read<WalletProvider>().balance;
+    final planAmount = _selectedSmileVoicePlan?.sellingPrice ?? 0.0;
+
     if (_selectedSmileVoicePlan == null) {
       ScaffoldMessenger.of(
         context,
@@ -81,6 +86,18 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
       return;
     }
 
+    if (planAmount > balance) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Insufficient balance. This plan costs ₦${NumberFormat("#,##0.00").format(planAmount)}, but your balance is ₦${NumberFormat("#,##0.00").format(balance)}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -90,6 +107,12 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
         bundleId: _selectedSmileVoicePlan?.id ?? 0,
         phoneNumber: _phoneController.text.trim(),
       );
+
+      // Update balance locally after success
+      if (mounted) {
+        context.read<WalletProvider>().updateBalance(balance - planAmount);
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Smile Plan purchase was successful'),
@@ -152,6 +175,8 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const BalanceSummary(),
+                  const SizedBox(height: 24),
                   // Smile Banner
                   Container(
                     width: double.infinity,

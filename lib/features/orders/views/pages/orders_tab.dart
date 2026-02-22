@@ -1,11 +1,13 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
-import 'package:app/features/wallet/data/repository/wallet_repo.dart';
+import 'package:app/core/providers/balance_visibility_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+import 'package:app/features/wallet/providers/wallet_provider.dart';
 
 class OrdersTab extends StatefulWidget {
   const OrdersTab({super.key});
@@ -15,12 +17,32 @@ class OrdersTab extends StatefulWidget {
 }
 
 class _OrdersTabState extends State<OrdersTab> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.authToken != null) {
+        context.read<WalletProvider>().fetchBalance(authProvider.authToken!);
+      }
+    });
+  }
+
   Future<void> _refresh() async {
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.authToken != null) {
+      await context.read<WalletProvider>().fetchBalance(
+        authProvider.authToken!,
+      );
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final balanceVisibility = context.watch<BalanceVisibilityProvider>();
+    final walletProvider = context.watch<WalletProvider>();
+
     return Scaffold(
       backgroundColor:
           Theme.of(context).scaffoldBackgroundColor, // sleek background
@@ -37,10 +59,7 @@ class _OrdersTabState extends State<OrdersTab> {
         elevation: 0,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         actions: [
-          IconButton(
-            onPressed: () => setState(() {}),
-            icon: const Icon(Icons.refresh),
-          ),
+          IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
       ),
       body: RefreshIndicator(
@@ -104,6 +123,18 @@ class _OrdersTabState extends State<OrdersTab> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap:
+                              () => balanceVisibility.toggleBalanceVisibility(),
+                          child: Icon(
+                            balanceVisibility.isBalanceHidden
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: Colors.white.withOpacity(0.7),
+                            size: 18,
+                          ),
+                        ),
                         const Spacer(),
                         InkWell(
                           onTap:
@@ -121,47 +152,30 @@ class _OrdersTabState extends State<OrdersTab> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    FutureBuilder<String>(
-                      future: WalletService().getBalance(
-                        context.read<AuthProvider>().authToken ?? "",
+                    if (walletProvider.isLoading && walletProvider.balance == 0)
+                      const SizedBox(
+                        height: 38,
+                        width: 38,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    else
+                      Text(
+                        balanceVisibility.isBalanceHidden
+                            ? "****"
+                            : NumberFormat.currency(
+                              locale: 'en_NG',
+                              symbol: '₦',
+                            ).format(walletProvider.balance),
+                        style: const TextStyle(
+                          fontSize: 32,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
                       ),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const SizedBox(
-                            height: 38,
-                            width: 38,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          );
-                        }
-                        if (!snapshot.hasData || snapshot.hasError) {
-                          return const Text(
-                            "Error",
-                            style: TextStyle(
-                              fontSize: 28,
-                              color: Colors.redAccent,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          );
-                        }
-                        var balance = double.tryParse(snapshot.data!);
-                        return Text(
-                          NumberFormat.currency(
-                            locale: 'en_NG',
-                            symbol: '₦',
-                          ).format(balance ?? 0),
-                          style: const TextStyle(
-                            fontSize: 32,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                          ),
-                        );
-                      },
-                    ),
                   ],
                 ),
               ),

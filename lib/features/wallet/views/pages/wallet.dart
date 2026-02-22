@@ -1,9 +1,10 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
-// import 'package:app/features/profile/providers/profile_provider.dart';
 import 'package:app/features/wallet/data/models/wallet.dart';
 import 'package:app/features/wallet/data/repository/wallet_repo.dart';
 import 'package:app/features/wallet/views/widgets/transaction_history_list.dart';
 import 'package:app/features/wallet/views/widgets/transfer_deposit_account_info_card.dart';
+import 'package:app/core/providers/balance_visibility_provider.dart';
+import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -17,9 +18,22 @@ class WalletPage extends StatefulWidget {
 }
 
 class _WalletPageState extends State<WalletPage> {
-  bool showBalance = true;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.authToken != null) {
+        context.read<WalletProvider>().fetchBalance(authProvider.authToken!);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final balanceVisibility = context.watch<BalanceVisibilityProvider>();
+    final walletProvider = context.watch<WalletProvider>();
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -36,7 +50,12 @@ class _WalletPageState extends State<WalletPage> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          setState(() {});
+          final authProvider = context.read<AuthProvider>();
+          if (authProvider.authToken != null) {
+            await context.read<WalletProvider>().fetchBalance(
+              authProvider.authToken!,
+            );
+          }
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -72,52 +91,57 @@ class _WalletPageState extends State<WalletPage> {
                 ),
                 child: Column(
                   children: [
-                    Text(
-                      "Available Balance",
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Available Balance",
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap:
+                              () => balanceVisibility.toggleBalanceVisibility(),
+                          child: Icon(
+                            balanceVisibility.isBalanceHidden
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: Colors.white.withOpacity(0.7),
+                            size: 18,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
-                    FutureBuilder<String>(
-                      future: WalletService().getBalance(
-                        context.read<AuthProvider>().authToken ?? "",
-                      ),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const SizedBox(
-                            height: 40,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          );
-                        }
-
-                        double balance = 0;
-                        if (snapshot.hasData) {
-                          balance = double.tryParse(snapshot.data!) ?? 0;
-                        }
-
-                        return Text(
-                          NumberFormat.currency(
-                            locale: 'en_NG',
-                            symbol: '₦',
-                          ).format(balance),
-                          style: const TextStyle(
-                            fontSize: 36,
+                    if (walletProvider.isLoading && walletProvider.balance == 0)
+                      const SizedBox(
+                        height: 40,
+                        child: Center(
+                          child: CircularProgressIndicator(
                             color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
+                            strokeWidth: 2,
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      )
+                    else
+                      Text(
+                        balanceVisibility.isBalanceHidden
+                            ? "****"
+                            : NumberFormat.currency(
+                              locale: 'en_NG',
+                              symbol: '₦',
+                            ).format(walletProvider.balance),
+                        style: const TextStyle(
+                          fontSize: 36,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
                     const SizedBox(height: 24),
                     Row(
                       children: [

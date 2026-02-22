@@ -41,6 +41,16 @@ class AuthProvider extends ChangeNotifier {
     await prefs.setBool('is_first_time', false);
   }
 
+  Future<bool> get hasSeenOnboarding async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('has_seen_onboarding') ?? false;
+  }
+
+  Future<void> markOnboardingSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_seen_onboarding', true);
+  }
+
   Future<bool> get hasLoggedInBefore async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('has_logged_in_before') ?? false;

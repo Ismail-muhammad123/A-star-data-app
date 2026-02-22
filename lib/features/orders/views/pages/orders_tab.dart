@@ -48,7 +48,7 @@ class _OrdersTabState extends State<OrdersTab> {
           Theme.of(context).scaffoldBackgroundColor, // sleek background
       appBar: AppBar(
         title: const Text(
-          "A-Star Hub",
+          "A-Star Data",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -123,28 +123,18 @@ class _OrdersTabState extends State<OrdersTab> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap:
-                              () => balanceVisibility.toggleBalanceVisibility(),
-                          child: Icon(
-                            balanceVisibility.isBalanceHidden
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                            color: Colors.white.withOpacity(0.7),
-                            size: 18,
-                          ),
-                        ),
+
                         const Spacer(),
                         InkWell(
                           onTap:
                               () => context
                                   .push("/wallet")
                                   .then((_) => setState(() {})),
+
                           child: const Text(
                             "Go to Wallet",
                             style: TextStyle(
-                              color: Colors.lightBlueAccent,
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -152,30 +142,48 @@ class _OrdersTabState extends State<OrdersTab> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    if (walletProvider.isLoading && walletProvider.balance == 0)
-                      const SizedBox(
-                        height: 38,
-                        width: 38,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (walletProvider.isLoading &&
+                            walletProvider.balance == 0)
+                          const SizedBox(
+                            height: 38,
+                            width: 38,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        else
+                          Text(
+                            balanceVisibility.isBalanceHidden
+                                ? "****"
+                                : NumberFormat.currency(
+                                  locale: 'en_NG',
+                                  symbol: '₦',
+                                ).format(walletProvider.balance),
+                            style: const TextStyle(
+                              fontSize: 32,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap:
+                              () => balanceVisibility.toggleBalanceVisibility(),
+                          child: Icon(
+                            balanceVisibility.isBalanceHidden
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: Colors.white.withOpacity(0.8),
+                            size: 24,
+                          ),
                         ),
-                      )
-                    else
-                      Text(
-                        balanceVisibility.isBalanceHidden
-                            ? "****"
-                            : NumberFormat.currency(
-                              locale: 'en_NG',
-                              symbol: '₦',
-                            ).format(walletProvider.balance),
-                        style: const TextStyle(
-                          fontSize: 32,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
+                      ],
+                    ),
                   ],
                 ),
               ),

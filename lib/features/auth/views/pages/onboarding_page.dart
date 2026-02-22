@@ -75,8 +75,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (_currentPage == _onboardingData.length - 1) {
-                        await context.read<AuthProvider>().markFirstTimeSeen();
-                        if (mounted) context.go('/register');
+                        await context.read<AuthProvider>().markOnboardingSeen();
+                        if (mounted) context.go('/');
                       } else {
                         _pageController.nextPage(
                           duration: const Duration(milliseconds: 300),
@@ -106,8 +106,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 if (_currentPage < _onboardingData.length - 1)
                   TextButton(
                     onPressed: () async {
-                      await context.read<AuthProvider>().markFirstTimeSeen();
-                      if (mounted) context.go('/register');
+                      await context.read<AuthProvider>().markOnboardingSeen();
+                      if (mounted) context.go('/');
                     },
                     child: const Text(
                       "Skip",

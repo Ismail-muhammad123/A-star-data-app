@@ -598,7 +598,7 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                   const SizedBox(height: 24),
 
                   Text(
-                    "Phone Number",
+                    "Account ID",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -622,7 +622,7 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: "Enter phone number",
+                      hintText: "Enter Account ID ",
                       prefixIcon: const Icon(
                         Icons.phone_android,
                         color: Colors.blueAccent,

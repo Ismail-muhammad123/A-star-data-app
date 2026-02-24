@@ -210,7 +210,7 @@ class _OrdersTabState extends State<OrdersTab> {
                 children: [
                   _buildServiceCard(
                     title: "Buy Airtime",
-                    icon: Icons.phone_android,
+                    icon: Icons.call,
                     color: Colors.blueAccent,
                     onTap:
                         () => context
@@ -248,9 +248,19 @@ class _OrdersTabState extends State<OrdersTab> {
                     title: "Buy Smile",
                     icon: Icons.call,
                     color: Colors.purple,
+                    image: "assets/images/smile.png",
                     onTap:
                         () => context
                             .push("/orders/buy-smile")
+                            .then((_) => setState(() {})),
+                  ),
+                  _buildServiceCard(
+                    title: "History",
+                    icon: Icons.history,
+                    color: Colors.blueAccent,
+                    onTap:
+                        () => context
+                            .push("/orders/history")
                             .then((_) => setState(() {})),
                   ),
                 ],
@@ -261,7 +271,7 @@ class _OrdersTabState extends State<OrdersTab> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Recent Transactions",
+                    "Recent Purchases",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -356,6 +366,7 @@ class _OrdersTabState extends State<OrdersTab> {
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
+    String? image,
   }) {
     return InkWell(
       onTap: onTap,
@@ -377,12 +388,15 @@ class _OrdersTabState extends State<OrdersTab> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(image != null ? 14 : 16),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 24, color: color),
+              child:
+                  image != null
+                      ? Image.asset(image, width: 30, height: 30)
+                      : Icon(icon, size: 24, color: color),
             ),
             const SizedBox(height: 16),
             Text(

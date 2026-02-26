@@ -2,6 +2,7 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:provider/provider.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -23,15 +24,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _sendSms = true;
   bool _sendEmail = true;
-
-  final Map<String, String> countryPhoneCodes = {
-    "Nigeria": "+234",
-    "Ghana": "+233",
-    "South Africa": "+27",
-    "Kenya": "+254",
-    "United Kingdom": "+44",
-    "United States": "+1",
-  };
 
   void _handleSignUp() async {
     if (!_formKey.currentState!.validate()) return;
@@ -194,58 +186,37 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           const SizedBox(height: 32),
 
-                          // Country Code
-                          _buildLabel("Country", theme),
-                          const SizedBox(height: 8),
-                          DropdownButtonFormField<String>(
-                            value: _countryCode,
-                            dropdownColor: theme.cardColor,
-                            style: TextStyle(
-                              color: theme.textTheme.bodyLarge?.color,
-                            ),
-                            decoration: _inputDecoration(
-                              theme: theme,
-                              hint: "Select Country",
-                              icon: Icons.public,
-                            ),
-                            items:
-                                countryPhoneCodes.entries.map((entry) {
-                                  return DropdownMenuItem(
-                                    value: entry.value,
-                                    child: Text(
-                                      "${entry.key} (${entry.value})",
-                                    ),
-                                  );
-                                }).toList(),
-                            onChanged:
-                                _isLoading
-                                    ? null
-                                    : (v) => setState(() => _countryCode = v!),
-                          ),
-                          const SizedBox(height: 20),
-
-                          // Phone Number
+                          // Phone Number (with Country Picker)
                           _buildLabel("Phone Number", theme),
                           const SizedBox(height: 8),
-                          TextFormField(
+                          IntlPhoneField(
                             controller: _phoneController,
+                            initialCountryCode: 'NG',
                             keyboardType: TextInputType.phone,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
                             style: TextStyle(
                               color: theme.textTheme.bodyLarge?.color,
                             ),
                             decoration: _inputDecoration(
                               theme: theme,
-                              hint: "08012345678",
-                              icon: Icons.phone_android,
+                              hint: "801 234 5678",
                             ),
-                            validator:
-                                (v) =>
-                                    (v == null || v.isEmpty)
-                                        ? "Required"
-                                        : null,
+                            languageCode: "en",
+                            onChanged: (phone) {
+                              setState(() {
+                                _countryCode = phone.countryCode;
+                              });
+                            },
+                            onCountryChanged: (country) {
+                              setState(() {
+                                _countryCode = "+${country.dialCode}";
+                              });
+                            },
+                            validator: (v) {
+                              if (v == null || v.number.isEmpty) {
+                                return "Required";
+                              }
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 20),
 
@@ -529,13 +500,16 @@ class _SignUpPageState extends State<SignUpPage> {
   InputDecoration _inputDecoration({
     required ThemeData theme,
     required String hint,
-    required IconData icon,
+    IconData? icon,
     Widget? suffixIcon,
     String? counterText,
   }) {
     return InputDecoration(
       hintText: hint,
-      prefixIcon: Icon(icon, color: theme.colorScheme.primary, size: 20),
+      prefixIcon:
+          icon != null
+              ? Icon(icon, color: theme.colorScheme.primary, size: 20)
+              : null,
       suffixIcon: suffixIcon,
       counterText: counterText,
       filled: true,

@@ -133,7 +133,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 validator:
                     (value) =>
                         (value?.length ?? 0) < 4
-                            ? "Enter 4-digit current PIN"
+                            ? "Enter 6-digit current PIN"
                             : null,
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyLarge?.color,
@@ -174,7 +174,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 24),
 
               Text(
-                "New 4-Digit PIN",
+                "New 6-Digit PIN",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -195,7 +195,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 validator:
                     (value) =>
                         (value?.length ?? 0) < 4
-                            ? "Enter 4-digit new PIN"
+                            ? "Enter 6-digit new PIN"
                             : null,
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyLarge?.color,

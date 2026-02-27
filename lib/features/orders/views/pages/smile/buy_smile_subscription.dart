@@ -21,13 +21,13 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
 
   bool _isLoading = false;
   SmilePackage? _selectedSmileVoicePlan;
-  String _packageType = 'data'; // 'data' or 'smilevoice'
+  String _packageType = 'smilevoice'; // 'data' or 'smilevoice'
   bool _isVerified = false;
   String? _customerName;
 
   _verifyNumber() async {
     if (_phoneController.text.trim().isEmpty ||
-        _phoneController.text.trim().length < 10) {
+        _phoneController.text.trim().length < 11) {
       return;
     }
     if (_selectedSmileVoicePlan == null) return;
@@ -72,7 +72,7 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
     }
 
     if (_phoneController.text.trim().isEmpty ||
-        _phoneController.text.trim().length < 10) {
+        _phoneController.text.trim().length < 11) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter a valid phone number')),
       );
@@ -212,16 +212,16 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                     child: SegmentedButton<String>(
                       segments: const [
                         ButtonSegment(
-                          value: 'data',
+                          value: 'smilevoice',
                           label: Text(
-                            'Smile Data',
+                            'Smile Voice',
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
                         ButtonSegment(
-                          value: 'smilevoice',
+                          value: 'data',
                           label: Text(
-                            'Smile Voice',
+                            'Smile Data',
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
@@ -598,7 +598,7 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                   const SizedBox(height: 24),
 
                   Text(
-                    "Account ID",
+                    "Phone Number / Account ID",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -616,13 +616,13 @@ class _SmileVoicePurchasePageState extends State<SmileVoicePurchasePage> {
                           _customerName = null;
                         });
                       }
-                      if (value.length >= 10 &&
+                      if (value.length >= 11 &&
                           _selectedSmileVoicePlan != null) {
                         _verifyNumber();
                       }
                     },
                     decoration: InputDecoration(
-                      hintText: "Enter Account ID ",
+                      hintText: "Enter Phone Number / Account ID ",
                       prefixIcon: const Icon(
                         Icons.phone_android,
                         color: Colors.blueAccent,

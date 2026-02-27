@@ -211,6 +211,10 @@ class OrderServices {
     required String customerId,
     String? meterType,
   }) async {
+    if (customerId.startsWith("0") && customerId.length > 10) {
+      customerId = customerId.substring(1, customerId.length);
+      customerId = "234$customerId";
+    }
     var response = await _dio.post(
       _endpoints.verifyCustomer,
       data: {

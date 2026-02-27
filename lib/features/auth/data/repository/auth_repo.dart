@@ -121,6 +121,9 @@ class AuthService {
     String newPassword,
     String phoneNumber,
   ) async {
+    if (phoneNumber.startsWith("0") && phoneNumber.length > 10) {
+      phoneNumber = phoneNumber.substring(1, phoneNumber.length);
+    }
     final response = await _dio.post(
       endpoints.confirmPinReset,
       options: Options(
@@ -166,6 +169,9 @@ class AuthService {
   }
 
   Future<void> activateAccount(String phoneNumber, String otp) async {
+    if (phoneNumber.startsWith("0") && phoneNumber.length > 10) {
+      phoneNumber = phoneNumber.substring(1, phoneNumber.length);
+    }
     final response = await _dio.post(
       endpoints.activateAccount,
       options: Options(

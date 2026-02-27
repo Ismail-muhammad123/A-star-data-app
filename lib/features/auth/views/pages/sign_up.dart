@@ -22,8 +22,8 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoading = false;
   bool _obscurePin = true;
 
-  bool _sendSms = true;
-  bool _sendEmail = true;
+  // bool _sendSms = true;
+  // bool _sendEmail = true;
 
   void _handleSignUp() async {
     if (!_formKey.currentState!.validate()) return;
@@ -38,23 +38,11 @@ class _SignUpPageState extends State<SignUpPage> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-      dynamic selectedChannel;
-      if (_sendSms && _sendEmail && _emailController.text.isNotEmpty) {
-        selectedChannel = null; // Backend handles both when null
-      } else if (_sendSms) {
-        selectedChannel = 'sms';
-      } else if (_sendEmail && _emailController.text.isNotEmpty) {
-        selectedChannel = 'email';
-      } else {
-        selectedChannel = 'sms'; // Fallback
-      }
-
       var res = await authProvider.register(
         phone,
         _pinController.text.trim(),
         countryCode: _countryCode,
         email: _emailController.text.trim(),
-        channel: selectedChannel,
       );
 
       if (res?['success'] == true) {
@@ -67,7 +55,7 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           ),
         );
-        context.go('/activate-account', extra: _phoneController.text);
+        context.go('/login', extra: _phoneController.text);
       } else {
         if (!mounted) return;
         _showError(res?['message'] ?? "Registration failed. Please try again.");
@@ -279,148 +267,6 @@ class _SignUpPageState extends State<SignUpPage> {
                             },
                           ),
                           const SizedBox(height: 24),
-
-                          // Verification Channel
-                          _buildLabel("Receive Verification Code Via:", theme),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: InkWell(
-                                  onTap:
-                                      () =>
-                                          setState(() => _sendSms = !_sendSms),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          _sendSms
-                                              ? theme.colorScheme.primary
-                                                  .withOpacity(0.1)
-                                              : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color:
-                                            _sendSms
-                                                ? theme.colorScheme.primary
-                                                : theme.dividerColor,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.sms_outlined,
-                                          size: 18,
-                                          color:
-                                              _sendSms
-                                                  ? theme.colorScheme.primary
-                                                  : theme
-                                                      .textTheme
-                                                      .bodySmall
-                                                      ?.color,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          "SMS",
-                                          style: TextStyle(
-                                            fontWeight:
-                                                _sendSms
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal,
-                                            color:
-                                                _sendSms
-                                                    ? theme.colorScheme.primary
-                                                    : theme
-                                                        .textTheme
-                                                        .bodySmall
-                                                        ?.color,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: InkWell(
-                                  onTap: () {
-                                    if (_emailController.text.isEmpty) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            "Please enter an email address first",
-                                          ),
-                                        ),
-                                      );
-                                      return;
-                                    }
-                                    setState(() => _sendEmail = !_sendEmail);
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 12,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          _sendEmail
-                                              ? theme.colorScheme.primary
-                                                  .withOpacity(0.1)
-                                              : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color:
-                                            _sendEmail
-                                                ? theme.colorScheme.primary
-                                                : theme.dividerColor,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.email_outlined,
-                                          size: 18,
-                                          color:
-                                              _sendEmail
-                                                  ? theme.colorScheme.primary
-                                                  : theme
-                                                      .textTheme
-                                                      .bodySmall
-                                                      ?.color,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          "Email",
-                                          style: TextStyle(
-                                            fontWeight:
-                                                _sendEmail
-                                                    ? FontWeight.bold
-                                                    : FontWeight.normal,
-                                            color:
-                                                _sendEmail
-                                                    ? theme.colorScheme.primary
-                                                    : theme
-                                                        .textTheme
-                                                        .bodySmall
-                                                        ?.color,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 40),
 
                           // Signup Button
                           SizedBox(

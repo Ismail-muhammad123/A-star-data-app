@@ -4,7 +4,7 @@ class UserProfile {
   final String? middleName;
   final String? email;
   final String phoneCountryCode;
-  final String? bvn;
+
   final int tier;
   final String phoneNumber;
   final DateTime createdAt;
@@ -24,7 +24,7 @@ class UserProfile {
     required this.createdAt,
     required this.phoneNumber,
     this.email,
-    this.bvn,
+
     this.tier = 1,
     this.isActive = false,
     this.phoneCountryCode = '+234',
@@ -39,7 +39,7 @@ class UserProfile {
       lastName: json['last_name'],
       middleName: json['middle_name'],
       email: json['email'],
-      bvn: json['bvn'],
+
       tier: json['tier'] ?? 1,
       phoneNumber: json['phone_number'],
       phoneCountryCode: json['phone_country_code'] ?? '+234',
@@ -58,7 +58,7 @@ class UserProfile {
       'middle_name': middleName,
       'email': email,
       'phone_number': phoneNumber,
-      'bvn': bvn,
+
       'tier': tier,
       'phone_country_code': phoneCountryCode,
       'is_active': isActive,

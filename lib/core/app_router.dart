@@ -10,7 +10,7 @@ import 'package:app/features/orders/views/pages/history/order_history.dart';
 import 'package:app/features/orders/views/pages/tv/buy_tv_page.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_pachage.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_service.dart';
-import 'package:app/features/settings/views/pages/tier/upgrade_tier.dart';
+
 import 'package:app/features/settings/views/pages/personal/change_pin_form_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +22,7 @@ import 'package:app/features/auth/views/pages/forget_pin.dart';
 import 'package:app/features/auth/views/pages/login.dart';
 import 'package:app/features/auth/views/pages/sign_up.dart';
 import 'package:app/features/settings/views/pages/personal/profile_form_page.dart';
-import 'package:app/features/wallet/views/pages/fund_wallet_page.dart';
+
 import 'package:app/features/wallet/views/pages/transaction_details_page.dart';
 import 'package:app/features/wallet/views/pages/wallet_history_page.dart';
 import 'package:app/features/settings/views/pages/bank_information/withdrawal_account_page.dart';
@@ -199,10 +199,6 @@ final GoRouter router = GoRouter(
         return TransactionDetailsPage(transactionId: transactionId);
       },
     ),
-    GoRoute(
-      path: '/wallet/fund',
-      builder: (context, state) => FundWalletFormPage(),
-    ),
 
     GoRoute(
       path: '/wallet/withdraw',
@@ -225,10 +221,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/profile/change-pin',
       builder: (context, state) => const ChangePasswordPage(),
-    ),
-    GoRoute(
-      path: '/profile/tier',
-      builder: (context, state) => const AccountTierUpgradePage(),
     ),
   ],
 );

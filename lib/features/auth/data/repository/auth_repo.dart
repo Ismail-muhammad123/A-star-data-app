@@ -29,6 +29,9 @@ class AuthService {
     String pin, {
     String countryCode = "+234",
     String email = "",
+    String firstName = "",
+    String lastName = "",
+    String middleName = "",
     dynamic channel,
   }) async {
     final Map<String, dynamic> data = {
@@ -36,6 +39,9 @@ class AuthService {
       "phone_number": phone,
       "pin": pin,
       "email": email,
+      "first_name": firstName,
+      "last_name": lastName,
+      "middle_name": middleName,
     };
     if (channel != null) {
       data["channel"] = channel;

@@ -17,13 +17,24 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _pinController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _middleNameController = TextEditingController();
 
   String _countryCode = "+234";
   bool _isLoading = false;
   bool _obscurePin = true;
 
-  // bool _sendSms = true;
-  // bool _sendEmail = true;
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _emailController.dispose();
+    _pinController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _middleNameController.dispose();
+    super.dispose();
+  }
 
   void _handleSignUp() async {
     if (!_formKey.currentState!.validate()) return;
@@ -43,6 +54,9 @@ class _SignUpPageState extends State<SignUpPage> {
         _pinController.text.trim(),
         countryCode: _countryCode,
         email: _emailController.text.trim(),
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        middleName: _middleNameController.text.trim(),
       );
 
       if (res?['success'] == true) {
@@ -173,6 +187,69 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                           const SizedBox(height: 32),
+
+                          // First Name
+                          _buildLabel("First Name", theme),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _firstNameController,
+                            textCapitalization: TextCapitalization.words,
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                            decoration: _inputDecoration(
+                              theme: theme,
+                              hint: "John",
+                              icon: Icons.person_outline,
+                            ),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return "First name is required";
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Last Name
+                          _buildLabel("Last Name", theme),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _lastNameController,
+                            textCapitalization: TextCapitalization.words,
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                            decoration: _inputDecoration(
+                              theme: theme,
+                              hint: "Doe",
+                              icon: Icons.person_outline,
+                            ),
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) {
+                                return "Last name is required";
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Middle Name (Optional)
+                          _buildLabel("Middle Name (Optional)", theme),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _middleNameController,
+                            textCapitalization: TextCapitalization.words,
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                            decoration: _inputDecoration(
+                              theme: theme,
+                              hint: "Middle name",
+                              icon: Icons.person_outline,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
 
                           // Phone Number (with Country Picker)
                           _buildLabel("Phone Number", theme),

@@ -18,7 +18,9 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _middleNameController = TextEditingController();
-  final TextEditingController _bvnController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _countryCodeController = TextEditingController();
+
   bool _isLoading = false;
 
   @override
@@ -26,8 +28,10 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _middleNameController.dispose();
+    _phoneController.dispose();
+    _countryCodeController.dispose();
     _emailController.dispose();
-    _bvnController.dispose();
+
     super.dispose();
   }
 
@@ -44,7 +48,8 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
       _firstNameController.text = profile.firstName ?? "";
       _lastNameController.text = profile.lastName ?? "";
       _middleNameController.text = profile.middleName ?? "";
-      _bvnController.text = profile.bvn ?? "";
+      _phoneController.text = profile.phoneNumber;
+      _countryCodeController.text = profile.phoneCountryCode;
     }
   }
 
@@ -57,7 +62,6 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
             "first_name": _firstNameController.text.trim(),
             "last_name": _lastNameController.text.trim(),
             "middle_name": _middleNameController.text.trim(),
-            'bvn': _bvnController.text.trim(),
           });
       if (res != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -151,19 +155,26 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
             const SizedBox(height: 20),
             _buildTextField(
               context,
-              controller: _emailController,
-              label: "Email Address",
-              icon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
+              controller: _phoneController,
+              label: "Phone Number",
+              icon: Icons.phone_android_outlined,
+              enabled: false,
             ),
             const SizedBox(height: 20),
             _buildTextField(
               context,
-              controller: _bvnController,
-              label: "BVN (Optional)",
-              icon: Icons.security_outlined,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              controller: _countryCodeController,
+              label: "Country Code",
+              icon: Icons.public_outlined,
+              enabled: false,
+            ),
+            const SizedBox(height: 20),
+            _buildTextField(
+              context,
+              controller: _emailController,
+              label: "Email Address",
+              icon: Icons.email_outlined,
+              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 40),
             SizedBox(
@@ -202,11 +213,13 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     required IconData icon,
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
+    bool enabled = true,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
+      enabled: enabled,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: Colors.blueAccent),

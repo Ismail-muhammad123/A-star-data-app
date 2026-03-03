@@ -128,18 +128,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(4),
+                  LengthLimitingTextInputFormatter(6),
                 ],
                 validator:
                     (value) =>
-                        (value?.length ?? 0) < 4
+                        (value?.length ?? 0) < 6
                             ? "Enter 6-digit current PIN"
                             : null,
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
                 decoration: InputDecoration(
-                  hintText: "••••",
+                  hintText: "••••••",
                   prefixIcon: const Icon(
                     Icons.lock_outline,
                     color: Colors.blueAccent,
@@ -190,18 +190,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(4),
+                  LengthLimitingTextInputFormatter(6),
                 ],
                 validator:
                     (value) =>
-                        (value?.length ?? 0) < 4
+                        (value?.length ?? 0) < 6
                             ? "Enter 6-digit new PIN"
                             : null,
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
                 decoration: InputDecoration(
-                  hintText: "••••",
+                  hintText: "••••••",
                   prefixIcon: const Icon(
                     Icons.password_rounded,
                     color: Colors.blueAccent,

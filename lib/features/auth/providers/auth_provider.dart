@@ -177,6 +177,9 @@ class AuthProvider extends ChangeNotifier {
     String pin, {
     String countryCode = "+234",
     String email = "",
+    String firstName = "",
+    String lastName = "",
+    String middleName = "",
     dynamic channel,
   }) async {
     if (phone.startsWith("0")) {
@@ -189,6 +192,9 @@ class AuthProvider extends ChangeNotifier {
         pin,
         countryCode: countryCode,
         email: email,
+        firstName: firstName,
+        lastName: lastName,
+        middleName: middleName,
         channel: channel,
       );
       if (res != null) {

@@ -78,13 +78,12 @@ class _SettingsPageState extends State<SettingsPage> {
   double _calculateProfileCompletion(UserProfile? profile) {
     if (profile == null) return 0;
     int completedFields = 0;
-    int totalFields = 5;
+    int totalFields = 4;
 
     if (profile.firstName?.isNotEmpty ?? false) completedFields++;
     if (profile.lastName?.isNotEmpty ?? false) completedFields++;
     if (profile.phoneNumber.isNotEmpty) completedFields++;
     if (profile.email?.isNotEmpty ?? false) completedFields++;
-    if (profile.tier == 2) completedFields++;
 
     return completedFields / totalFields;
   }
@@ -178,56 +177,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                       ],
                                     ),
                                     const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(
-                                              0.2,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "Tier ${profile?.tier ?? "1"}",
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                        if (profile != null &&
-                                            !profile.isVerified) ...[
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.redAccent
-                                                  .withOpacity(0.8),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: const Text(
-                                              "Unverified",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
                                   ],
                                 ),
                               ],
@@ -392,18 +341,13 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ),
                             ),
                   ),
+
                   // SettingsTile(
                   //   title: "Bank Information",
                   //   subTitle: "Setup your payout bank",
                   //   leadingIcon: Icons.account_balance_outlined,
                   //   onTap: () => context.push("/profile/bank-info"),
                   // ),
-                  SettingsTile(
-                    title: "Upgrade Tier",
-                    subTitle: "Increase your transaction limits",
-                    leadingIcon: Icons.trending_up,
-                    onTap: () => context.push("/profile/tier"),
-                  ),
                   SettingsTile(
                     title: "Withdrawal Account",
                     subTitle: "Link your payout bank account",

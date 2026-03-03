@@ -5,6 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:gal/gal.dart';
 
 class TransactionDetailsPage extends StatefulWidget {
   final int? transactionId;
@@ -17,6 +23,7 @@ class TransactionDetailsPage extends StatefulWidget {
 class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
   WalletTransaction? transaction;
   bool _isLoading = false;
+  final ScreenshotController _screenshotController = ScreenshotController();
 
   _getTransaction() async {
     setState(() {
@@ -45,6 +52,56 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         setState(() {
           _isLoading = false;
         });
+      }
+    }
+  }
+
+  Future<void> _shareReceipt() async {
+    try {
+      final Uint8List? image = await _screenshotController.capture();
+      if (image == null) return;
+
+      final directory = await getTemporaryDirectory();
+      final imagePath =
+          await File(
+            '${directory.path}/receipt_${transaction!.id}.png',
+          ).create();
+      await imagePath.writeAsBytes(image);
+
+      await Share.shareXFiles([
+        XFile(imagePath.path),
+      ], text: 'Transaction Receipt - A-Star Connect');
+    } catch (e) {
+      debugPrint("Error sharing receipt: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to share receipt: ${e.toString()}")),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveReceipt() async {
+    try {
+      final Uint8List? image = await _screenshotController.capture();
+      if (image == null) return;
+
+      await Gal.putImageBytes(image);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Receipt saved to gallery!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error saving receipt: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to save receipt: ${e.toString()}")),
+        );
       }
     }
   }
@@ -85,104 +142,157 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   children: [
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(32.0),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          if (Theme.of(context).brightness == Brightness.light)
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.check_circle_rounded,
-                              color: Colors.green,
-                              size: 48,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            "Transaction Successful",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.green,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            NumberFormat.currency(
-                              locale: 'en_NG',
-                              symbol: '₦',
-                              decimalDigits: 2,
-                            ).format(transaction!.amount),
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  Theme.of(context).textTheme.bodyLarge?.color,
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-                          const Divider(),
-                          const SizedBox(height: 24),
-                          _buildInfoRow(
-                            "Transaction ID",
-                            "#${transaction!.id.toString().padLeft(7, '0')}",
-                          ),
-                          _buildInfoRow(
-                            "Type",
-                            transaction!.transactionType
-                                .replaceAll("_", " ")
-                                .toUpperCase(),
-                          ),
-                          _buildInfoRow(
-                            "Date & Time",
-                            DateFormat.yMMMEd().add_jm().format(
-                              transaction!.timestamp,
-                            ),
-                          ),
-                          _buildInfoRow("Status", "SUCCESSFUL"),
-                          const SizedBox(height: 24),
-                          const Divider(),
-                          const SizedBox(height: 24),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                // Share or Download logic could go here
-                              },
-                              icon: const Icon(Icons.share_outlined, size: 20),
-                              label: const Text("Share Receipt"),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
-                                side: BorderSide(
-                                  color: Theme.of(context).dividerColor,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                    Screenshot(
+                      controller: _screenshotController,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(32.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            if (Theme.of(context).brightness ==
+                                Brightness.light)
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                          ],
+                        ),
+                        child: Stack(
+                          children: [
+                            // Watermark
+                            Positioned.fill(
+                              child: Center(
+                                child: Transform.rotate(
+                                  angle: -0.5,
+                                  child: Text(
+                                    "A-Star Connect",
+                                    style: TextStyle(
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey.withOpacity(0.05),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                            Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_circle_rounded,
+                                    color: Colors.green,
+                                    size: 48,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  "Transaction Successful",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  NumberFormat.currency(
+                                    locale: 'en_NG',
+                                    symbol: '₦',
+                                    decimalDigits: 2,
+                                  ).format(transaction!.amount),
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                  ),
+                                ),
+                                const SizedBox(height: 32),
+                                const Divider(),
+                                const SizedBox(height: 24),
+                                _buildInfoRow(
+                                  "Transaction ID",
+                                  "#${transaction!.id.toString().padLeft(7, '0')}",
+                                ),
+                                _buildInfoRow(
+                                  "Type",
+                                  transaction!.transactionType
+                                      .replaceAll("_", " ")
+                                      .toUpperCase(),
+                                ),
+                                _buildInfoRow(
+                                  "Date & Time",
+                                  DateFormat.yMMMEd().add_jm().format(
+                                    transaction!.timestamp,
+                                  ),
+                                ),
+                                _buildInfoRow("Status", "SUCCESSFUL"),
+                                const SizedBox(height: 24),
+                                const Divider(),
+                                const SizedBox(height: 16),
+                                Center(
+                                  child: Text(
+                                    "A-Star Connect",
+                                    style: TextStyle(
+                                      color: Colors.blueAccent.withOpacity(0.5),
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _saveReceipt,
+                            icon: const Icon(Icons.download_outlined, size: 18),
+                            label: const Text("Save"),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: BorderSide(
+                                color: Theme.of(context).dividerColor,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _shareReceipt,
+                            icon: const Icon(Icons.share_outlined, size: 18),
+                            label: const Text("Share"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 32),
                     const Text(

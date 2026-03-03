@@ -18,6 +18,8 @@ class WalletPage extends StatefulWidget {
 }
 
 class _WalletPageState extends State<WalletPage> {
+  bool _isGenerating = false;
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +29,36 @@ class _WalletPageState extends State<WalletPage> {
         context.read<WalletProvider>().fetchBalance(authProvider.authToken!);
       }
     });
+  }
+
+  Future<void> _generateAccount() async {
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.authToken == null) return;
+
+    setState(() => _isGenerating = true);
+    try {
+      await WalletService().generateVirtualAccount(authProvider.authToken!);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Virtual account generated successfully!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        setState(() {}); // Refresh FutureBuilder
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll("Exception: ", "")),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isGenerating = false);
+    }
   }
 
   @override
@@ -147,20 +179,7 @@ class _WalletPageState extends State<WalletPage> {
                       children: [
                         Expanded(
                           child: _buildActionButton(
-                            label: "Fund",
-                            icon: Icons.add_circle_outline,
-                            color: Colors.white,
-                            textColor: Colors.blueAccent,
-                            onTap:
-                                () => context
-                                    .push("/wallet/fund")
-                                    .then((_) => setState(() {})),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildActionButton(
-                            label: "Withdraw",
+                            label: "Withdraw Funds",
                             icon: Icons.account_balance_wallet_outlined,
                             color: Colors.white.withOpacity(0.2),
                             textColor: Colors.white,
@@ -185,11 +204,97 @@ class _WalletPageState extends State<WalletPage> {
                 ),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox();
+                    return const Center(child: CircularProgressIndicator());
                   }
 
                   if (!snapshot.hasData || snapshot.hasError) {
-                    return _buildIncompleteProfileNotice(context);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Deposit Account",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Theme.of(context).dividerColor,
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.account_balance_outlined,
+                                size: 48,
+                                color: Colors.blueAccent.withOpacity(0.5),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                "No Virtual Account Found",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Generate a permanent virtual account to fund your wallet instantly via bank transfer.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.color
+                                      ?.withOpacity(0.6),
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: ElevatedButton(
+                                  onPressed:
+                                      _isGenerating ? null : _generateAccount,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blueAccent,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child:
+                                      _isGenerating
+                                          ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                          : const Text(
+                                            "Generate Virtual Account",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
                   }
 
                   final account = snapshot.data!;
@@ -352,37 +457,6 @@ class _WalletPageState extends State<WalletPage> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIncompleteProfileNotice(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push("/profile/update"),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.orange[50],
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.orange.shade100),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.info_outline, color: Colors.orange[400], size: 28),
-            const SizedBox(width: 16),
-            const Expanded(
-              child: Text(
-                "Complete your profile to unlock a permanent virtual account for instant funding.",
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 13,
-                  height: 1.4,
-                ),
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Colors.orange),
-          ],
         ),
       ),
     );

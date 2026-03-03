@@ -135,6 +135,27 @@ class WalletService {
     }
   }
 
+  Future<VirtualAccount> generateVirtualAccount(String authToken) async {
+    var response = await _dio.post(
+      _endpoints.createVirtualAccount,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          "Authorization": "Bearer $authToken",
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return VirtualAccount.fromJson(response.data);
+    } else {
+      throw Exception(
+        response.data['error'] ?? 'Failed to generate virtual account',
+      );
+    }
+  }
+
   Future<Map<String, dynamic>> requestWithdrawal(
     String authToken,
     double amount,
@@ -148,10 +169,10 @@ class WalletService {
       _endpoints.withdraw,
       data: {
         "amount": amount.toString(),
+        "reason": reason,
         "bank_name": bankName,
         "account_number": accountNumber,
         "account_name": accountName,
-        "reason": reason,
         "bank_code": bankCode,
       },
       options: Options(

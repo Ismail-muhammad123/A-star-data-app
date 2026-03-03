@@ -81,28 +81,6 @@ class ProfileService {
     }
   }
 
-  Future<void> upgradeAccount(String authToken) async {
-    try {
-      final response = await _dio.post(
-        profileEndpoints.upgradeAccountTier,
-        options: Options(
-          validateStatus: (status) => true,
-          headers: {
-            'Authorization': "Bearer $authToken",
-            'content-Type': 'application/json',
-          },
-        ),
-      );
-      if (response.statusCode != 200) {
-        print(response);
-        throw Exception(response.data['error'] ?? "Failed to upgrade account");
-      }
-    } catch (e) {
-      print(e);
-      throw Exception("Failed to upgrade account");
-    }
-  }
-
   Future<BankInformationModel?> retriveBankInformation(String authToken) async {
     try {
       final response = await _dio.get(

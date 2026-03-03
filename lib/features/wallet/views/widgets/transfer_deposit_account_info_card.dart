@@ -88,17 +88,40 @@ class _TransferDepositAccountInfoCardState
             ],
           ),
           const SizedBox(height: 32),
-          Text(
-            widget.accountNumber.replaceAllMapped(
-              RegExp(r".{4}"),
-              (match) => "${match.group(0)} ",
-            ),
-            style: const TextStyle(
-              fontSize: 26,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 2,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.accountNumber.replaceAllMapped(
+                    RegExp(r".{4}"),
+                    (match) => "${match.group(0)} ",
+                  ),
+                  style: const TextStyle(
+                    fontSize: 26,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: widget.accountNumber));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Account number copied to clipboard',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: Color(0xFF203A43),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.copy, color: Colors.white70, size: 20),
+                tooltip: "Copy Account Number",
+              ),
+            ],
           ),
           const SizedBox(height: 24),
           Row(
@@ -115,11 +138,13 @@ class _TransferDepositAccountInfoCardState
               const SizedBox(width: 16),
               InkWell(
                 onTap: () {
-                  Clipboard.setData(ClipboardData(text: widget.accountNumber));
+                  final textToCopy =
+                      "Account Name: ${widget.accountName}\nAccount Number: ${widget.accountNumber}\nBank Name: ${widget.bankName}";
+                  Clipboard.setData(ClipboardData(text: textToCopy));
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                        'Account number copied to clipboard',
+                        'Account details copied to clipboard',
                         style: TextStyle(color: Colors.white),
                       ),
                       behavior: SnackBarBehavior.floating,

@@ -1,6 +1,6 @@
 class KYCData {
   final int? user;
-  final String? bvn;
+
   final String? nin;
   final String? idImage;
   final bool? isVerified;
@@ -13,7 +13,7 @@ class KYCData {
 
   KYCData({
     this.user,
-    this.bvn,
+
     this.nin,
     this.idImage,
     this.isVerified,
@@ -28,7 +28,7 @@ class KYCData {
   factory KYCData.fromJson(Map<String, dynamic> json) {
     return KYCData(
       user: json['user'],
-      bvn: json['bvn'],
+
       nin: json['nin'],
       idImage: json['is_image'],
       isVerified: json['id_verified'],
@@ -44,7 +44,7 @@ class KYCData {
   Map<String, dynamic> toJson() {
     return {
       'user': user,
-      'bvn': bvn,
+
       'nin': nin,
       'id_image': idImage,
       'id_verified': isVerified,

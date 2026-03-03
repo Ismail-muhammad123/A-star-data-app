@@ -24,17 +24,20 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+          if (!isDark)
+            BoxShadow(
+              color: Colors.blue.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
         ],
       ),
       child: Material(
@@ -49,14 +52,18 @@ class SettingsTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: (leadingIconColor ?? Colors.blue).withOpacity(0.1),
+                    color: (leadingIconColor ??
+                            Theme.of(context).colorScheme.primary)
+                        .withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child:
                       leading ??
                       Icon(
                         leadingIcon,
-                        color: leadingIconColor ?? Colors.blue,
+                        color:
+                            leadingIconColor ??
+                            Theme.of(context).colorScheme.primary,
                         size: 24,
                       ),
                 ),
@@ -67,10 +74,10 @@ class SettingsTile extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       if (subTitle != null) ...[
@@ -79,7 +86,9 @@ class SettingsTile extends StatelessWidget {
                           subTitle!,
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey.shade600,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color?.withOpacity(0.6),
                           ),
                         ),
                       ],

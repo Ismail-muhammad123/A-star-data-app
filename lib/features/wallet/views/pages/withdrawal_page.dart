@@ -1,7 +1,9 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/wallet/data/models/withdrawal_account_model.dart';
 import 'package:app/features/wallet/data/repository/wallet_repo.dart';
+import 'package:app/features/settings/views/pages/bank_information/wallet_bank_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -16,11 +18,17 @@ class WithdrawalPage extends StatefulWidget {
 class _WithdrawalPageState extends State<WithdrawalPage> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
+  final _otherAccountNumberController = TextEditingController();
+  final _otherBankNameController = TextEditingController();
+  final _otherAccountNameController = TextEditingController();
 
   bool _isLoading = false;
   double _balance = 0.0;
   bool _isLoadingData = true;
   WithdrawalAccount? _withdrawalAccount;
+  bool _useOtherAccount = false;
+  String? _otherBankCode;
+  bool _isResolving = false;
 
   double _withdrawalCharge = 0.0;
   bool _isChargePercentage = false;
@@ -58,19 +66,71 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     }
   }
 
+  Future<void> _resolveAccount() async {
+    if (_isResolving) return;
+    setState(() => _isResolving = true);
+    try {
+      final token = context.read<AuthProvider>().authToken;
+      if (token != null && _otherBankCode != null) {
+        final name = await WalletService().resolveAccount(
+          token,
+          _otherBankCode!,
+          _otherAccountNumberController.text,
+        );
+        setState(() {
+          _otherAccountNameController.text = name;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll("Exception: ", ""))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isResolving = false);
+    }
+  }
+
   Future<void> _submitWithdrawal() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_withdrawalAccount == null ||
-        _withdrawalAccount!.accountNumber.isEmpty ||
-        _withdrawalAccount!.bankName.isEmpty ||
-        _withdrawalAccount!.accountName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please link a valid withdrawal account first"),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
+
+    String bankName;
+    String accountNumber;
+    String accountName;
+    String? bankCode;
+
+    if (_useOtherAccount) {
+      if (_otherBankCode == null || _otherAccountNameController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please select a bank and resolve the account name"),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+      bankName = _otherBankNameController.text;
+      accountNumber = _otherAccountNumberController.text;
+      accountName = _otherAccountNameController.text;
+      bankCode = _otherBankCode;
+    } else {
+      if (_withdrawalAccount == null ||
+          _withdrawalAccount!.accountNumber.isEmpty ||
+          _withdrawalAccount!.bankName.isEmpty ||
+          _withdrawalAccount!.accountName.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please link a valid withdrawal account first"),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+      bankName = _withdrawalAccount!.bankName;
+      accountNumber = _withdrawalAccount!.accountNumber;
+      accountName = _withdrawalAccount!.accountName;
+      bankCode = _withdrawalAccount!.bankCode;
     }
 
     final amount = double.tryParse(_amountController.text) ?? 0.0;
@@ -94,11 +154,11 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
         await WalletService().requestWithdrawal(
           token,
           amount,
-          _withdrawalAccount!.bankName,
-          _withdrawalAccount!.accountNumber,
-          _withdrawalAccount!.accountName,
+          bankName,
+          accountNumber,
+          accountName,
           reason: "Withdrawal request",
-          bankCode: _withdrawalAccount!.bankCode,
+          bankCode: bankCode,
         );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -387,26 +447,108 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                                     ).textTheme.bodyLarge?.color,
                               ),
                             ),
-                            TextButton(
-                              onPressed:
-                                  () => context
-                                      .push('/wallet/withdrawal-account')
-                                      .then((_) => _loadData()),
-                              child: Text(
-                                _withdrawalAccount == null ? "Link" : "Change",
-                                style: const TextStyle(
-                                  color: Colors.blueAccent,
-                                  fontWeight: FontWeight.bold,
+                            if (!_useOtherAccount)
+                              TextButton(
+                                onPressed:
+                                    () => context
+                                        .push('/wallet/withdrawal-account')
+                                        .then((_) => _loadData()),
+                                child: Text(
+                                  _withdrawalAccount == null
+                                      ? "Link"
+                                      : "Change",
+                                  style: const TextStyle(
+                                    color: Colors.blueAccent,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
 
-                        _withdrawalAccount == null
-                            ? _buildEmptyAccountCard()
-                            : _buildAccountCard(),
+                        // Switch between saved and other account
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap:
+                                      () => setState(
+                                        () => _useOtherAccount = false,
+                                      ),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          !_useOtherAccount
+                                              ? Colors.blueAccent
+                                              : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      "Saved Account",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            !_useOtherAccount
+                                                ? Colors.white
+                                                : Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap:
+                                      () => setState(
+                                        () => _useOtherAccount = true,
+                                      ),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          _useOtherAccount
+                                              ? Colors.blueAccent
+                                              : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      "Other Account",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            _useOtherAccount
+                                                ? Colors.white
+                                                : Colors.grey,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        if (!_useOtherAccount)
+                          _withdrawalAccount == null
+                              ? _buildEmptyAccountCard()
+                              : _buildAccountCard()
+                        else
+                          _buildOtherAccountForm(),
 
                         const SizedBox(height: 48),
 
@@ -536,9 +678,143 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     );
   }
 
+  Widget _buildOtherAccountForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLabel("Select Bank"),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const WalletBankPicker()),
+            );
+            if (result != null) {
+              setState(() {
+                _otherBankNameController.text = result['name'];
+                _otherBankCode = result['code'];
+                _otherAccountNameController.clear();
+              });
+              if (_otherAccountNumberController.text.length == 10) {
+                _resolveAccount();
+              }
+            }
+          },
+          child: AbsorbPointer(
+            child: TextFormField(
+              controller: _otherBankNameController,
+              readOnly: true,
+              decoration: _inputDecoration(
+                hint: "Choose recipient bank",
+                icon: Icons.account_balance,
+              ),
+              validator:
+                  (v) =>
+                      (_useOtherAccount && (v == null || v.isEmpty))
+                          ? "Bank is required"
+                          : null,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        _buildLabel("Account Number"),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _otherAccountNumberController,
+          keyboardType: TextInputType.number,
+          maxLength: 10,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          decoration: _inputDecoration(
+            hint: "10-digit account number",
+            icon: Icons.numbers,
+            counterText: "",
+          ),
+          onChanged: (v) {
+            if (v.length == 10 && _otherBankCode != null) {
+              _resolveAccount();
+            }
+          },
+          validator:
+              (v) =>
+                  (_useOtherAccount && (v == null || v.length != 10))
+                      ? "Enter a valid 10-digit account number"
+                      : null,
+        ),
+        const SizedBox(height: 16),
+        _buildLabel("Account Name"),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _otherAccountNameController,
+          enabled: false,
+          decoration: _inputDecoration(
+            hint: "Account holder name",
+            icon: Icons.person,
+            prefixWidget:
+                _isResolving
+                    ? Container(
+                      padding: const EdgeInsets.all(12),
+                      child: const SizedBox(
+                        height: 10,
+                        width: 10,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                    )
+                    : null,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.6),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData icon,
+    String? counterText,
+    Widget? prefixWidget,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon:
+          prefixWidget ?? Icon(icon, color: Colors.blueAccent, size: 20),
+      filled: true,
+      fillColor: Theme.of(context).cardColor,
+      counterText: counterText,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _amountController.dispose();
+    _otherAccountNumberController.dispose();
+    _otherBankNameController.dispose();
+    _otherAccountNameController.dispose();
     super.dispose();
   }
 }

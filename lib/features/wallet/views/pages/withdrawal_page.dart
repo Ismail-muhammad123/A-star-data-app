@@ -29,6 +29,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   bool _useOtherAccount = false;
   String? _otherBankCode;
   bool _isResolving = false;
+  bool _isSaving = false;
 
   double _withdrawalCharge = 0.0;
   bool _isChargePercentage = false;
@@ -89,6 +90,64 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
       }
     } finally {
       if (mounted) setState(() => _isResolving = false);
+    }
+  }
+
+  Future<void> _saveAsWithdrawalAccount() async {
+    if (_isSaving) return;
+
+    final bankName = _otherBankNameController.text;
+    final accountNumber = _otherAccountNumberController.text;
+    final accountName = _otherAccountNameController.text;
+    final bankCode = _otherBankCode;
+
+    if (bankCode == null || accountName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please select a bank and resolve the account name first",
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final token = context.read<AuthProvider>().authToken;
+      if (token != null) {
+        final account = WithdrawalAccount(
+          bankName: bankName,
+          bankCode: bankCode,
+          accountNumber: accountNumber,
+          accountName: accountName,
+        );
+        await WalletService().saveWithdrawalAccount(token, account);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Withdrawal account saved successfully"),
+              backgroundColor: Colors.green,
+            ),
+          );
+          await _loadData(); // Reload to get the new withdrawal account
+          setState(() {
+            _useOtherAccount = false; // Switch to saved account tab
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll("Exception: ", "")),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -447,22 +506,6 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                                     ).textTheme.bodyLarge?.color,
                               ),
                             ),
-                            if (!_useOtherAccount)
-                              TextButton(
-                                onPressed:
-                                    () => context
-                                        .push('/wallet/withdrawal-account')
-                                        .then((_) => _loadData()),
-                                child: Text(
-                                  _withdrawalAccount == null
-                                      ? "Link"
-                                      : "Change",
-                                  style: const TextStyle(
-                                    color: Colors.blueAccent,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
                         const SizedBox(height: 12),
@@ -594,9 +637,14 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   }
 
   Widget _buildEmptyAccountCard() {
+    final bool canSaveOther =
+        _otherBankCode != null &&
+        _otherAccountNumberController.text.length == 10 &&
+        _otherAccountNameController.text.isNotEmpty;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.orange.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
@@ -604,18 +652,74 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
       ),
       child: Column(
         children: [
-          Icon(Icons.info_outline, color: Colors.orange[700], size: 32),
-          const SizedBox(height: 12),
+          Icon(Icons.info_outline, color: Colors.orange[700], size: 40),
+          const SizedBox(height: 16),
           const Text(
             "No Withdrawal Account Linked",
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
-            "Link a bank account to receive your funds.",
+            canSaveOther
+                ? "You can save the account details entered in the 'Other Account' tab."
+                : "Link a bank account to receive your funds automatically.",
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[600], fontSize: 13),
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
           ),
+          const SizedBox(height: 24),
+          if (canSaveOther)
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: _isSaving ? null : _saveAsWithdrawalAccount,
+                icon:
+                    _isSaving
+                        ? const SizedBox(
+                          height: 18,
+                          width: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Icon(Icons.save_outlined),
+                label: const Text(
+                  "Save as Withdrawal Account",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            )
+          else
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed:
+                    () => context
+                        .push('/wallet/withdrawal-account')
+                        .then((_) => _loadData()),
+                icon: const Icon(Icons.add),
+                label: const Text(
+                  "Add Account",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange[700],
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -650,6 +754,26 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                   color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed:
+                    () => context
+                        .push('/wallet/withdrawal-account')
+                        .then((_) => _loadData()),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(50, 30),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  "Change",
+                  style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ],

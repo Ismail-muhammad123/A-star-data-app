@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "477252807138",
+    "project_id": "starboy-global-vtu",
+    "storage_bucket": "starboy-global-vtu.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477252807138:android:841be66c4941ce407f71bb",
+        "android_client_info": {
+          "package_name": "com.astardata.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByd4XuC7y5EP3n1pdplIA_7qxjhlEh8MI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

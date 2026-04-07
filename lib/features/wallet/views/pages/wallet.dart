@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:app/features/notifications/providers/notification_provider.dart';
 
 class WalletPage extends StatefulWidget {
   const WalletPage({super.key});
@@ -79,6 +80,38 @@ class _WalletPageState extends State<WalletPage> {
         ),
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
+        actions: [
+          Consumer<NotificationProvider>(
+            builder: (context, notifications, child) {
+              return Stack(
+                children: [
+                  IconButton(
+                    onPressed: () => context.push('/notifications'),
+                    icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+                  ),
+                  if (notifications.unreadCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        child: Text(
+                          notifications.unreadCount > 9 ? "9+" : notifications.unreadCount.toString(),
+                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -186,6 +219,19 @@ class _WalletPageState extends State<WalletPage> {
                             onTap:
                                 () => context
                                     .push("/wallet/withdraw")
+                                    .then((_) => setState(() {})),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildActionButton(
+                            label: "Transfer",
+                            icon: Icons.send_rounded,
+                            color: Colors.white.withOpacity(0.2),
+                            textColor: Colors.white,
+                            onTap:
+                                () => context
+                                    .push("/wallet/p2p")
                                     .then((_) => setState(() {})),
                           ),
                         ),

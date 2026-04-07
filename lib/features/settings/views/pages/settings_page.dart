@@ -128,57 +128,52 @@ class _SettingsPageState extends State<SettingsPage> {
                     SafeArea(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Row(
                           children: [
-                            const SizedBox(height: 20),
-                            Row(
+                            CircleAvatar(
+                              radius: 35,
+                              backgroundColor:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey[800]
+                                      : Colors.white,
+                              child: Icon(
+                                Icons.person,
+                                size: 40,
+                                color:
+                                    Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                CircleAvatar(
-                                  radius: 35,
-                                  backgroundColor:
-                                      Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? Colors.grey[800]
-                                          : Colors.white,
-                                  child: Icon(
-                                    Icons.person,
-                                    size: 40,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                                const SizedBox(width: 15),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
                                   children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          profile == null
-                                              ? "Loading..."
-                                              : (profile.fullName.isNotEmpty)
-                                              ? profile.fullName.capitalize()
-                                              : profile.phoneNumber,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        if (profile?.isVerified ?? false) ...[
-                                          const SizedBox(width: 8),
-                                          const Icon(
-                                            Icons.verified,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                        ],
-                                      ],
+                                    Text(
+                                      profile == null
+                                          ? "Loading..."
+                                          : (profile.fullName.isNotEmpty)
+                                          ? profile.fullName.capitalize()
+                                          : profile.phoneNumber,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                    const SizedBox(height: 4),
+                                    if (profile?.isVerified ?? false) ...[
+                                      const SizedBox(width: 8),
+                                      const Icon(
+                                        Icons.verified,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ],
                                   ],
                                 ),
+                                const SizedBox(height: 4),
                               ],
                             ),
                           ],
@@ -341,6 +336,12 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ),
                             ),
                   ),
+                  SettingsTile(
+                    title: "Identity Verification (KYC)",
+                    subTitle: "NIN, BVN & Identification",
+                    leadingIcon: Icons.verified_user_outlined,
+                    onTap: () => context.push("/profile/kyc"),
+                  ),
 
                   // SettingsTile(
                   //   title: "Bank Information",
@@ -358,10 +359,22 @@ class _SettingsPageState extends State<SettingsPage> {
                   const SizedBox(height: 24),
                   _buildSectionHeader("Security"),
                   SettingsTile(
-                    title: "Change Transaction PIN",
-                    subTitle: "Secure your transactions",
-                    leadingIcon: Icons.lock_outline,
+                    title: "Change Login PIN",
+                    subTitle: "Used to unlock the app",
+                    leadingIcon: Icons.lock_open_outlined,
                     onTap: () => context.push("/profile/change-pin"),
+                  ),
+                  SettingsTile(
+                    title: (profile?.hasTransactionPin ?? false) ? "Change Transaction PIN" : "Set Transaction PIN",
+                    subTitle: "Authorize payments and transfers",
+                    leadingIcon: Icons.lock_outline,
+                    onTap: () {
+                      if (profile?.hasTransactionPin ?? false) {
+                        context.push("/profile/transaction-pin/change");
+                      } else {
+                        context.push("/profile/transaction-pin/set");
+                      }
+                    },
                   ),
                   Consumer<AuthProvider>(
                     builder: (context, auth, child) {
@@ -426,8 +439,20 @@ class _SettingsPageState extends State<SettingsPage> {
                   const SizedBox(height: 24),
                   _buildSectionHeader("Support"),
                   SettingsTile(
-                    title: "Help & Support",
-                    subTitle: "Chat with us on WhatsApp",
+                    title: "Help Desk",
+                    subTitle: "Tickets, FAQs & Support",
+                    leadingIcon: Icons.support_agent_rounded,
+                    onTap: () => context.push('/support'),
+                  ),
+                  SettingsTile(
+                    title: "Refer & Earn",
+                    subTitle: "Invite friends & earn rewards",
+                    leadingIcon: Icons.stars_rounded,
+                    onTap: () => context.push('/referral'),
+                  ),
+                  SettingsTile(
+                    title: "Live Chat (WhatsApp)",
+                    subTitle: "Chat with us instantly",
                     leading: const FaIcon(
                       FontAwesomeIcons.whatsapp,
                       color: Colors.green,

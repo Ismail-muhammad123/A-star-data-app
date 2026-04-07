@@ -12,6 +12,9 @@ import 'package:app/features/orders/views/pages/tv/select_tv_pachage.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_service.dart';
 
 import 'package:app/features/settings/views/pages/personal/change_pin_form_page.dart';
+import 'package:app/features/settings/views/pages/transaction_pin/change_transaction_pin_page.dart';
+import 'package:app/features/settings/views/pages/transaction_pin/reset_transaction_pin_page.dart';
+import 'package:app/features/settings/views/pages/transaction_pin/set_transaction_pin_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -21,16 +24,25 @@ import 'package:app/features/auth/views/pages/account_activation_page.dart';
 import 'package:app/features/auth/views/pages/forget_pin.dart';
 import 'package:app/features/auth/views/pages/login.dart';
 import 'package:app/features/auth/views/pages/sign_up.dart';
+import 'package:app/features/auth/views/pages/two_fa_otp_page.dart';
 import 'package:app/features/settings/views/pages/personal/profile_form_page.dart';
 
 import 'package:app/features/wallet/views/pages/transaction_details_page.dart';
 import 'package:app/features/wallet/views/pages/wallet_history_page.dart';
 import 'package:app/features/settings/views/pages/bank_information/withdrawal_account_page.dart';
 import 'package:app/features/wallet/views/pages/withdrawal_page.dart';
+import 'package:app/features/wallet/views/pages/p2p/p2p_transfer_page.dart';
 import 'package:app/home.dart';
 
+import 'package:app/features/notifications/views/pages/notifications_page.dart';
 import 'package:app/features/auth/views/pages/onboarding_page.dart';
 import 'package:app/features/auth/views/pages/splash_screen.dart';
+import 'package:app/features/support/views/pages/support_page.dart';
+import 'package:app/features/support/views/pages/create_support_ticket_page.dart';
+import 'package:app/features/support/views/pages/support_ticket_details_page.dart';
+import 'package:app/features/support/data/models/support_model.dart';
+import 'package:app/features/referral/views/pages/referral_page.dart';
+import 'package:app/features/settings/views/pages/kyc/kyc_page.dart';
 
 final GoRouter router = GoRouter(
   redirect: (context, state) {
@@ -45,6 +57,7 @@ final GoRouter router = GoRouter(
       '/activate-account',
       '/account-not-activated',
       '/confirm-pin-reset',
+      '/verify-2fa',
     ];
     // Allow product details as public
     // final isProductDetails =
@@ -102,6 +115,13 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         var phone = state.extra == null ? "" : state.extra.toString();
         return AccountActivationPage(phoneNumber: phone);
+      },
+    ),
+    GoRoute(
+      path: '/verify-2fa',
+      builder: (context, state) {
+        var phone = state.extra == null ? "" : state.extra.toString();
+        return TwoFaOtpPage(phoneNumber: phone);
       },
     ),
 
@@ -192,6 +212,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const WalletHistoryPage(),
     ),
     GoRoute(
+      path: '/wallet/p2p',
+      builder: (context, state) => const P2PTransferPage(),
+    ),
+    GoRoute(
       path: '/wallet/history/:transactionId',
       builder: (context, state) {
         final transactionId =
@@ -221,6 +245,45 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/profile/change-pin',
       builder: (context, state) => const ChangePasswordPage(),
+    ),
+    GoRoute(
+      path: '/profile/transaction-pin/set',
+      builder: (context, state) => const SetTransactionPinPage(),
+    ),
+    GoRoute(
+      path: '/profile/transaction-pin/change',
+      builder: (context, state) => const ChangeTransactionPinPage(),
+    ),
+    GoRoute(
+      path: '/profile/transaction-pin/reset',
+      builder: (context, state) => const ResetTransactionPinPage(),
+    ),
+    GoRoute(
+      path: '/support',
+      builder: (context, state) => const SupportPage(),
+    ),
+    GoRoute(
+      path: '/support/create',
+      builder: (context, state) => const CreateSupportTicketPage(),
+    ),
+    GoRoute(
+      path: '/support/ticket/:id',
+      builder: (context, state) {
+        final ticket = state.extra as SupportTicket;
+        return SupportTicketDetailsPage(ticket: ticket);
+      },
+    ),
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationsPage(),
+    ),
+    GoRoute(
+      path: '/profile/kyc',
+      builder: (context, state) => const KycPage(),
+    ),
+    GoRoute(
+      path: '/referral',
+      builder: (context, state) => const ReferralPage(),
     ),
   ],
 );

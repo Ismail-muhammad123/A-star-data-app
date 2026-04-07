@@ -7,6 +7,9 @@ import 'package:app/core/themes/theme_provider.dart';
 import 'package:app/core/themes/app_theme.dart';
 import 'package:app/core/providers/balance_visibility_provider.dart';
 import 'package:app/features/wallet/providers/wallet_provider.dart';
+import 'package:app/features/settings/providers/transaction_pin_provider.dart';
+import 'package:app/features/support/providers/support_provider.dart';
+import 'package:app/features/notifications/providers/notification_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +21,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => BalanceVisibilityProvider()),
         ChangeNotifierProvider(create: (_) => WalletProvider()),
+        ChangeNotifierProvider(create: (_) => TransactionPinProvider()),
+        ChangeNotifierProvider(create: (_) => SupportProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: const AStarDataApp(),
     ),

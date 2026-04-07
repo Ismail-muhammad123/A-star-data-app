@@ -20,6 +20,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _middleNameController = TextEditingController();
+  final TextEditingController _referralController = TextEditingController();
 
   String _countryCode = "+234";
   bool _isLoading = false;
@@ -33,6 +34,7 @@ class _SignUpPageState extends State<SignUpPage> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _middleNameController.dispose();
+    _referralController.dispose();
     super.dispose();
   }
 
@@ -57,6 +59,7 @@ class _SignUpPageState extends State<SignUpPage> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         middleName: _middleNameController.text.trim(),
+        referralCode: _referralController.text.trim(),
       );
 
       if (res?['success'] == true) {
@@ -302,6 +305,23 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           const SizedBox(height: 20),
 
+                          // Referral Code (Optional)
+                          _buildLabel("Referral Code (Optional)", theme),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: _referralController,
+                            textCapitalization: TextCapitalization.characters,
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                            decoration: _inputDecoration(
+                              theme: theme,
+                              hint: "ABC-123",
+                              icon: Icons.card_giftcard_outlined,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
                           // PIN
                           _buildLabel("6-Digit PIN", theme),
                           const SizedBox(height: 8),
@@ -397,6 +417,46 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: theme.dividerColor)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            "OR",
+                            style: TextStyle(
+                              color: theme.textTheme.bodySmall?.color,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: theme.dividerColor)),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: OutlinedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.g_mobiledata_rounded, size: 34, color: Colors.red),
+                        label: const Text(
+                          "Sign up with Google",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          side: BorderSide(color: theme.dividerColor),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 40),
                   ],

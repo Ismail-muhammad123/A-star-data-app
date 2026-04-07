@@ -75,6 +75,10 @@ class _LoginPageState extends State<LoginPage> {
 
       if (res?['success'] == true) {
         if (mounted) _navigateToHome();
+      } else if (res?['requires_2fa'] == true) {
+        if (mounted) {
+          context.push('/verify-2fa', extra: _phoneNumberController.text.trim());
+        }
       } else {
         if (mounted) {
           _showError(res?['message'] ?? "Invalid Phone Number or PIN!");

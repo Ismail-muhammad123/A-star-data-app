@@ -23,6 +23,44 @@ class AuthService {
     }
   }
 
+  // Verify 2FA
+  Future<Map<String, dynamic>> verify2FA(String tempToken, String otp) async {
+    final response = await _dio.post(
+      endpoints.verify2FA,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $tempToken', // Verify if backend uses Authorization or data field
+        },
+      ),
+      data: jsonEncode({'otp': otp}),
+    );
+    if (response.statusCode == 200) {
+      return response.data as Map<String, dynamic>;
+    } else {
+      throw Exception(response.data['detail'] ?? 'Failed to verify OTP');
+    }
+  }
+
+  // Resend 2FA OTP
+  Future<void> resend2FAOtp(String tempToken) async {
+    final response = await _dio.post(
+      endpoints.resend2FA,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $tempToken',
+        },
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception(
+          response.data['detail'] ?? 'Failed to resend activation code');
+    }
+  }
+
   // Register
   Future<Map<String, dynamic>?> register(
     String phone,
@@ -32,6 +70,7 @@ class AuthService {
     String firstName = "",
     String lastName = "",
     String middleName = "",
+    String referralCode = "",
     dynamic channel,
   }) async {
     final Map<String, dynamic> data = {
@@ -43,6 +82,9 @@ class AuthService {
       "last_name": lastName,
       "middle_name": middleName,
     };
+    if (referralCode.isNotEmpty) {
+      data["referral_code"] = referralCode;
+    }
     if (channel != null) {
       data["channel"] = channel;
     }

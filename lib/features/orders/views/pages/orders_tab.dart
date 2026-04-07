@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:app/features/wallet/providers/wallet_provider.dart';
+import 'package:app/features/notifications/providers/notification_provider.dart';
 
 class OrdersTab extends StatefulWidget {
   const OrdersTab({super.key});
@@ -59,6 +60,36 @@ class _OrdersTabState extends State<OrdersTab> {
         elevation: 0,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         actions: [
+          Consumer<NotificationProvider>(
+            builder: (context, notifications, child) {
+              return Stack(
+                children: [
+                  IconButton(
+                    onPressed: () => context.push('/notifications'),
+                    icon: const Icon(Icons.notifications_outlined),
+                  ),
+                  if (notifications.unreadCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        child: Text(
+                          notifications.unreadCount > 9 ? "9+" : notifications.unreadCount.toString(),
+                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
       ),

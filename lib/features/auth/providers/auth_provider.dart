@@ -1,13 +1,17 @@
 import 'package:app/core/services/biometric_service.dart';
 import 'package:app/features/settings/data/repositories/profile_repo.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app/features/auth/data/repository/auth_repo.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool _isAuthenticated = false;
-  bool get isAuthenticated => _isAuthenticated;
   String? authToken;
+  String? _tempToken;
+
+  String? get tempToken => _tempToken;
+  bool get isAuthenticated => _isAuthenticated;
 
   final AuthService _authService = AuthService();
   final BiometricService _biometricService = BiometricService();
@@ -129,9 +133,20 @@ class AuthProvider extends ChangeNotifier {
     if (phoneNumber.startsWith("0")) {
       phoneNumber = phoneNumber.substring(1);
     }
+    _tempToken = null;
+
     try {
       var res = await _authService.login(phoneNumber, pin);
       print(res);
+
+      if (res['requires_2fa'] == true) {
+        _tempToken = res['temp_token'];
+        return {
+          'success': false,
+          'requires_2fa': true,
+          'temp_token': _tempToken,
+        };
+      }
 
       var token = res['access'];
       var refresh = res['refresh'];
@@ -167,8 +182,56 @@ class AuthProvider extends ChangeNotifier {
         return {"success": false, "message": "Invalid Phone Number or Pin"};
       }
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       return {"success": false, "message": e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> verify2FA(String otp) async {
+    if (_tempToken == null) {
+      return {
+        'success': false,
+        'message': 'No temporary token found. Please login again.'
+      };
+    }
+
+    try {
+      var res = await _authService.verify2FA(_tempToken!, otp);
+      var token = res['access'];
+      var refresh = res['refresh'];
+
+      if (token != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', token);
+        await prefs.setString('refresh_token', refresh);
+
+        authToken = token;
+        _isAuthenticated = true;
+        _tempToken = null;
+        notifyListeners();
+        return {'success': true};
+      }
+      return {'success': false, 'message': 'Invalid response from server'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> resend2FAOtp() async {
+    if (_tempToken == null) {
+      return {
+        'success': false,
+        'message': 'No temporary token found. Please login again.'
+      };
+    }
+
+    try {
+      await _authService.resend2FAOtp(_tempToken!);
+      return {'success': true};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -180,6 +243,7 @@ class AuthProvider extends ChangeNotifier {
     String firstName = "",
     String lastName = "",
     String middleName = "",
+    String referralCode = "",
     dynamic channel,
   }) async {
     if (phone.startsWith("0")) {
@@ -195,6 +259,7 @@ class AuthProvider extends ChangeNotifier {
         firstName: firstName,
         lastName: lastName,
         middleName: middleName,
+        referralCode: referralCode,
         channel: channel,
       );
       if (res != null) {

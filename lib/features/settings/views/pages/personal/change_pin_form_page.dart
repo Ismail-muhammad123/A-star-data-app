@@ -70,7 +70,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text(
-          "Change Transaction PIN",
+          "Change Login PIN",
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,

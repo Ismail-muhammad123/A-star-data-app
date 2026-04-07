@@ -13,6 +13,11 @@ class AuthEndpoints {
   final String activateAccount = "$baseUrl/account/activate-account/";
   final String confirmPinReset = "$baseUrl/account/confirm-reset-password/";
   final String closeAccount = "$baseUrl/account/close-account/";
+  
+  // NEW: 2FA & FCM
+  final String verify2FA = "$baseUrl/account/verify-2fa/";
+  final String resend2FA = "$baseUrl/account/resend-2fa-otp/"; // Confirm with schema logic (resend-activation-code exists, but 2FA might have its own)
+  final String registerFCM = "$baseUrl/account/register-fcm-token/";
 }
 
 class ProfileEndpoints {
@@ -23,7 +28,6 @@ class ProfileEndpoints {
   final String bankInfoSubmit = "$baseUrl/account/bank-details/create/";
   final String bankInfoUpdate = "$baseUrl/account/bank-details/update/";
   final String bankInfoRetrive = "$baseUrl/account/bank-details/";
-  // final String getNigerianBanks = "$baseUrl/account/list-nigerian-banks";
 }
 
 class WalletEndpoints {
@@ -38,6 +42,10 @@ class WalletEndpoints {
   final String resolveAccount = "$baseUrl/wallet/resolve-account/";
   final String withdrawalAccount = "$baseUrl/wallet/withdrawal-account/";
   final String chargesConfig = "$baseUrl/payment/charges-config/";
+  
+  // NEW: P2P inside Wallet
+  final String lookupUser = "$baseUrl/wallet/lookup-user/";
+  final String p2pTransfer = "$baseUrl/wallet/p2p-transfer/";
 }
 
 class OrderEndpoints {
@@ -61,4 +69,45 @@ class OrderEndpoints {
   final String purchaseElectricity = "$baseUrl/orders/buy-electricity/";
 
   final String orderHistory = "$baseUrl/orders/purchase-history/";
+}
+
+// ---- NEW FEATURE CLASSES ----
+
+class TransactionPinEndpoints {
+  final String setPin = "$baseUrl/account/set-transaction-pin/";
+  final String changePin = "$baseUrl/account/change-transaction-pin/";
+  final String verifyPin = "$baseUrl/account/verify-transaction-pin/";
+  final String requestResetOtp = "$baseUrl/account/request-transaction-pin-reset-otp/";
+  final String resetPin = "$baseUrl/account/reset-transaction-pin/";
+}
+
+class SupportEndpoints {
+  final String tickets = "$baseUrl/support/tickets/";
+  String messages(int id) => "$baseUrl/support/tickets/$id/messages/";
+  String closeTicket(int id) => "$baseUrl/support/tickets/$id/close/";
+}
+
+class NotificationEndpoints {
+  final String list = "$baseUrl/notifications/";
+  String markRead(int id) => "$baseUrl/notifications/$id/read/";
+  final String markAllRead = "$baseUrl/notifications/mark-all-read/";
+}
+
+class KycEndpoints {
+  final String status = "$baseUrl/account/kyc/";
+  final String submit = "$baseUrl/account/kyc/submit/";
+}
+
+class ReferralEndpoints {
+  final String info = "$baseUrl/account/referral/";
+}
+
+class BeneficiaryEndpoints {
+  final String purchaseBeneficiaries = "$baseUrl/account/purchase-beneficiaries/";
+  String deletePurchaseBeneficiary(int id) => "$baseUrl/account/purchase-beneficiaries/$id/";
+}
+
+class P2PEndpoints {
+  final String lookup = "$baseUrl/wallet/lookup-user/";
+  final String transfer = "$baseUrl/wallet/p2p-transfer/";
 }

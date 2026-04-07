@@ -12,6 +12,7 @@ class UserProfile {
   final bool isVerified;
   final bool emailVerified;
   final bool phoneVerified;
+  final bool hasTransactionPin;
 
   String get fullName {
     return '$firstName $lastName';
@@ -31,6 +32,7 @@ class UserProfile {
     this.isVerified = false,
     this.emailVerified = false,
     this.phoneVerified = false,
+    this.hasTransactionPin = false,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class UserProfile {
       isVerified: json['is_verified'] ?? false,
       emailVerified: json['email_verified'] ?? false,
       phoneVerified: json['phone_verified'] ?? false,
+      hasTransactionPin: json['has_transaction_pin'] ?? false,
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -65,6 +68,7 @@ class UserProfile {
       'is_verified': isVerified,
       'email_verified': emailVerified,
       'phone_verified': phoneVerified,
+      'has_transaction_pin': hasTransactionPin,
       'created_at': createdAt.toIso8601String(),
     };
   }

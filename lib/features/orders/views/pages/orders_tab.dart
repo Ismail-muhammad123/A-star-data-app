@@ -297,7 +297,7 @@ class _OrdersTabState extends State<OrdersTab> {
                             .then((_) => setState(() {})),
                   ),
                   _buildServiceCard(
-                    title: "Cable TV",
+                    title: "Cable/TV",
                     icon: Icons.tv,
                     color: Colors.purple,
                     onTap:
@@ -332,15 +332,15 @@ class _OrdersTabState extends State<OrdersTab> {
                             .push("/orders/buy-internet", extra: "ratel")
                             .then((_) => setState(() {})),
                   ),
-                  _buildServiceCard(
-                    title: "History",
-                    icon: Icons.history,
-                    color: Colors.blueAccent,
-                    onTap:
-                        () => context
-                            .push("/orders/history")
-                            .then((_) => setState(() {})),
-                  ),
+                  // _buildServiceCard(
+                  //   title: "History",
+                  //   icon: Icons.history,
+                  //   color: Colors.blueAccent,
+                  //   onTap:
+                  //       () => context
+                  //           .push("/orders/history")
+                  //           .then((_) => setState(() {})),
+                  // ),
                 ],
               ),
 

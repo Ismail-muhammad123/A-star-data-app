@@ -1,6 +1,6 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/wallet/data/models/withdrawal_account_model.dart';
-import 'package:app/features/wallet/data/repository/wallet_repo.dart';
+import 'package:app/features/wallet/data/repositories/wallet_repo.dart';
 import 'package:app/features/settings/views/pages/bank_information/wallet_bank_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,7 +29,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   bool _useOtherAccount = false;
   String? _otherBankCode;
   bool _isResolving = false;
-  bool _isSaving = false;
+  // bool _isSaving = false;
 
   double _withdrawalCharge = 0.0;
   bool _isChargePercentage = false;
@@ -93,63 +93,63 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     }
   }
 
-  Future<void> _saveAsWithdrawalAccount() async {
-    if (_isSaving) return;
+  // Future<void> _saveAsWithdrawalAccount() async {
+  //   if (_isSaving) return;
 
-    final bankName = _otherBankNameController.text;
-    final accountNumber = _otherAccountNumberController.text;
-    final accountName = _otherAccountNameController.text;
-    final bankCode = _otherBankCode;
+  //   final bankName = _otherBankNameController.text;
+  //   final accountNumber = _otherAccountNumberController.text;
+  //   final accountName = _otherAccountNameController.text;
+  //   final bankCode = _otherBankCode;
 
-    if (bankCode == null || accountName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Please select a bank and resolve the account name first",
-          ),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
+  //   if (bankCode == null || accountName.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text(
+  //           "Please select a bank and resolve the account name first",
+  //         ),
+  //         backgroundColor: Colors.orange,
+  //       ),
+  //     );
+  //     return;
+  //   }
 
-    setState(() => _isSaving = true);
-    try {
-      final token = context.read<AuthProvider>().authToken;
-      if (token != null) {
-        final account = WithdrawalAccount(
-          bankName: bankName,
-          bankCode: bankCode,
-          accountNumber: accountNumber,
-          accountName: accountName,
-        );
-        await WalletService().saveWithdrawalAccount(token, account);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Withdrawal account saved successfully"),
-              backgroundColor: Colors.green,
-            ),
-          );
-          await _loadData(); // Reload to get the new withdrawal account
-          setState(() {
-            _useOtherAccount = false; // Switch to saved account tab
-          });
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceAll("Exception: ", "")),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
-    }
-  }
+  //   setState(() => _isSaving = true);
+  //   try {
+  //     final token = context.read<AuthProvider>().authToken;
+  //     if (token != null) {
+  //       final account = WithdrawalAccount(
+  //         bankName: bankName,
+  //         bankCode: bankCode,
+  //         accountNumber: accountNumber,
+  //         accountName: accountName,
+  //       );
+  //       await WalletService().saveWithdrawalAccount(token, account);
+  //       if (mounted) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           const SnackBar(
+  //             content: Text("Withdrawal account saved successfully"),
+  //             backgroundColor: Colors.green,
+  //           ),
+  //         );
+  //         await _loadData(); // Reload to get the new withdrawal account
+  //         setState(() {
+  //           _useOtherAccount = false; // Switch to saved account tab
+  //         });
+  //       }
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(
+  //           content: Text(e.toString().replaceAll("Exception: ", "")),
+  //           backgroundColor: Colors.red,
+  //         ),
+  //       );
+  //     }
+  //   } finally {
+  //     if (mounted) setState(() => _isSaving = false);
+  //   }
+  // }
 
   Future<void> _submitWithdrawal() async {
     if (!_formKey.currentState!.validate()) return;

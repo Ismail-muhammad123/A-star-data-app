@@ -38,9 +38,8 @@ class WalletService {
         },
       ),
     );
-
     if (response.statusCode == 200) {
-      return (response.data as List)
+      return (response.data['results'] as List)
           .map((e) => WalletTransaction.fromJson(e as Map<String, dynamic>))
           .toList();
     } else {

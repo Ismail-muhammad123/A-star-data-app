@@ -2,7 +2,6 @@ import 'package:app/features/auth/views/pages/confirm_pin_reset.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/views/pages/airtime/buy_airtime.dart';
 import 'package:app/features/orders/views/pages/data/buy_data.dart';
-import 'package:app/features/orders/views/pages/smile/buy_smile_subscription.dart';
 import 'package:app/features/orders/views/pages/electricity/buy_electricity_page.dart';
 import 'package:app/features/orders/views/pages/electricity/list_electricity_providers.dart';
 import 'package:app/features/orders/views/pages/history/order_details.dart';
@@ -208,10 +207,10 @@ final GoRouter router = GoRouter(
     ),
 
     // ===================== Wallet Routes =====================
-    GoRoute(
-      path: "/orders/buy-smile",
-      builder: (context, state) => SmileVoicePurchasePage(),
-    ),
+    // GoRoute(
+    //   path: "/orders/buy-smile",
+    //   builder: (context, state) => SmileVoicePurchasePage(),
+    // ),
     GoRoute(
       path: '/wallet',
       builder: (context, state) => const HomePage(index: 1),

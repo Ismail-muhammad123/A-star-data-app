@@ -6,10 +6,13 @@ class P2PService {
   final Dio _dio = Dio();
   final P2PEndpoints endpoints = P2PEndpoints();
 
-  Future<Map<String, dynamic>> lookupUser(String authToken, String identifier) async {
-    final response = await _dio.post(
+  Future<Map<String, dynamic>> lookupUser(
+    String authToken,
+    String identifier,
+  ) async {
+    final response = await _dio.get(
       endpoints.lookup,
-      data: jsonEncode({'identifier': identifier}),
+      queryParameters: {'phone_number': identifier},
       options: Options(
         validateStatus: (status) => true,
         headers: {
@@ -18,6 +21,7 @@ class P2PService {
         },
       ),
     );
+    print('Lookup response: ${response.statusCode} - ${response.data}');
     if (response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     } else {

@@ -1,5 +1,5 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
-import 'package:app/features/wallet/data/repository/wallet_repo.dart';
+import 'package:app/features/wallet/data/repositories/wallet_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

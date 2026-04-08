@@ -1,4 +1,4 @@
-import 'package:app/features/wallet/data/repository/wallet_repo.dart';
+import 'package:app/features/wallet/data/repositories/wallet_repo.dart';
 import 'package:flutter/material.dart';
 
 class WalletProvider with ChangeNotifier {

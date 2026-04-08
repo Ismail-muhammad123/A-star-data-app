@@ -18,6 +18,7 @@ class OrderServices {
         },
       ),
     );
+    print(response.data);
 
     if (response.statusCode == 200) {
       List<dynamic> data = response.data["results"];
@@ -40,6 +41,7 @@ class OrderServices {
         },
       ),
     );
+    print(response.data);
 
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
@@ -157,27 +159,27 @@ class OrderServices {
     }
   }
 
-  Future<List<SmilePackage>> fetchSmilePackages(String authToken) async {
-    var response = await _dio.get(
-      _endpoints.getSmilePackages,
-      options: Options(
-        validateStatus: (status) => true,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $authToken',
-        },
-      ),
-    );
+  // Future<List<SmilePackage>> fetchSmilePackages(String authToken) async {
+  //   var response = await _dio.get(
+  //     _endpoints.getSmilePackages,
+  //     options: Options(
+  //       validateStatus: (status) => true,
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer $authToken',
+  //       },
+  //     ),
+  //   );
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
-      return data
-          .map((item) => SmilePackage.fromJson(item as Map<String, dynamic>))
-          .toList();
-    } else {
-      throw Exception('Failed to load smile packages');
-    }
-  }
+  //   if (response.statusCode == 200) {
+  //     List<dynamic> data = response.data;
+  //     return data
+  //         .map((item) => SmilePackage.fromJson(item as Map<String, dynamic>))
+  //         .toList();
+  //   } else {
+  //     throw Exception('Failed to load smile packages');
+  //   }
+  // }
 
   Future<void> purchaseSmileSubscription({
     required String authToken,
@@ -456,9 +458,10 @@ class OrderServices {
     String authToken,
     int? networkId,
   ) async {
-    String url = networkId != null
-        ? _endpoints.getInternetPackagesByService(networkId)
-        : _endpoints.getInternetPackages;
+    String url =
+        networkId != null
+            ? _endpoints.getInternetPackagesByService(networkId)
+            : _endpoints.getInternetPackages;
 
     var response = await _dio.get(
       url,

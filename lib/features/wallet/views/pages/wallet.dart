@@ -1,6 +1,6 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/wallet/data/models/wallet.dart';
-import 'package:app/features/wallet/data/repository/wallet_repo.dart';
+import 'package:app/features/wallet/data/repositories/wallet_repo.dart';
 import 'package:app/features/wallet/views/widgets/transaction_history_list.dart';
 import 'package:app/features/wallet/views/widgets/transfer_deposit_account_info_card.dart';
 import 'package:app/core/providers/balance_visibility_provider.dart';

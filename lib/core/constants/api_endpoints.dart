@@ -120,6 +120,6 @@ class BeneficiaryEndpoints {
 }
 
 class P2PEndpoints {
-  final String lookup = "$baseUrl/wallet/lookup-user/";
+  final String lookup = "$baseUrl/wallet/p2p-verify/";
   final String transfer = "$baseUrl/wallet/p2p-transfer/";
 }

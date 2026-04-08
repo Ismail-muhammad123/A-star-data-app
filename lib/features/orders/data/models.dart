@@ -17,7 +17,7 @@ class DataNetwork {
       id: json['id'],
       serviceName: json['service_name'],
       serviceId: json['service_id'],
-      imageUrl: json['image_url'],
+      imageUrl: json['image'],
     );
   }
 
@@ -26,7 +26,7 @@ class DataNetwork {
       'id': id,
       'service_name': serviceName,
       'service_id': serviceId,
-      'image_url': imageUrl,
+      'image': imageUrl,
     };
   }
 }
@@ -36,17 +36,23 @@ class AirtimeNetwork {
   final int? id;
   final String serviceName;
   final String serviceId;
-  // final double minimumAmount;
-  // final double maximumAmount;
+  final double minimumAmount;
+  final double maximumAmount;
   final String imageUrl;
+  final bool isActive;
+  final String discount;
+  final String agentDiscount;
 
   AirtimeNetwork({
     required this.id,
     required this.serviceName,
     required this.serviceId,
-    // required this.minimumAmount,
-    // required this.maximumAmount,
+    required this.minimumAmount,
+    required this.maximumAmount,
     required this.imageUrl,
+    required this.isActive,
+    required this.discount,
+    required this.agentDiscount,
   });
 
   factory AirtimeNetwork.fromJson(Map<String, dynamic> json) {
@@ -54,9 +60,12 @@ class AirtimeNetwork {
       id: json['id'],
       serviceName: json['service_name'],
       serviceId: json['service_id'],
-      // minimumAmount: (json['minimum_amount'] as num).toDouble(),
-      // maximumAmount: (json['maximum_amount'] as num).toDouble(),
-      imageUrl: json['image_url'],
+      minimumAmount: double.tryParse(json['min_amount'] as String) ?? 0.0,
+      maximumAmount: double.tryParse(json['max_amount'] as String) ?? 0.0,
+      imageUrl: json['image'],
+      isActive: json['is_active'] ?? true,
+      discount: json['discount'] ?? '0',
+      agentDiscount: json['agent_discount'] ?? '0',
     );
   }
 
@@ -65,9 +74,12 @@ class AirtimeNetwork {
       'id': id,
       'service_name': serviceName,
       'service_id': serviceId,
-      // 'minimum_amount': minimumAmount,
-      // 'maximum_amount': maximumAmount,
-      'image_url': imageUrl,
+      'min_amount': minimumAmount,
+      'max_amount': maximumAmount,
+      'image': imageUrl,
+      'is_active': isActive,
+      'discount': discount,
+      'agent_discount': agentDiscount,
     };
   }
 }
@@ -230,41 +242,41 @@ class DataBundle {
 }
 
 // SMILE PACKAGES
-class SmilePackage {
-  final int id;
-  final String name;
-  final String variationId;
-  final double sellingPrice;
-  final bool isActive;
+// class SmilePackage {
+//   final int id;
+//   final String name;
+//   final String variationId;
+//   final double sellingPrice;
+//   final bool isActive;
 
-  SmilePackage({
-    required this.id,
-    required this.name,
-    required this.variationId,
-    required this.sellingPrice,
-    required this.isActive,
-  });
+//   SmilePackage({
+//     required this.id,
+//     required this.name,
+//     required this.variationId,
+//     required this.sellingPrice,
+//     required this.isActive,
+//   });
 
-  factory SmilePackage.fromJson(Map<String, dynamic> json) {
-    return SmilePackage(
-      id: json['id'],
-      name: json['name'],
-      variationId: json['variation_id'].toString(),
-      sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
-      isActive: json['is_active'],
-    );
-  }
+//   factory SmilePackage.fromJson(Map<String, dynamic> json) {
+//     return SmilePackage(
+//       id: json['id'],
+//       name: json['name'],
+//       variationId: json['variation_id'].toString(),
+//       sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
+//       isActive: json['is_active'],
+//     );
+//   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'variation_id': variationId,
-      'selling_price': sellingPrice,
-      'is_active': isActive,
-    };
-  }
-}
+//   Map<String, dynamic> toJson() {
+//     return {
+//       'id': id,
+//       'name': name,
+//       'variation_id': variationId,
+//       'selling_price': sellingPrice,
+//       'is_active': isActive,
+//     };
+//   }
+// }
 
 // INTERNET SERVICES
 class InternetService {
@@ -343,7 +355,10 @@ class InternetPackage {
       providerName: json['provider_name'],
       variationId: json['variation_id'],
       sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
-      agentPrice: json['agent_price'] != null ? double.tryParse(json['agent_price'].toString()) : null,
+      agentPrice:
+          json['agent_price'] != null
+              ? double.tryParse(json['agent_price'].toString())
+              : null,
       planType: json['plan_type'],
       isActive: json['is_active'] ?? true,
     );

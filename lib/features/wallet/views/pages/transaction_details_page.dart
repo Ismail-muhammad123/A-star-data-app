@@ -1,6 +1,6 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/wallet/data/models/wallet.dart';
-import 'package:app/features/wallet/data/repository/wallet_repo.dart';
+import 'package:app/features/wallet/data/repositories/wallet_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';

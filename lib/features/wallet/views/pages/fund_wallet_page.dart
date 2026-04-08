@@ -1,6 +1,6 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/settings/providers/profile_provider.dart';
-import 'package:app/features/wallet/data/repository/wallet_repo.dart';
+import 'package:app/features/wallet/data/repositories/wallet_repo.dart';
 import 'package:app/features/wallet/views/pages/funding_guide_page.dart';
 import 'package:app/features/wallet/views/pages/webview_payment_page.dart';
 import 'package:app/features/wallet/views/widgets/transfer_deposit_account_info_card.dart';

@@ -87,7 +87,10 @@ class _WalletPageState extends State<WalletPage> {
                 children: [
                   IconButton(
                     onPressed: () => context.push('/notifications'),
-                    icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+                    icon: const Icon(
+                      Icons.notifications_outlined,
+                      color: Colors.white,
+                    ),
                   ),
                   if (notifications.unreadCount > 0)
                     Positioned(
@@ -99,10 +102,19 @@ class _WalletPageState extends State<WalletPage> {
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
                         child: Text(
-                          notifications.unreadCount > 9 ? "9+" : notifications.unreadCount.toString(),
-                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                          notifications.unreadCount > 9
+                              ? "9+"
+                              : notifications.unreadCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -212,8 +224,9 @@ class _WalletPageState extends State<WalletPage> {
                       children: [
                         Expanded(
                           child: _buildActionButton(
-                            label: "Withdraw Funds",
-                            icon: Icons.account_balance_wallet_outlined,
+                            title: "Bank Transfer",
+                            subtitle: "To other banks",
+                            icon: Icons.account_balance_outlined,
                             color: Colors.white.withOpacity(0.2),
                             textColor: Colors.white,
                             onTap:
@@ -222,10 +235,11 @@ class _WalletPageState extends State<WalletPage> {
                                     .then((_) => setState(() {})),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: _buildActionButton(
-                            label: "Transfer",
+                            title: "P2P Transfer",
+                            subtitle: "To other users",
                             icon: Icons.send_rounded,
                             color: Colors.white.withOpacity(0.2),
                             textColor: Colors.white,
@@ -361,6 +375,7 @@ class _WalletPageState extends State<WalletPage> {
                         accountNumber: account.accountNumber,
                         bankName: account.bankName,
                         color: Theme.of(context).cardColor,
+                        compact: true,
                       ),
                     ],
                   );
@@ -471,7 +486,8 @@ class _WalletPageState extends State<WalletPage> {
   }
 
   Widget _buildActionButton({
-    required String label,
+    required String title,
+    required String subtitle,
     required IconData icon,
     required Color color,
     required Color textColor,
@@ -483,22 +499,36 @@ class _WalletPageState extends State<WalletPage> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: textColor, size: 20),
-              const SizedBox(width: 8),
+              Icon(icon, color: textColor, size: 18),
+              const SizedBox(height: 6),
               Text(
-                label,
+                title,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 12,
+                  height: 1.1,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textColor.withOpacity(0.85),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 10,
                 ),
               ),
             ],

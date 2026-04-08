@@ -492,106 +492,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
 
                         const SizedBox(height: 32),
 
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Destination Account",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.color,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Switch between saved and other account
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap:
-                                      () => setState(
-                                        () => _useOtherAccount = false,
-                                      ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          !_useOtherAccount
-                                              ? Colors.blueAccent
-                                              : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      "Saved Account",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color:
-                                            !_useOtherAccount
-                                                ? Colors.white
-                                                : Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap:
-                                      () => setState(
-                                        () => _useOtherAccount = true,
-                                      ),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          _useOtherAccount
-                                              ? Colors.blueAccent
-                                              : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      "Other Account",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color:
-                                            _useOtherAccount
-                                                ? Colors.white
-                                                : Colors.grey,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        if (!_useOtherAccount)
-                          _withdrawalAccount == null
-                              ? _buildEmptyAccountCard()
-                              : _buildAccountCard()
-                        else
-                          _buildOtherAccountForm(),
+                        _buildOtherAccountForm(),
 
                         const SizedBox(height: 48),
 
@@ -636,171 +537,171 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     );
   }
 
-  Widget _buildEmptyAccountCard() {
-    final bool canSaveOther =
-        _otherBankCode != null &&
-        _otherAccountNumberController.text.length == 10 &&
-        _otherAccountNameController.text.isNotEmpty;
+  // Widget _buildEmptyAccountCard() {
+  //   final bool canSaveOther =
+  //       _otherBankCode != null &&
+  //       _otherAccountNumberController.text.length == 10 &&
+  //       _otherAccountNameController.text.isNotEmpty;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.orange.withOpacity(0.2)),
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.info_outline, color: Colors.orange[700], size: 40),
-          const SizedBox(height: 16),
-          const Text(
-            "No Withdrawal Account Linked",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            canSaveOther
-                ? "You can save the account details entered in the 'Other Account' tab."
-                : "Link a bank account to receive your funds automatically.",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
-          ),
-          const SizedBox(height: 24),
-          if (canSaveOther)
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed: _isSaving ? null : _saveAsWithdrawalAccount,
-                icon:
-                    _isSaving
-                        ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                        : const Icon(Icons.save_outlined),
-                label: const Text(
-                  "Save as Withdrawal Account",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            )
-          else
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed:
-                    () => context
-                        .push('/wallet/withdrawal-account')
-                        .then((_) => _loadData()),
-                icon: const Icon(Icons.add),
-                label: const Text(
-                  "Add Account",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange[700],
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+  //   return Container(
+  //     width: double.infinity,
+  //     padding: const EdgeInsets.all(24),
+  //     decoration: BoxDecoration(
+  //       color: Colors.orange.withOpacity(0.05),
+  //       borderRadius: BorderRadius.circular(16),
+  //       border: Border.all(color: Colors.orange.withOpacity(0.2)),
+  //     ),
+  //     child: Column(
+  //       children: [
+  //         Icon(Icons.info_outline, color: Colors.orange[700], size: 40),
+  //         const SizedBox(height: 16),
+  //         const Text(
+  //           "No Withdrawal Account Linked",
+  //           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+  //         ),
+  //         const SizedBox(height: 8),
+  //         Text(
+  //           canSaveOther
+  //               ? "You can save the account details entered in the 'Other Account' tab."
+  //               : "Link a bank account to receive your funds automatically.",
+  //           textAlign: TextAlign.center,
+  //           style: TextStyle(color: Colors.grey[600], fontSize: 14),
+  //         ),
+  //         const SizedBox(height: 24),
+  //         if (canSaveOther)
+  //           SizedBox(
+  //             width: double.infinity,
+  //             height: 50,
+  //             child: ElevatedButton.icon(
+  //               onPressed: _isSaving ? null : _saveAsWithdrawalAccount,
+  //               icon:
+  //                   _isSaving
+  //                       ? const SizedBox(
+  //                         height: 18,
+  //                         width: 18,
+  //                         child: CircularProgressIndicator(
+  //                           strokeWidth: 2,
+  //                           color: Colors.white,
+  //                         ),
+  //                       )
+  //                       : const Icon(Icons.save_outlined),
+  //               label: const Text(
+  //                 "Save as Withdrawal Account",
+  //                 style: TextStyle(fontWeight: FontWeight.bold),
+  //               ),
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: Colors.blueAccent,
+  //                 foregroundColor: Colors.white,
+  //                 shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.circular(12),
+  //                 ),
+  //               ),
+  //             ),
+  //           )
+  //         else
+  //           SizedBox(
+  //             width: double.infinity,
+  //             height: 50,
+  //             child: ElevatedButton.icon(
+  //               onPressed:
+  //                   () => context
+  //                       .push('/wallet/withdrawal-account')
+  //                       .then((_) => _loadData()),
+  //               icon: const Icon(Icons.add),
+  //               label: const Text(
+  //                 "Add Account",
+  //                 style: TextStyle(fontWeight: FontWeight.bold),
+  //               ),
+  //               style: ElevatedButton.styleFrom(
+  //                 backgroundColor: Colors.orange[700],
+  //                 foregroundColor: Colors.white,
+  //                 shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.circular(12),
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _buildAccountCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          if (Theme.of(context).brightness == Brightness.light)
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.account_balance, color: Colors.blueAccent, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                _withdrawalAccount!.bankName,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                ),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed:
-                    () => context
-                        .push('/wallet/withdrawal-account')
-                        .then((_) => _loadData()),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(50, 30),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  "Change",
-                  style: TextStyle(
-                    color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _withdrawalAccount!.accountNumber,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.2,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _withdrawalAccount!.accountName,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildAccountCard() {
+  //   return Container(
+  //     width: double.infinity,
+  //     padding: const EdgeInsets.all(20),
+  //     decoration: BoxDecoration(
+  //       color: Theme.of(context).cardColor,
+  //       borderRadius: BorderRadius.circular(16),
+  //       boxShadow: [
+  //         if (Theme.of(context).brightness == Brightness.light)
+  //           BoxShadow(
+  //             color: Colors.black.withOpacity(0.05),
+  //             blurRadius: 10,
+  //             offset: const Offset(0, 4),
+  //           ),
+  //       ],
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Icon(Icons.account_balance, color: Colors.blueAccent, size: 20),
+  //             const SizedBox(width: 8),
+  //             Text(
+  //               _withdrawalAccount!.bankName,
+  //               style: TextStyle(
+  //                 fontWeight: FontWeight.bold,
+  //                 fontSize: 15,
+  //                 color: Theme.of(context).textTheme.bodyLarge?.color,
+  //               ),
+  //             ),
+  //             const Spacer(),
+  //             TextButton(
+  //               onPressed:
+  //                   () => context
+  //                       .push('/wallet/withdrawal-account')
+  //                       .then((_) => _loadData()),
+  //               style: TextButton.styleFrom(
+  //                 padding: EdgeInsets.zero,
+  //                 minimumSize: const Size(50, 30),
+  //                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  //               ),
+  //               child: const Text(
+  //                 "Change",
+  //                 style: TextStyle(
+  //                   color: Colors.blueAccent,
+  //                   fontWeight: FontWeight.bold,
+  //                   fontSize: 13,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 16),
+  //         Text(
+  //           _withdrawalAccount!.accountNumber,
+  //           style: TextStyle(
+  //             fontSize: 24,
+  //             fontWeight: FontWeight.bold,
+  //             letterSpacing: 1.2,
+  //             color: Theme.of(context).textTheme.bodyLarge?.color,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 4),
+  //         Text(
+  //           _withdrawalAccount!.accountName,
+  //           style: TextStyle(
+  //             color: Colors.grey[600],
+  //             fontSize: 14,
+  //             fontWeight: FontWeight.w500,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildOtherAccountForm() {
     return Column(

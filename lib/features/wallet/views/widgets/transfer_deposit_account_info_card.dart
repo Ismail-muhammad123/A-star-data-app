@@ -7,6 +7,7 @@ class TransferDepositAccountInfoCard extends StatefulWidget {
   final String accountName;
   final double? amount;
   final Color? color;
+  final bool compact;
   const TransferDepositAccountInfoCard({
     super.key,
     required this.accountNumber,
@@ -14,6 +15,7 @@ class TransferDepositAccountInfoCard extends StatefulWidget {
     required this.accountName,
     this.amount,
     this.color,
+    this.compact = false,
   });
 
   @override
@@ -25,16 +27,17 @@ class _TransferDepositAccountInfoCardState
     extends State<TransferDepositAccountInfoCard> {
   @override
   Widget build(BuildContext context) {
+    final isCompact = widget.compact;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isCompact ? 14 : 24),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(isCompact ? 16 : 24),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF0F2027).withOpacity(0.4),
@@ -53,26 +56,26 @@ class _TransferDepositAccountInfoCardState
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(isCompact ? 6 : 8),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(isCompact ? 10 : 12),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.account_balance,
                         color: Colors.white,
-                        size: 20,
+                        size: isCompact ? 16 : 20,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: isCompact ? 8 : 12),
                     Expanded(
                       child: Text(
                         widget.bankName,
-                        style: const TextStyle(
-                          fontSize: 18,
+                        style: TextStyle(
+                          fontSize: isCompact ? 14 : 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
-                          letterSpacing: 1.2,
+                          letterSpacing: isCompact ? 0.6 : 1.2,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -80,14 +83,15 @@ class _TransferDepositAccountInfoCardState
                   ],
                 ),
               ),
-              const Icon(
-                Icons.wifi,
-                color: Colors.white70,
-                size: 28,
-              ), // Contactless icon
+              if (!isCompact)
+                const Icon(
+                  Icons.wifi,
+                  color: Colors.white70,
+                  size: 28,
+                ),
             ],
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: isCompact ? 12 : 32),
           Row(
             children: [
               Expanded(
@@ -96,11 +100,11 @@ class _TransferDepositAccountInfoCardState
                     RegExp(r".{4}"),
                     (match) => "${match.group(0)} ",
                   ),
-                  style: const TextStyle(
-                    fontSize: 26,
+                  style: TextStyle(
+                    fontSize: isCompact ? 20 : 26,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
+                    letterSpacing: isCompact ? 1.2 : 2,
                   ),
                 ),
               ),
@@ -118,12 +122,16 @@ class _TransferDepositAccountInfoCardState
                     ),
                   );
                 },
-                icon: const Icon(Icons.copy, color: Colors.white70, size: 20),
+                icon: Icon(
+                  Icons.copy,
+                  color: Colors.white70,
+                  size: isCompact ? 18 : 20,
+                ),
                 tooltip: "Copy Account Number",
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: isCompact ? 12 : 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -133,9 +141,10 @@ class _TransferDepositAccountInfoCardState
                 child: _buildInfoItem(
                   "ACCOUNT NAME",
                   widget.accountName.toUpperCase(),
+                  compact: isCompact,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isCompact ? 8 : 16),
               InkWell(
                 onTap: () {
                   final textToCopy =
@@ -154,21 +163,25 @@ class _TransferDepositAccountInfoCardState
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                    horizontal: 12,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.copy, size: 14, color: Colors.white),
-                      SizedBox(width: 6),
+                      Icon(
+                        Icons.copy,
+                        size: isCompact ? 12 : 14,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: isCompact ? 4 : 6),
                       Text(
                         "COPY",
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: isCompact ? 10 : 12,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -180,12 +193,12 @@ class _TransferDepositAccountInfoCardState
             ],
           ),
           if (widget.amount != null) ...[
-            const SizedBox(height: 24),
+            SizedBox(height: isCompact ? 12 : 24),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isCompact ? 10 : 16),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
                 border: Border.all(color: Colors.white.withOpacity(0.2)),
               ),
               child: Row(
@@ -193,12 +206,12 @@ class _TransferDepositAccountInfoCardState
                 children: [
                   const Text(
                     'Expected Amount',
-                    style: TextStyle(fontSize: 14, color: Colors.white70),
+                    style: TextStyle(fontSize: 12, color: Colors.white70),
                   ),
                   Text(
                     '₦${widget.amount?.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: isCompact ? 15 : 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.greenAccent,
                     ),
@@ -212,27 +225,31 @@ class _TransferDepositAccountInfoCardState
     );
   }
 
-  Widget _buildInfoItem(String label, String value) {
+  Widget _buildInfoItem(
+    String label,
+    String value, {
+    bool compact = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: 10,
+            fontSize: compact ? 9 : 10,
             color: Colors.white.withOpacity(0.7),
             fontWeight: FontWeight.w500,
-            letterSpacing: 1.5,
+            letterSpacing: compact ? 1.1 : 1.5,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: compact ? 2 : 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: compact ? 12 : 14,
             color: Colors.white,
             fontWeight: FontWeight.w600,
-            letterSpacing: 1,
+            letterSpacing: compact ? 0.6 : 1,
           ),
           overflow: TextOverflow.ellipsis,
           maxLines: 2,

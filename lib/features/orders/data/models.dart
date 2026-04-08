@@ -266,41 +266,160 @@ class SmilePackage {
   }
 }
 
+// INTERNET SERVICES
+class InternetService {
+  final int id;
+  final String serviceName;
+  final String serviceId;
+  final int? provider;
+  final String? providerName;
+  final String? image;
+  final bool isActive;
+
+  InternetService({
+    required this.id,
+    required this.serviceName,
+    required this.serviceId,
+    this.provider,
+    this.providerName,
+    this.image,
+    required this.isActive,
+  });
+
+  factory InternetService.fromJson(Map<String, dynamic> json) {
+    return InternetService(
+      id: json['id'],
+      serviceName: json['service_name'],
+      serviceId: json['service_id'],
+      provider: json['provider'],
+      providerName: json['provider_name'],
+      image: json['image'],
+      isActive: json['is_active'] ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'service_name': serviceName,
+      'service_id': serviceId,
+      'provider': provider,
+      'provider_name': providerName,
+      'image': image,
+      'is_active': isActive,
+    };
+  }
+}
+
+// INTERNET PACKAGES
+class InternetPackage {
+  final int id;
+  final String name;
+  final InternetService service;
+  final String? providerName;
+  final String variationId;
+  final double sellingPrice;
+  final double? agentPrice;
+  final String? planType;
+  final bool isActive;
+
+  InternetPackage({
+    required this.id,
+    required this.name,
+    required this.service,
+    this.providerName,
+    required this.variationId,
+    required this.sellingPrice,
+    this.agentPrice,
+    this.planType,
+    required this.isActive,
+  });
+
+  factory InternetPackage.fromJson(Map<String, dynamic> json) {
+    return InternetPackage(
+      id: json['id'],
+      name: json['name'],
+      service: InternetService.fromJson(json['service']),
+      providerName: json['provider_name'],
+      variationId: json['variation_id'],
+      sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
+      agentPrice: json['agent_price'] != null ? double.tryParse(json['agent_price'].toString()) : null,
+      planType: json['plan_type'],
+      isActive: json['is_active'] ?? true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'service': service.toJson(),
+      'provider_name': providerName,
+      'variation_id': variationId,
+      'selling_price': sellingPrice,
+      'agent_price': agentPrice,
+      'plan_type': planType,
+      'is_active': isActive,
+    };
+  }
+}
+
 // ORDER HISTORY
 class OrderHistory {
   int id;
   final String purchaseType;
-  final int? airtimeService;
-  final int? dataVariation;
   final String reference;
   final double amount;
   final String beneficiary;
   final String status;
   final DateTime time;
+  final String? remarks;
+  final String? initiator;
+  final int? airtimeService;
+  final int? dataVariation;
+  final int? electricityService;
+  final int? electricityVariation;
+  final int? tvVariation;
+  final int? internetVariation;
+  final int? educationVariation;
 
   OrderHistory({
     required this.id,
     required this.purchaseType,
-    required this.airtimeService,
-    required this.dataVariation,
     required this.reference,
     required this.amount,
     required this.beneficiary,
     required this.status,
     required this.time,
+    this.remarks,
+    this.initiator,
+    this.airtimeService,
+    this.dataVariation,
+    this.electricityService,
+    this.electricityVariation,
+    this.tvVariation,
+    this.internetVariation,
+    this.educationVariation,
   });
 
   factory OrderHistory.fromJson(Map<String, dynamic> json) {
     return OrderHistory(
       id: json['id'],
       purchaseType: json['purchase_type'],
-      airtimeService: json['airtime_service'],
-      dataVariation: json['data_variation'],
       reference: json['reference'],
-      amount: double.parse(json['amount']),
-      beneficiary: json['beneficiary'],
+      amount: double.tryParse(json['amount'].toString()) ?? 0.0,
+      beneficiary: json['beneficiary'] ?? "",
       status: json['status'],
       time: DateTime.parse(json['time']),
+      remarks: json['remarks'],
+      initiator: json['initiator'],
+      airtimeService: json['airtime_service'],
+      dataVariation: json['data_variation'],
+      electricityService: json['electricity_service'],
+      electricityVariation: json['electricity_variation'],
+      tvVariation: json['tv_variation'],
+      internetVariation: json['internet_variation'],
+      educationVariation: json['education_variation'],
     );
   }
 
@@ -308,13 +427,20 @@ class OrderHistory {
     return {
       'id': id,
       'purchase_type': purchaseType,
-      'airtime_service': airtimeService,
-      'data_variation': dataVariation,
       'reference': reference,
       'amount': amount,
       'beneficiary': beneficiary,
       'status': status,
       'time': time.toIso8601String(),
+      'remarks': remarks,
+      'initiator': initiator,
+      'airtime_service': airtimeService,
+      'data_variation': dataVariation,
+      'electricity_service': electricityService,
+      'electricity_variation': electricityVariation,
+      'tv_variation': tvVariation,
+      'internet_variation': internetVariation,
+      'education_variation': educationVariation,
     };
   }
 }

@@ -78,10 +78,19 @@ class _OrdersTabState extends State<OrdersTab> {
                           color: Colors.red,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
                         child: Text(
-                          notifications.unreadCount > 9 ? "9+" : notifications.unreadCount.toString(),
-                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                          notifications.unreadCount > 9
+                              ? "9+"
+                              : notifications.unreadCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -261,11 +270,10 @@ class _OrdersTabState extends State<OrdersTab> {
                     title: "Internet",
                     icon: Icons.router_outlined,
                     color: Colors.indigo,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Internet Services Coming Soon")),
-                      );
-                    },
+                    onTap:
+                        () => context
+                            .push("/orders/buy-internet")
+                            .then((_) => setState(() {})),
                   ),
                   _buildServiceCard(
                     title: "Education",
@@ -273,7 +281,9 @@ class _OrdersTabState extends State<OrdersTab> {
                     color: Colors.brown,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Education Services Coming Soon")),
+                        const SnackBar(
+                          content: Text("Education Services Coming Soon"),
+                        ),
                       );
                     },
                   ),
@@ -296,13 +306,30 @@ class _OrdersTabState extends State<OrdersTab> {
                             .then((_) => setState(() {})),
                   ),
                   _buildServiceCard(
-                    title: "Buy Smile",
-                    icon: Icons.call,
-                    color: Colors.purple,
-                    image: "assets/images/smile.png",
+                    title: "Smile",
+                    icon: Icons.router_outlined,
+                    color: Colors.pinkAccent,
                     onTap:
                         () => context
-                            .push("/orders/buy-smile")
+                            .push("/orders/buy-internet", extra: "smile")
+                            .then((_) => setState(() {})),
+                  ),
+                  _buildServiceCard(
+                    title: "Kirani",
+                    icon: Icons.router_outlined,
+                    color: Colors.green,
+                    onTap:
+                        () => context
+                            .push("/orders/buy-internet", extra: "kirani")
+                            .then((_) => setState(() {})),
+                  ),
+                  _buildServiceCard(
+                    title: "Ratel",
+                    icon: Icons.router_outlined,
+                    color: Colors.deepOrange,
+                    onTap:
+                        () => context
+                            .push("/orders/buy-internet", extra: "ratel")
                             .then((_) => setState(() {})),
                   ),
                   _buildServiceCard(

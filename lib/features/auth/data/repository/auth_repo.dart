@@ -248,4 +248,29 @@ class AuthService {
       throw Exception('Failed to close account');
     }
   }
+
+  Future<void> registerFcmToken({
+    required String authToken,
+    required String fcmToken,
+  }) async {
+    final response = await _dio.post(
+      endpoints.registerFCM,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+      data: jsonEncode({'fcm_token': fcmToken}),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception(
+        response.data?['error'] ??
+            response.data?['detail'] ??
+            'Failed to register FCM token',
+      );
+    }
+  }
 }

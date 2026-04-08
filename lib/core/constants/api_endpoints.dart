@@ -70,6 +70,13 @@ class OrderEndpoints {
   final String getElectricityServices = "$baseUrl/orders/electricity-services/";
   final String purchaseElectricity = "$baseUrl/orders/buy-electricity/";
 
+  final String getInternetServices = "$baseUrl/orders/internet-services/";
+  final String getInternetPackages = "$baseUrl/orders/internet-packages/";
+  String getInternetPackagesByService(int networkId) =>
+      "$baseUrl/orders/internet-services/$networkId/packages/";
+  final String purchaseInternetSubscription =
+      "$baseUrl/orders/buy-internet-subscription/";
+
   final String orderHistory = "$baseUrl/orders/purchase-history/";
 }
 

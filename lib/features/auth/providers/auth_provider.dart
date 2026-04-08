@@ -1,4 +1,5 @@
 import 'package:app/core/services/biometric_service.dart';
+import 'package:app/core/services/push_notification_service.dart';
 import 'package:app/features/settings/data/repositories/profile_repo.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -114,6 +115,7 @@ class AuthProvider extends ChangeNotifier {
         await prefs.setString('auth_token', token);
         authToken = token;
         _isAuthenticated = true;
+        await registerCurrentFcmToken();
         notifyListeners();
       } else {
         _isAuthenticated = false;
@@ -175,6 +177,7 @@ class AuthProvider extends ChangeNotifier {
 
         authToken = token;
         _isAuthenticated = true;
+        await registerCurrentFcmToken();
         await _markLoggedInBefore();
         notifyListeners();
         return {"success": true, "message": ""};
@@ -210,6 +213,7 @@ class AuthProvider extends ChangeNotifier {
         authToken = token;
         _isAuthenticated = true;
         _tempToken = null;
+        await registerCurrentFcmToken();
         notifyListeners();
         return {'success': true};
       }
@@ -370,6 +374,7 @@ class AuthProvider extends ChangeNotifier {
 
         authToken = token;
         _isAuthenticated = true;
+        await registerCurrentFcmToken();
         notifyListeners();
         return {"success": true, "message": ""};
       } else {
@@ -378,6 +383,38 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       print(e);
       return {"success": false, "message": "Failed to authenticate"};
+    }
+  }
+
+  Future<void> registerCurrentFcmToken() async {
+    try {
+      final currentAuthToken = authToken;
+      if (currentAuthToken == null || currentAuthToken.isEmpty) return;
+
+      final fcmToken = await PushNotificationService.instance.getToken();
+      if (fcmToken == null || fcmToken.isEmpty) return;
+
+      await _authService.registerFcmToken(
+        authToken: currentAuthToken,
+        fcmToken: fcmToken,
+      );
+    } catch (e) {
+      debugPrint("AuthProvider: Error registering current FCM token: $e");
+    }
+  }
+
+  Future<void> registerSpecificFcmToken(String fcmToken) async {
+    try {
+      final currentAuthToken = authToken;
+      if (currentAuthToken == null || currentAuthToken.isEmpty) return;
+      if (fcmToken.isEmpty) return;
+
+      await _authService.registerFcmToken(
+        authToken: currentAuthToken,
+        fcmToken: fcmToken,
+      );
+    } catch (e) {
+      debugPrint("AuthProvider: Error registering specific FCM token: $e");
     }
   }
 }

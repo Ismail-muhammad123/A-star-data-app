@@ -7,6 +7,7 @@ import 'package:app/features/orders/views/pages/electricity/buy_electricity_page
 import 'package:app/features/orders/views/pages/electricity/list_electricity_providers.dart';
 import 'package:app/features/orders/views/pages/history/order_details.dart';
 import 'package:app/features/orders/views/pages/history/order_history.dart';
+import 'package:app/features/orders/views/pages/internet/buy_internet_subscription.dart';
 import 'package:app/features/orders/views/pages/tv/buy_tv_page.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_pachage.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_service.dart';
@@ -157,6 +158,15 @@ final GoRouter router = GoRouter(
       path: "/orders/buy-data",
       builder: (context, state) => DataPurchaseFormPage(),
     ),
+    GoRoute(
+      path: "/orders/buy-internet",
+      builder: (context, state) {
+        final preferredNetworkName = state.extra as String?;
+        return InternetPurchasePage(
+          preferredNetworkName: preferredNetworkName,
+        );
+      },
+    ),
 
     // ==================== Electricity Routes =====================
     GoRoute(
@@ -214,6 +224,7 @@ final GoRouter router = GoRouter(
       path: '/wallet/p2p',
       builder: (context, state) => const P2PTransferPage(),
     ),
+   
     GoRoute(
       path: '/wallet/history/:transactionId',
       builder: (context, state) {

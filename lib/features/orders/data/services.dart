@@ -428,4 +428,89 @@ class OrderServices {
       throw Exception('Failed to load order details');
     }
   }
+
+  //======================== INTERNET SERVICES ======================================
+  Future<List<InternetService>> fetchInternetServices(String authToken) async {
+    var response = await _dio.get(
+      _endpoints.getInternetServices,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data['results'];
+      return data
+          .map((item) => InternetService.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception('Failed to load internet services');
+    }
+  }
+
+  Future<List<InternetPackage>> fetchInternetPackages(
+    String authToken,
+    int? networkId,
+  ) async {
+    String url = networkId != null
+        ? _endpoints.getInternetPackagesByService(networkId)
+        : _endpoints.getInternetPackages;
+
+    var response = await _dio.get(
+      url,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data['results'];
+      return data
+          .map((item) => InternetPackage.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception('Failed to load internet packages');
+    }
+  }
+
+  Future<OrderHistory> purchaseInternetSubscription({
+    required String authToken,
+    required String transactionPin,
+    required int planId,
+    required String phoneNumber,
+    String? promoCode,
+  }) async {
+    var response = await _dio.post(
+      _endpoints.purchaseInternetSubscription,
+      data: {
+        'transaction_pin': transactionPin,
+        'plan_id': planId,
+        'phone_number': phoneNumber,
+        if (promoCode != null) 'promo_code': promoCode,
+      },
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return OrderHistory.fromJson(response.data as Map<String, dynamic>);
+    } else {
+      throw Exception(
+        response.data['error'] ?? 'Failed to purchase internet subscription',
+      );
+    }
+  }
 }

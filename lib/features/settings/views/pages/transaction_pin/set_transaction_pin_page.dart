@@ -98,7 +98,7 @@ class _SetTransactionPinPageState extends State<SetTransactionPinPage> {
             const SizedBox(height: 12),
             Text(
               _isConfirming
-                  ? "Enter the 6-digit PIN again to confirm."
+                  ? "Enter the 4-digit PIN again to confirm."
                   : "This PIN will be used to authorize your transactions.",
               style: TextStyle(
                 fontSize: 14,
@@ -110,11 +110,13 @@ class _SetTransactionPinPageState extends State<SetTransactionPinPage> {
               child: _isConfirming
                   ? OtpInput(
                       key: const ValueKey("confirm"),
+                      length: 4,
                       controller: _confirmPinController,
                       onCompleted: _onPinEntered,
                     )
                   : OtpInput(
                       key: const ValueKey("create"),
+                      length: 4,
                       controller: _pinController,
                       onCompleted: _onPinEntered,
                     ),

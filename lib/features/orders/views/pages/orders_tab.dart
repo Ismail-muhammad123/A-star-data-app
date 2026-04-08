@@ -258,6 +258,26 @@ class _OrdersTabState extends State<OrdersTab> {
                             .then((_) => setState(() {})),
                   ),
                   _buildServiceCard(
+                    title: "Internet",
+                    icon: Icons.router_outlined,
+                    color: Colors.indigo,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Internet Services Coming Soon")),
+                      );
+                    },
+                  ),
+                  _buildServiceCard(
+                    title: "Education",
+                    icon: Icons.school_outlined,
+                    color: Colors.brown,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Education Services Coming Soon")),
+                      );
+                    },
+                  ),
+                  _buildServiceCard(
                     title: "Electricity",
                     icon: Icons.electric_bolt,
                     color: Colors.orange,

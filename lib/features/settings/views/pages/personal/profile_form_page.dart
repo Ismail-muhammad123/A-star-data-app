@@ -1,9 +1,10 @@
+import 'dart:io';
 import 'package:app/features/auth/providers/auth_provider.dart';
-import 'package:app/features/settings/data/repositories/profile_repo.dart';
 import 'package:app/features/settings/providers/profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class ProfileFormPage extends StatefulWidget {
@@ -22,6 +23,17 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
   final TextEditingController _countryCodeController = TextEditingController();
 
   bool _isLoading = false;
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -56,24 +68,30 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
   _updateProfile() async {
     setState(() => _isLoading = true);
     try {
-      final res = await ProfileService()
-          .updateUserProfile(context.read<AuthProvider>().authToken ?? "", {
-            "email": _emailController.text.trim(),
-            "first_name": _firstNameController.text.trim(),
-            "last_name": _lastNameController.text.trim(),
-            "middle_name": _middleNameController.text.trim(),
-          });
-      if (res != null && mounted) {
+      final authToken = context.read<AuthProvider>().authToken ?? "";
+      final profileProvider = context.read<ProfileProvider>();
+      
+      final success = await profileProvider.updateProfile(
+        authToken,
+        {
+          "email": _emailController.text.trim(),
+          "first_name": _firstNameController.text.trim(),
+          "last_name": _lastNameController.text.trim(),
+          "middle_name": _middleNameController.text.trim(),
+        },
+        profileImagePath: _selectedImage?.path,
+      );
+
+      if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Profile Updated Successfully"),
             backgroundColor: Colors.green,
           ),
         );
-        await context.read<ProfileProvider>().loadProfile(
-          context.read<AuthProvider>().authToken ?? "",
-        );
         if (mounted) context.pop();
+      } else if (mounted) {
+        throw Exception("Update failed");
       }
     } catch (e) {
       if (mounted) {
@@ -129,6 +147,59 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
                   context,
                 ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                 fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 30),
+            Center(
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                    backgroundImage:
+                        _selectedImage != null
+                            ? FileImage(_selectedImage!)
+                            : (context.read<ProfileProvider>().profile?.profileImage !=
+                                        null
+                                    ? NetworkImage(
+                                      context
+                                          .read<ProfileProvider>()
+                                          .profile!
+                                          .profileImage!,
+                                    )
+                                    : null)
+                                as ImageProvider?,
+                    child:
+                        _selectedImage == null &&
+                                context.read<ProfileProvider>().profile?.profileImage ==
+                                    null
+                            ? const Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Colors.blueAccent,
+                            )
+                            : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Colors.blueAccent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 30),

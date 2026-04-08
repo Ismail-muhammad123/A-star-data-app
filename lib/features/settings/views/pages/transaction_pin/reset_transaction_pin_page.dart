@@ -20,8 +20,6 @@ class _ResetTransactionPinPageState extends State<ResetTransactionPinPage> {
   
   bool _isLoading = false;
   bool _otpSent = false;
-  bool _obscureNew = true;
-  bool _obscureConfirm = true;
 
   Future<void> _requestOtp() async {
     setState(() => _isLoading = true);
@@ -56,7 +54,7 @@ class _ResetTransactionPinPageState extends State<ResetTransactionPinPage> {
 
   Future<void> _handleReset() async {
     if (_otpController.text.length < 6) return;
-    if (_newPinController.text.length < 6) return;
+    if (_newPinController.text.length < 4) return;
     if (_newPinController.text != _confirmPinController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("PINs do not match"), backgroundColor: Colors.red),
@@ -114,7 +112,7 @@ class _ResetTransactionPinPageState extends State<ResetTransactionPinPage> {
             const SizedBox(height: 12),
             Text(
               _otpSent
-                  ? "Enter the 6-digit OTP and your new PIN."
+                  ? "Enter the 6-digit OTP and your new 4-digit PIN."
                   : "We will send an OTP verify your identity before resetting your transaction PIN.",
               style: TextStyle(
                 fontSize: 14,
@@ -153,16 +151,26 @@ class _ResetTransactionPinPageState extends State<ResetTransactionPinPage> {
               const SizedBox(height: 32),
 
               // New PIN
-              _buildLabel("New 6-Digit PIN"),
-              const SizedBox(height: 8),
-              _buildPinField(_newPinController, _obscureNew, () => setState(() => _obscureNew = !_obscureNew)),
+              _buildLabel("New 4-Digit PIN"),
+              const SizedBox(height: 12),
+              OtpInput(
+                length: 4,
+                controller: _newPinController,
+                onCompleted: (v) {},
+                autofocus: false,
+              ),
 
               const SizedBox(height: 24),
 
               // Confirm New PIN
               _buildLabel("Confirm New PIN"),
-              const SizedBox(height: 8),
-              _buildPinField(_confirmPinController, _obscureConfirm, () => setState(() => _obscureConfirm = !_obscureConfirm)),
+              const SizedBox(height: 12),
+              OtpInput(
+                length: 4,
+                controller: _confirmPinController,
+                onCompleted: (v) {},
+                autofocus: false,
+              ),
 
               const SizedBox(height: 48),
 
@@ -200,31 +208,5 @@ class _ResetTransactionPinPageState extends State<ResetTransactionPinPage> {
     );
   }
 
-  Widget _buildPinField(TextEditingController ctrl, bool obscure, VoidCallback onToggle) {
-    final theme = Theme.of(context);
-    return TextFormField(
-      controller: ctrl,
-      obscureText: obscure,
-      keyboardType: TextInputType.number,
-      maxLength: 6,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      textAlign: TextAlign.center,
-      style: const TextStyle(letterSpacing: 8, fontWeight: FontWeight.bold),
-      decoration: InputDecoration(
-        hintText: "••••••",
-        counterText: "",
-        suffixIcon: IconButton(
-          icon: Icon(obscure ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
-          onPressed: onToggle,
-        ),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-        filled: true,
-        fillColor: theme.cardColor,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: theme.dividerColor),
-        ),
-      ),
-    );
-  }
 }
+

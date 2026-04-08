@@ -10,8 +10,8 @@ class PinEntryBottomSheet extends StatefulWidget {
   const PinEntryBottomSheet({
     super.key,
     this.title = "Verify Transaction PIN",
-    this.subtitle = "Enter your 6-digit transaction PIN to continue",
-    this.pinLength = 6,
+    this.subtitle = "Enter your 4-digit transaction PIN to continue",
+    this.pinLength = 4,
     required this.onPinEntered,
   });
 
@@ -195,8 +195,8 @@ class _PinEntryBottomSheetState extends State<PinEntryBottomSheet> {
 Future<String?> showPinEntrySheet(
   BuildContext context, {
   String title = "Verify Transaction PIN",
-  String subtitle = "Enter your 6-digit transaction PIN to continue",
-  int pinLength = 6,
+  String subtitle = "Enter your 4-digit transaction PIN to continue",
+  int pinLength = 4,
 }) {
   return showModalBottomSheet<String>(
     context: context,

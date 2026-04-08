@@ -12,4 +12,21 @@ class ProfileProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<bool> updateProfile(
+    String authToken,
+    Map<String, dynamic> data, {
+    String? profileImagePath,
+  }) async {
+    final result = await _profileService.updateUserProfile(
+      authToken,
+      data,
+      profileImagePath: profileImagePath,
+    );
+    if (result != null) {
+      await loadProfile(authToken);
+      return true;
+    }
+    return false;
+  }
 }

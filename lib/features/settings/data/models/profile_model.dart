@@ -13,6 +13,7 @@ class UserProfile {
   final bool emailVerified;
   final bool phoneVerified;
   final bool hasTransactionPin;
+  final String? profileImage;
 
   String get fullName {
     return '$firstName $lastName';
@@ -33,6 +34,7 @@ class UserProfile {
     this.emailVerified = false,
     this.phoneVerified = false,
     this.hasTransactionPin = false,
+    this.profileImage,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -50,6 +52,7 @@ class UserProfile {
       emailVerified: json['email_verified'] ?? false,
       phoneVerified: json['phone_verified'] ?? false,
       hasTransactionPin: json['has_transaction_pin'] ?? false,
+      profileImage: json['profile_image'],
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -69,6 +72,7 @@ class UserProfile {
       'email_verified': emailVerified,
       'phone_verified': phoneVerified,
       'has_transaction_pin': hasTransactionPin,
+      'profile_image': profileImage,
       'created_at': createdAt.toIso8601String(),
     };
   }

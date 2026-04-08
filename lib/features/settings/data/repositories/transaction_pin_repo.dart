@@ -16,14 +16,19 @@ class TransactionPinService {
           'Authorization': 'Bearer $authToken',
         },
       ),
-      data: jsonEncode({'pin': pin}),
+      data: jsonEncode({'pin': pin, "confirm_pin": pin}),
     );
+    print(response.data);
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception(response.data['detail'] ?? 'Failed to set PIN');
     }
   }
 
-  Future<void> changeTransactionPin(String authToken, String oldPin, String newPin) async {
+  Future<void> changeTransactionPin(
+    String authToken,
+    String oldPin,
+    String newPin,
+  ) async {
     final response = await _dio.post(
       endpoints.changePin,
       options: Options(
@@ -75,7 +80,11 @@ class TransactionPinService {
     }
   }
 
-  Future<void> resetTransactionPin(String authToken, String otp, String newPin) async {
+  Future<void> resetTransactionPin(
+    String authToken,
+    String otp,
+    String newPin,
+  ) async {
     final response = await _dio.post(
       endpoints.resetPin,
       options: Options(

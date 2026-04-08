@@ -32,25 +32,40 @@ class ProfileService {
 
   Future<Map<String, dynamic>?> updateUserProfile(
     String authToken,
-    Map<String, dynamic> updatedData,
-  ) async {
+    Map<String, dynamic> updatedData, {
+    String? profileImagePath,
+  }) async {
     try {
+      dynamic data;
+      Map<String, dynamic> headers = {
+        'Authorization': "Bearer $authToken",
+      };
+
+      if (profileImagePath != null) {
+        data = FormData.fromMap({
+          ...updatedData,
+          'profile_image': await MultipartFile.fromFile(
+            profileImagePath,
+            filename: profileImagePath.split('/').last,
+          ),
+        });
+        // Dio handles content-type for FormData automatically
+      } else {
+        data = jsonEncode(updatedData);
+        headers['Content-Type'] = 'application/json';
+      }
+
       final response = await _dio.put(
         profileEndpoints.updateProfile,
-        data: jsonEncode(updatedData),
+        data: data,
         options: Options(
           validateStatus: (status) => true,
-          headers: {
-            'Authorization': "Bearer $authToken",
-            'content-Type': 'application/json',
-          },
+          headers: headers,
         ),
       );
-      // print(response);
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        print(response);
         return null;
       }
     } catch (e) {

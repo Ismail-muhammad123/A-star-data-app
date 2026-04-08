@@ -6,6 +6,7 @@ class OrderServices {
   final OrderEndpoints _endpoints = OrderEndpoints();
   final Dio _dio = Dio();
 
+  //======================== AIRTIME ======================================
   Future<List<AirtimeNetwork>> fetchAirtimeNetworks(String authToken) async {
     var response = await _dio.get(
       _endpoints.getAirtimeNetworks,
@@ -19,7 +20,7 @@ class OrderServices {
     );
 
     if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
+      List<dynamic> data = response.data["results"];
       return data
           .map((item) => AirtimeNetwork.fromJson(item as Map<String, dynamic>))
           .toList();
@@ -397,7 +398,7 @@ class OrderServices {
       ),
     );
     if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
+      List<dynamic> data = response.data['results'];
       return data
           .map((item) => OrderHistory.fromJson(item as Map<String, dynamic>))
           .toList();

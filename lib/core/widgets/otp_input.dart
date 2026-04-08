@@ -5,12 +5,14 @@ class OtpInput extends StatefulWidget {
   final int length;
   final Function(String) onCompleted;
   final TextEditingController controller;
+  final bool autofocus;
 
   const OtpInput({
     super.key,
     this.length = 6,
     required this.onCompleted,
     required this.controller,
+    this.autofocus = true,
   });
 
   @override
@@ -42,6 +44,14 @@ class _OtpInputState extends State<OtpInput> {
     }
 
     widget.controller.addListener(_updateFromMainController);
+
+    if (widget.autofocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _focusNodes.isNotEmpty) {
+          _focusNodes[0].requestFocus();
+        }
+      });
+    }
   }
 
   void _updateFromMainController() {
@@ -105,11 +115,12 @@ class _OtpInputState extends State<OtpInput> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(widget.length, (index) {
-        return SizedBox(
-          width: 45,
-          height: 55,
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          width: 50,
+          height: 60,
           child: RawKeyboardListener(
             focusNode: FocusNode(), // Dummy node for listener
             onKey: (event) => _onKeyPress(event, index),
@@ -124,21 +135,24 @@ class _OtpInputState extends State<OtpInput> {
               decoration: InputDecoration(
                 counterText: "",
                 filled: true,
-                fillColor: Colors.grey[50],
+                fillColor: Theme.of(context).cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: Theme.of(context).dividerColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.blue, width: 2),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
                 ),
               ),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
         );

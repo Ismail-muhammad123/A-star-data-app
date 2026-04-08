@@ -1,5 +1,6 @@
-const baseUrl = "https://backend.stardata.com.ng/api";
+// const baseUrl = "https://backend.stardata.com.ng/api";
 // const baseUrl = "https://0663225b3ddb.ngrok-free.app/api";
+const baseUrl = "https://a-star-backend-staging.up.railway.app/api";
 
 // AUTH
 class AuthEndpoints {
@@ -13,10 +14,11 @@ class AuthEndpoints {
   final String activateAccount = "$baseUrl/account/activate-account/";
   final String confirmPinReset = "$baseUrl/account/confirm-reset-password/";
   final String closeAccount = "$baseUrl/account/close-account/";
-  
+
   // NEW: 2FA & FCM
   final String verify2FA = "$baseUrl/account/verify-2fa/";
-  final String resend2FA = "$baseUrl/account/resend-2fa-otp/"; // Confirm with schema logic (resend-activation-code exists, but 2FA might have its own)
+  final String resend2FA =
+      "$baseUrl/account/resend-2fa-otp/"; // Confirm with schema logic (resend-activation-code exists, but 2FA might have its own)
   final String registerFCM = "$baseUrl/account/register-fcm-token/";
 }
 
@@ -42,7 +44,7 @@ class WalletEndpoints {
   final String resolveAccount = "$baseUrl/wallet/resolve-account/";
   final String withdrawalAccount = "$baseUrl/wallet/withdrawal-account/";
   final String chargesConfig = "$baseUrl/payment/charges-config/";
-  
+
   // NEW: P2P inside Wallet
   final String lookupUser = "$baseUrl/wallet/lookup-user/";
   final String p2pTransfer = "$baseUrl/wallet/p2p-transfer/";
@@ -77,14 +79,15 @@ class TransactionPinEndpoints {
   final String setPin = "$baseUrl/account/set-transaction-pin/";
   final String changePin = "$baseUrl/account/change-transaction-pin/";
   final String verifyPin = "$baseUrl/account/verify-transaction-pin/";
-  final String requestResetOtp = "$baseUrl/account/request-transaction-pin-reset-otp/";
+  final String requestResetOtp =
+      "$baseUrl/account/request-transaction-pin-reset-otp/";
   final String resetPin = "$baseUrl/account/reset-transaction-pin/";
 }
 
 class SupportEndpoints {
-  final String tickets = "$baseUrl/support/tickets/";
-  String messages(int id) => "$baseUrl/support/tickets/$id/messages/";
-  String closeTicket(int id) => "$baseUrl/support/tickets/$id/close/";
+  final String support = "$baseUrl/support/";
+  String messages(int id) => "$baseUrl/support/$id/messages/";
+  String closeTicket(int id) => "$baseUrl/support/$id/close/";
 }
 
 class NotificationEndpoints {
@@ -95,7 +98,7 @@ class NotificationEndpoints {
 
 class KycEndpoints {
   final String status = "$baseUrl/account/kyc/";
-  final String submit = "$baseUrl/account/kyc/submit/";
+  final String submit = "$baseUrl/account/kyc/";
 }
 
 class ReferralEndpoints {
@@ -103,8 +106,10 @@ class ReferralEndpoints {
 }
 
 class BeneficiaryEndpoints {
-  final String purchaseBeneficiaries = "$baseUrl/account/purchase-beneficiaries/";
-  String deletePurchaseBeneficiary(int id) => "$baseUrl/account/purchase-beneficiaries/$id/";
+  final String purchaseBeneficiaries =
+      "$baseUrl/account/purchase-beneficiaries/";
+  String deletePurchaseBeneficiary(int id) =>
+      "$baseUrl/account/purchase-beneficiaries/$id/";
 }
 
 class P2PEndpoints {

@@ -1,3 +1,5 @@
+import 'package:app/core/extenstions/string_extention.dart';
+import 'package:app/features/support/data/models/support_model.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -8,14 +10,18 @@ class CreateSupportTicketPage extends StatefulWidget {
   const CreateSupportTicketPage({super.key});
 
   @override
-  State<CreateSupportTicketPage> createState() => _CreateSupportTicketPageState();
+  State<CreateSupportTicketPage> createState() =>
+      _CreateSupportTicketPageState();
 }
 
 class _CreateSupportTicketPageState extends State<CreateSupportTicketPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _subjectController = TextEditingController();
-  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
   bool _isLoading = false;
+
+  String? _selectedCategory;
 
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -26,7 +32,9 @@ class _CreateSupportTicketPageState extends State<CreateSupportTicketPage> {
       final res = await context.read<SupportProvider>().createTicket(
         auth.authToken ?? "",
         _subjectController.text.trim(),
-        _messageController.text.trim(),
+        _descriptionController.text.trim(),
+        _descriptionController.text.trim(),
+        _selectedCategory ?? "other",
       );
 
       if (!mounted) return;
@@ -44,6 +52,15 @@ class _CreateSupportTicketPageState extends State<CreateSupportTicketPage> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+
+    _descriptionController.dispose();
+    _subjectController.dispose();
+    super.dispose();
   }
 
   @override
@@ -93,11 +110,38 @@ class _CreateSupportTicketPageState extends State<CreateSupportTicketPage> {
 
               const SizedBox(height: 24),
 
+              // Category
+              _buildLabel("Issue Category"),
+              const SizedBox(height: 8),
+
+              DropdownButtonFormField(
+                decoration: _inputDecoration(
+                  hint: "Select Category",
+                  icon: Icons.category_rounded,
+                ),
+                items:
+                    SupportCategories.values
+                        .map(
+                          (e) => DropdownMenuItem(
+                            value: e.name,
+                            child: Text(e.name.toTitleCase()),
+                          ),
+                        )
+                        .toList(),
+                onChanged: (v) {
+                  setState(() {
+                    _selectedCategory = v;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 24),
+
               // Message
-              _buildLabel("Initial Message"),
+              _buildLabel("Description"),
               const SizedBox(height: 8),
               TextFormField(
-                controller: _messageController,
+                controller: _descriptionController,
                 maxLines: 6,
                 validator: (v) => (v?.isEmpty ?? true) ? "Required" : null,
                 decoration: _inputDecoration(
@@ -116,14 +160,20 @@ class _CreateSupportTicketPageState extends State<CreateSupportTicketPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "Create Ticket",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
+                  child:
+                      _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                            "Create Ticket",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                 ),
               ),
             ],
@@ -144,16 +194,28 @@ class _CreateSupportTicketPageState extends State<CreateSupportTicketPage> {
     );
   }
 
-  InputDecoration _inputDecoration({required String hint, required IconData icon}) {
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData icon,
+  }) {
     final theme = Theme.of(context);
     return InputDecoration(
       hintText: hint,
       prefixIcon: Icon(icon, color: theme.colorScheme.primary, size: 20),
       filled: true,
       fillColor: theme.cardColor,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: theme.dividerColor)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: theme.colorScheme.primary, width: 2)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: theme.dividerColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+      ),
     );
   }
 }

@@ -10,11 +10,11 @@ class KycService {
       endpoints.status,
       options: Options(
         validateStatus: (status) => true,
-        headers: {
-          'Authorization': 'Bearer $authToken',
-        },
+        headers: {'Authorization': 'Bearer $authToken'},
       ),
     );
+    print(response.data);
+
     if (response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     } else {
@@ -23,14 +23,21 @@ class KycService {
   }
 
   Future<void> submitKyc(String authToken, Map<String, dynamic> data) async {
+    final formData = FormData.fromMap({
+      'id_type': data['id_type'],
+      'id_number': data['id_number'],
+      if (data['id_image'] != null)
+        'id_image': await MultipartFile.fromFile(data['id_image']),
+      if (data['face_image'] != null)
+        'face_image': await MultipartFile.fromFile(data['face_image']),
+    });
+
     final response = await _dio.post(
       endpoints.submit,
-      data: data, // Form data is usually multipart or json. Schema says json/multipart depending on if files are sent.
+      data: formData,
       options: Options(
         validateStatus: (status) => true,
-        headers: {
-          'Authorization': 'Bearer $authToken',
-        },
+        headers: {'Authorization': 'Bearer $authToken'},
       ),
     );
     if (response.statusCode != 201 && response.statusCode != 200) {

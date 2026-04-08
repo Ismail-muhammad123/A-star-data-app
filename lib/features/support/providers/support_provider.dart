@@ -11,7 +11,8 @@ class SupportProvider extends ChangeNotifier {
   List<SupportTicket> get tickets => _tickets;
 
   Map<int, List<SupportMessage>> _ticketMessages = {};
-  List<SupportMessage> getMessages(int ticketId) => _ticketMessages[ticketId] ?? [];
+  List<SupportMessage> getMessages(int ticketId) =>
+      _ticketMessages[ticketId] ?? [];
 
   Future<void> fetchTickets(String authToken) async {
     _isLoading = true;
@@ -26,11 +27,23 @@ class SupportProvider extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> createTicket(String authToken, String subject, String message) async {
+  Future<Map<String, dynamic>> createTicket(
+    String authToken,
+    String subject,
+    String message,
+    String description,
+    String category,
+  ) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final ticket = await _supportService.createTicket(authToken, subject, message);
+      final ticket = await _supportService.createTicket(
+        authToken,
+        subject,
+        message,
+        description,
+        category,
+      );
       _tickets.insert(0, ticket);
       return {'success': true, 'ticketId': ticket.id};
     } catch (e) {
@@ -55,7 +68,11 @@ class SupportProvider extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> sendMessage(String authToken, int ticketId, String text) async {
+  Future<Map<String, dynamic>> sendMessage(
+    String authToken,
+    int ticketId,
+    String text,
+  ) async {
     try {
       final msg = await _supportService.sendMessage(authToken, ticketId, text);
       if (_ticketMessages[ticketId] == null) {
@@ -74,19 +91,11 @@ class SupportProvider extends ChangeNotifier {
       await _supportService.closeTicket(authToken, ticketId);
       // Update ticket status locally
       var idx = _tickets.indexWhere((t) => t.id == ticketId);
-      if (idx != -1) {
-        var old = _tickets[idx];
-        _tickets[idx] = SupportTicket(
-          id: old.id,
-          subject: old.subject,
-          status: 'closed',
-          createdAt: old.createdAt,
-          updatedAt: DateTime.now(),
-        );
-      }
+      _tickets.removeWhere((t) => t.id == ticketId);
+      fetchTickets(authToken);
       notifyListeners();
     } catch (e) {
-       debugPrint("Support: Error closing ticket: $e");
+      debugPrint("Support: Error closing ticket: $e");
     }
   }
 }

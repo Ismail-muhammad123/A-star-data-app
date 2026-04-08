@@ -79,7 +79,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
               ),
               const SizedBox(height: 32),
               const Text(
-                "A-STAR CONNECT",
+                "STARBOY GLOBAL",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

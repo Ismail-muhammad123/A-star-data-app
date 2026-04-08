@@ -29,7 +29,6 @@ import 'package:app/features/settings/views/pages/personal/profile_form_page.dar
 
 import 'package:app/features/wallet/views/pages/transaction_details_page.dart';
 import 'package:app/features/wallet/views/pages/wallet_history_page.dart';
-import 'package:app/features/settings/views/pages/bank_information/withdrawal_account_page.dart';
 import 'package:app/features/wallet/views/pages/withdrawal_page.dart';
 import 'package:app/features/wallet/views/pages/p2p/p2p_transfer_page.dart';
 import 'package:app/home.dart';
@@ -228,10 +227,6 @@ final GoRouter router = GoRouter(
       path: '/wallet/withdraw',
       builder: (context, state) => const WithdrawalPage(),
     ),
-    GoRoute(
-      path: '/wallet/withdrawal-account',
-      builder: (context, state) => const WithdrawalAccountPage(),
-    ),
 
     // ===================== Profile Routes =====================
     GoRoute(
@@ -258,10 +253,7 @@ final GoRouter router = GoRouter(
       path: '/profile/transaction-pin/reset',
       builder: (context, state) => const ResetTransactionPinPage(),
     ),
-    GoRoute(
-      path: '/support',
-      builder: (context, state) => const SupportPage(),
-    ),
+    GoRoute(path: '/support', builder: (context, state) => const SupportPage()),
     GoRoute(
       path: '/support/create',
       builder: (context, state) => const CreateSupportTicketPage(),
@@ -277,10 +269,7 @@ final GoRouter router = GoRouter(
       path: '/notifications',
       builder: (context, state) => const NotificationsPage(),
     ),
-    GoRoute(
-      path: '/profile/kyc',
-      builder: (context, state) => const KycPage(),
-    ),
+    GoRoute(path: '/profile/kyc', builder: (context, state) => const KycPage()),
     GoRoute(
       path: '/referral',
       builder: (context, state) => const ReferralPage(),

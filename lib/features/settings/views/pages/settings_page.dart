@@ -75,6 +75,139 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  void _showWhatsAppSupportOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder:
+          (context) => Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  "WhatsApp Support",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "How would you like to reach us?",
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+                _buildSupportOption(
+                  context,
+                  title: "Chat with Support",
+                  subtitle: "Directly chat with our agent",
+                  icon: FontAwesomeIcons.whatsapp,
+                  iconColor: Colors.green,
+                  onTap: () {
+                    Navigator.pop(context);
+                    openWhatsAppChat(context, "+2348067682425");
+                  },
+                ),
+                const SizedBox(height: 12),
+                _buildSupportOption(
+                  context,
+                  title: "Support & Updates Channel",
+                  subtitle: "Join our channel for latest news",
+                  icon: Icons.campaign_rounded,
+                  iconColor: Colors.blue,
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final Uri channelUrl = Uri.parse(
+                      "https://whatsapp.com/channel/0029Vb7rJr035fLz4bUIKS1d",
+                    );
+                    if (await canLaunchUrl(channelUrl)) {
+                      await launchUrl(
+                        channelUrl,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+    );
+  }
+
+  Widget _buildSupportOption(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.grey[900] : Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child:
+                  icon is FontAwesomeIcons
+                      ? FaIcon(icon, color: iconColor, size: 24)
+                      : Icon(icon, color: iconColor, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey[400]),
+          ],
+        ),
+      ),
+    );
+  }
+
   double _calculateProfileCompletion(UserProfile? profile) {
     if (profile == null) return 0;
     int completedFields = 0;
@@ -137,12 +270,21 @@ class _SettingsPageState extends State<SettingsPage> {
                                           Brightness.dark
                                       ? Colors.grey[800]
                                       : Colors.white,
-                              child: Icon(
-                                Icons.person,
-                                size: 40,
-                                color:
-                                    Theme.of(context).colorScheme.primary,
-                              ),
+                              backgroundImage:
+                                  (profile?.profileImage != null &&
+                                          profile!.profileImage!.isNotEmpty)
+                                      ? NetworkImage(profile!.profileImage!)
+                                      : null,
+                              child:
+                                  (profile?.profileImage == null ||
+                                          profile!.profileImage!.isEmpty)
+                                      ? Icon(
+                                        Icons.person,
+                                        size: 40,
+                                        color:
+                                            Theme.of(context).colorScheme.primary,
+                                      )
+                                      : null,
                             ),
                             const SizedBox(width: 15),
                             Column(
@@ -343,19 +485,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () => context.push("/profile/kyc"),
                   ),
 
-                  // SettingsTile(
-                  //   title: "Bank Information",
-                  //   subTitle: "Setup your payout bank",
-                  //   leadingIcon: Icons.account_balance_outlined,
-                  //   onTap: () => context.push("/profile/bank-info"),
-                  // ),
-                  SettingsTile(
-                    title: "Withdrawal Account",
-                    subTitle: "Link your payout bank account",
-                    leadingIcon: Icons.account_balance_wallet_outlined,
-                    onTap: () => context.push("/wallet/withdrawal-account"),
-                  ),
-
                   const SizedBox(height: 24),
                   _buildSectionHeader("Security"),
                   SettingsTile(
@@ -365,7 +494,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () => context.push("/profile/change-pin"),
                   ),
                   SettingsTile(
-                    title: (profile?.hasTransactionPin ?? false) ? "Change Transaction PIN" : "Set Transaction PIN",
+                    title:
+                        (profile?.hasTransactionPin ?? false)
+                            ? "Change Transaction PIN"
+                            : "Set Transaction PIN",
                     subTitle: "Authorize payments and transfers",
                     leadingIcon: Icons.lock_outline,
                     onTap: () {
@@ -451,14 +583,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () => context.push('/referral'),
                   ),
                   SettingsTile(
-                    title: "Live Chat (WhatsApp)",
-                    subTitle: "Chat with us instantly",
+                    title: "WhatsApp Support",
+                    subTitle: "Chat or join our updates channel",
                     leading: const FaIcon(
                       FontAwesomeIcons.whatsapp,
                       color: Colors.green,
                       size: 24,
                     ),
-                    onTap: () => openWhatsAppChat(context, "+2348067682425"),
+                    onTap: () => _showWhatsAppSupportOptions(context),
                   ),
 
                   const SizedBox(height: 32),

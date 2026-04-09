@@ -10,8 +10,10 @@ class AuthProvider extends ChangeNotifier {
   bool _isAuthenticated = false;
   String? authToken;
   String? _tempToken;
+  String? _pending2FAIdentifier;
 
   String? get tempToken => _tempToken;
+  String? get pending2FAIdentifier => _pending2FAIdentifier;
   bool get isAuthenticated => _isAuthenticated;
 
   final AuthService _authService = AuthService();
@@ -136,17 +138,19 @@ class AuthProvider extends ChangeNotifier {
       phoneNumber = phoneNumber.substring(1);
     }
     _tempToken = null;
+    _pending2FAIdentifier = null;
 
     try {
       var res = await _authService.login(phoneNumber, pin);
-      print(res);
 
-      if (res['requires_2fa'] == true) {
+      if (res['requires_2fa'] == true || res['two_factor_required'] == true) {
         _tempToken = res['temp_token'];
+        _pending2FAIdentifier = (res['identifier'] ?? phoneNumber).toString();
         return {
           'success': false,
           'requires_2fa': true,
           'temp_token': _tempToken,
+          'identifier': _pending2FAIdentifier,
         };
       }
 
@@ -192,16 +196,20 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> verify2FA(String otp) async {
-    if (_tempToken == null) {
+  Future<Map<String, dynamic>> verify2FA(
+    String otp, {
+    String? identifier,
+  }) async {
+    final resolvedIdentifier = identifier ?? _pending2FAIdentifier;
+    if (resolvedIdentifier == null || resolvedIdentifier.trim().isEmpty) {
       return {
         'success': false,
-        'message': 'No temporary token found. Please login again.'
+        'message': 'No 2FA identifier found. Please login again.',
       };
     }
 
     try {
-      var res = await _authService.verify2FA(_tempToken!, otp);
+      var res = await _authService.verify2FA(resolvedIdentifier, otp);
       var token = res['access'];
       var refresh = res['refresh'];
 
@@ -209,10 +217,12 @@ class AuthProvider extends ChangeNotifier {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', token);
         await prefs.setString('refresh_token', refresh);
+        await prefs.setString('last_phone_number', resolvedIdentifier);
 
         authToken = token;
         _isAuthenticated = true;
         _tempToken = null;
+        _pending2FAIdentifier = null;
         await registerCurrentFcmToken();
         notifyListeners();
         return {'success': true};
@@ -223,16 +233,89 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> resend2FAOtp() async {
-    if (_tempToken == null) {
+  Future<Map<String, dynamic>> resend2FAOtp({
+    String? identifier,
+    String channel = 'sms',
+  }) async {
+    final resolvedIdentifier = identifier ?? _pending2FAIdentifier;
+    if (resolvedIdentifier == null || resolvedIdentifier.trim().isEmpty) {
       return {
         'success': false,
-        'message': 'No temporary token found. Please login again.'
+        'message': 'No 2FA identifier found. Please login again.',
       };
     }
 
     try {
-      await _authService.resend2FAOtp(_tempToken!);
+      await _authService.resend2FAOtp(resolvedIdentifier, channel: channel);
+      return {'success': true};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> request2FAReset({
+    String? identifier,
+    String channel = 'sms',
+  }) async {
+    final resolvedIdentifier = identifier ?? _pending2FAIdentifier;
+    if (resolvedIdentifier == null || resolvedIdentifier.trim().isEmpty) {
+      return {
+        'success': false,
+        'message': 'No account identifier found for 2FA reset.',
+      };
+    }
+
+    try {
+      await _authService.request2FAReset(
+        resolvedIdentifier,
+        channel: channel,
+      );
+      return {'success': true};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> confirm2FAReset({
+    String? identifier,
+    required String otpCode,
+  }) async {
+    final resolvedIdentifier = identifier ?? _pending2FAIdentifier;
+    if (resolvedIdentifier == null || resolvedIdentifier.trim().isEmpty) {
+      return {
+        'success': false,
+        'message': 'No account identifier found for 2FA reset.',
+      };
+    }
+
+    try {
+      await _authService.confirm2FAReset(resolvedIdentifier, otpCode);
+      _tempToken = null;
+      _pending2FAIdentifier = null;
+      return {'success': true};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> update2FASettings({
+    required bool isEnabled,
+    String twoFactorMethod = 'sms',
+  }) async {
+    final token = authToken;
+    if (token == null || token.isEmpty) {
+      return {
+        'success': false,
+        'message': 'You need to be logged in to update 2FA settings.',
+      };
+    }
+
+    try {
+      await _authService.update2FASettings(
+        authToken: token,
+        isEnabled: isEnabled,
+        twoFactorMethod: twoFactorMethod,
+      );
       return {'success': true};
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -292,6 +375,8 @@ class AuthProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
     await prefs.remove('refresh_token');
+    _tempToken = null;
+    _pending2FAIdentifier = null;
     _isAuthenticated = false;
     notifyListeners();
   }
@@ -305,6 +390,8 @@ class AuthProvider extends ChangeNotifier {
     await prefs.remove('auth_token');
     await prefs.remove('refresh_token');
     await _biometricService.disableBiometricLogin();
+    _tempToken = null;
+    _pending2FAIdentifier = null;
     _isAuthenticated = false;
     notifyListeners();
   }

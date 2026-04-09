@@ -73,6 +73,44 @@ class ProfileService {
     }
   }
 
+  Future<void> setTwoFactorStatus(String authToken, bool enabled) async {
+    final payloadCandidates = <Map<String, dynamic>>[
+      {'requires_2fa': enabled},
+      {'two_factor_enabled': enabled},
+      {'two_fa_enabled': enabled},
+      {'is_2fa_enabled': enabled},
+    ];
+
+    String? lastError;
+
+    for (final payload in payloadCandidates) {
+      try {
+        final response = await _dio.put(
+          profileEndpoints.updateProfile,
+          data: jsonEncode(payload),
+          options: Options(
+            validateStatus: (status) => true,
+            headers: {
+              'Authorization': "Bearer $authToken",
+              'Content-Type': 'application/json',
+            },
+          ),
+        );
+
+        if (response.statusCode != null &&
+            response.statusCode! >= 200 &&
+            response.statusCode! < 300) {
+          return;
+        }
+        lastError = _extractErrorMessage(response.data);
+      } catch (e) {
+        lastError = e.toString();
+      }
+    }
+
+    throw Exception(lastError ?? 'Unable to update 2FA setting right now.');
+  }
+
   Future<bool> changePin(String authToken, String oldPin, String newPin) async {
     try {
       final response = await _dio.post(
@@ -213,5 +251,17 @@ class ProfileService {
       print('Error fetching Nigerian banks: $e');
       return [];
     }
+  }
+
+  String? _extractErrorMessage(dynamic responseData) {
+    if (responseData is Map<String, dynamic>) {
+      for (final key in ['detail', 'error', 'message']) {
+        final value = responseData[key];
+        if (value is String && value.trim().isNotEmpty) {
+          return value.trim();
+        }
+      }
+    }
+    return null;
   }
 }

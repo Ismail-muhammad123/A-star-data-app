@@ -1,6 +1,6 @@
 {
-    "name": "app",
-    "short_name": "app",
+    "name": "Starboy Global",
+    "short_name": "Starboy Global",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",

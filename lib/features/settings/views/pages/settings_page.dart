@@ -20,6 +20,62 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool _isUpdatingTwoFactor = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profileProvider = context.read<ProfileProvider>();
+      if (profileProvider.profile == null) {
+        final authToken = context.read<AuthProvider>().authToken ?? "";
+        profileProvider.loadProfile(authToken);
+      }
+    });
+  }
+
+  Future<void> _toggleTwoFactor(bool enabled) async {
+    if (_isUpdatingTwoFactor) return;
+
+    setState(() => _isUpdatingTwoFactor = true);
+    try {
+      final authProvider = context.read<AuthProvider>();
+      final res = await authProvider.update2FASettings(
+        isEnabled: enabled,
+        twoFactorMethod: enabled ? 'sms' : 'none',
+      );
+      if (res['success'] != true) {
+        throw Exception(res['message'] ?? 'Unable to update 2FA right now.');
+      }
+      await context.read<ProfileProvider>().loadProfile(authProvider.authToken ?? "");
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            enabled
+                ? "Two-factor authentication has been enabled."
+                : "Two-factor authentication has been disabled.",
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString().replaceAll('Exception: ', '').trim().isEmpty
+                ? "Unable to update 2FA right now. Please try again."
+                : e.toString().replaceAll('Exception: ', ''),
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isUpdatingTwoFactor = false);
+    }
+  }
+
   Future<void> openWhatsAppChat(
     BuildContext context,
     String phoneNumber, {
@@ -507,6 +563,23 @@ class _SettingsPageState extends State<SettingsPage> {
                         context.push("/profile/transaction-pin/set");
                       }
                     },
+                  ),
+                  SettingsTile(
+                    title: "Two-Factor Authentication (2FA)",
+                    subTitle:
+                        (profile?.twoFactorEnabled ?? false)
+                            ? "Extra sign-in protection is active"
+                            : "Add an extra verification step on login",
+                    leadingIcon: Icons.security_outlined,
+                    showChevron: false,
+                    trailing: Switch.adaptive(
+                      value: profile?.twoFactorEnabled ?? false,
+                      activeColor: Colors.blueAccent,
+                      onChanged:
+                          _isUpdatingTwoFactor || profile == null
+                              ? null
+                              : _toggleTwoFactor,
+                    ),
                   ),
                   Consumer<AuthProvider>(
                     builder: (context, auth, child) {

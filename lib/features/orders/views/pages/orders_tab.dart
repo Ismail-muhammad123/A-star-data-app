@@ -1,11 +1,14 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
+import 'package:app/core/constants/support_phone_number.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
 import 'package:app/core/providers/balance_visibility_provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:app/features/notifications/providers/notification_provider.dart';
@@ -18,6 +21,9 @@ class OrdersTab extends StatefulWidget {
 }
 
 class _OrdersTabState extends State<OrdersTab> {
+  static const String _whatsAppChannelUrl =
+      "https://whatsapp.com/channel/0029Vb7rJr035fLz4bUIKS1d";
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +43,34 @@ class _OrdersTabState extends State<OrdersTab> {
       );
     }
     setState(() {});
+  }
+
+  Future<void> _openWhatsAppChat() async {
+    final sanitizedPhoneNumber = supportPhoneNumber.replaceAll('+', '');
+    final uri = Uri.parse(
+      "https://wa.me/$sanitizedPhoneNumber?text=${Uri.encodeComponent("Hello, I need help with my order.")}",
+    );
+
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Unable to open WhatsApp chat right now."),
+        ),
+      );
+    }
+  }
+
+  Future<void> _openWhatsAppChannel() async {
+    final uri = Uri.parse(_whatsAppChannelUrl);
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Unable to open WhatsApp channel right now."),
+        ),
+      );
+    }
   }
 
   @override
@@ -60,6 +94,28 @@ class _OrdersTabState extends State<OrdersTab> {
         elevation: 0,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         actions: [
+          PopupMenuButton<String>(
+            tooltip: "WhatsApp",
+            icon: const FaIcon(FontAwesomeIcons.whatsapp, size: 20),
+            onSelected: (value) async {
+              if (value == "chat") {
+                await _openWhatsAppChat();
+              } else if (value == "channel") {
+                await _openWhatsAppChannel();
+              }
+            },
+            itemBuilder:
+                (context) => const [
+                  PopupMenuItem<String>(
+                    value: "chat",
+                    child: Text("Chat via WhatsApp"),
+                  ),
+                  PopupMenuItem<String>(
+                    value: "channel",
+                    child: Text("Join WhatsApp channel"),
+                  ),
+                ],
+          ),
           Consumer<NotificationProvider>(
             builder: (context, notifications, child) {
               return Stack(

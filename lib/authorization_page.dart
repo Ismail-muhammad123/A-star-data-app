@@ -63,18 +63,11 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
             children: [
               Hero(
                 tag: "logo",
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Image.asset(
-                    "assets/images/logo/a-star_app_logo.png",
-                    height: 100,
-                    width: 100,
-                    fit: BoxFit.contain,
-                  ),
+                child: Image.asset(
+                  "assets/images/logo/starboy.png",
+                  height: 200,
+                  width: 200,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: 32),
@@ -124,23 +117,16 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
               const Spacer(),
               Hero(
                 tag: "logo",
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Image.asset(
-                    "assets/images/logo/a-star_app_logo.png",
-                    height: 100,
-                    width: 100,
-                    fit: BoxFit.contain,
-                  ),
+                child: Image.asset(
+                  "assets/images/logo/starboy.png",
+                  height: 200,
+                  width: 200,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: 32),
               const Text(
-                "A-STAR CONNECT",
+                "STARBOY GLOBAL",
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,
@@ -184,7 +170,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
                         elevation: 0,
                       ),
                       child: const Text(
-                        "Get Started",
+                        "Login",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

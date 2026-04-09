@@ -103,10 +103,13 @@ flutter:
 
 flutter_launcher_icons:
   android: "launcher_icon"
-  image_path: "assets/images/logo/a-star_app_logo.png"
+  ios: true
+  image_path: "assets/images/logo/starboy-logo2.png"
+  image_path_ios: "assets/images/logo/starboy-logo2.png"
+  remove_alpha_ios: true
   min_sdk_android: 21 
   web:
     generate: true
-    image_path: "assets/images/logo/a-star_app_logo.png"
+    image_path: "assets/images/logo/starboy-logo2.png"
     background_color: "#FFFFFF"
     theme_color: "#0000FF"

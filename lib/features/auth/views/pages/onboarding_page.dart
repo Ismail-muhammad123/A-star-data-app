@@ -56,7 +56,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             },
           ),
           Positioned(
-            bottom: 60,
+            bottom: 30,
             left: 20,
             right: 20,
             child: Column(
@@ -68,7 +68,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     (index) => _buildIndicator(index),
                   ),
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 25),
                 SizedBox(
                   width: double.infinity,
                   height: 56,

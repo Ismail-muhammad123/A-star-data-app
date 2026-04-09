@@ -5,6 +5,19 @@ import 'package:app/core/constants/api_endpoints.dart';
 class AuthService {
   final Dio _dio = Dio();
   final AuthEndpoints endpoints = AuthEndpoints();
+
+  String _extractError(dynamic responseData, String fallback) {
+    if (responseData is Map<String, dynamic>) {
+      for (final key in ['detail', 'error', 'message']) {
+        final value = responseData[key];
+        if (value is String && value.trim().isNotEmpty) {
+          return value.trim();
+        }
+      }
+    }
+    return fallback;
+  }
+
   // Login
   Future<Map<String, dynamic>> login(String phoneNumber, String pin) async {
     final response = await _dio.post(
@@ -15,49 +28,99 @@ class AuthService {
       ),
       data: jsonEncode({'phone_number': phoneNumber, 'pin': pin}),
     );
-    print(response.data);
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 202) {
       return response.data as Map<String, dynamic>;
     } else {
-      throw Exception(response.data['detail'] ?? 'Failed to login');
+      throw Exception(_extractError(response.data, 'Failed to login'));
     }
   }
 
   // Verify 2FA
-  Future<Map<String, dynamic>> verify2FA(String tempToken, String otp) async {
+  Future<Map<String, dynamic>> verify2FA(String identifier, String otpCode) async {
     final response = await _dio.post(
       endpoints.verify2FA,
       options: Options(
         validateStatus: (status) => true,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $tempToken', // Verify if backend uses Authorization or data field
-        },
+        headers: {'Content-Type': 'application/json'},
       ),
-      data: jsonEncode({'otp': otp}),
+      data: jsonEncode({'identifier': identifier, 'otp_code': otpCode}),
     );
     if (response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     } else {
-      throw Exception(response.data['detail'] ?? 'Failed to verify OTP');
+      throw Exception(_extractError(response.data, 'Failed to verify OTP'));
     }
   }
 
   // Resend 2FA OTP
-  Future<void> resend2FAOtp(String tempToken) async {
+  Future<void> resend2FAOtp(String identifier, {String channel = 'sms'}) async {
     final response = await _dio.post(
-      endpoints.resend2FA,
+      endpoints.twoFaResend,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {'Content-Type': 'application/json'},
+      ),
+      data: jsonEncode({'identifier': identifier, 'channel': channel}),
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.data, 'Failed to resend 2FA code'));
+    }
+  }
+
+  Future<void> request2FAReset(
+    String identifier, {
+    String channel = 'sms',
+  }) async {
+    final response = await _dio.post(
+      endpoints.twoFaReset,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {'Content-Type': 'application/json'},
+      ),
+      data: jsonEncode({'identifier': identifier, 'channel': channel}),
+    );
+    if (response.statusCode != 200) {
+      throw Exception(
+        _extractError(response.data, 'Failed to request 2FA reset code'),
+      );
+    }
+  }
+
+  Future<void> confirm2FAReset(String identifier, String otpCode) async {
+    final response = await _dio.put(
+      endpoints.twoFaReset,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {'Content-Type': 'application/json'},
+      ),
+      data: jsonEncode({'identifier': identifier, 'otp_code': otpCode}),
+    );
+    if (response.statusCode != 200) {
+      throw Exception(_extractError(response.data, 'Failed to reset 2FA'));
+    }
+  }
+
+  Future<void> update2FASettings({
+    required String authToken,
+    required bool isEnabled,
+    required String twoFactorMethod,
+  }) async {
+    final response = await _dio.post(
+      endpoints.twoFaSettings,
       options: Options(
         validateStatus: (status) => true,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $tempToken',
+          'Authorization': 'Bearer $authToken',
         },
       ),
+      data: jsonEncode({
+        'is_2fa_enabled': isEnabled,
+        'two_factor_method': twoFactorMethod,
+      }),
     );
     if (response.statusCode != 200) {
-      throw Exception(
-          response.data['detail'] ?? 'Failed to resend activation code');
+      throw Exception(_extractError(response.data, 'Failed to update 2FA settings'));
     }
   }
 
@@ -141,11 +204,9 @@ class AuthService {
 
   // // Reset password
   Future<void> resetPin(String phoneNumber, {String? channel}) async {
-    print(phoneNumber);
     if (phoneNumber.startsWith("0")) {
       phoneNumber = phoneNumber.substring(1, phoneNumber.length);
     }
-    print(phoneNumber);
     var data = {"identifier": phoneNumber};
     if (channel != null) {
       data["channel"] = channel;
@@ -158,7 +219,6 @@ class AuthService {
       ),
       data: jsonEncode(data),
     );
-    print(response.data);
     if (response.statusCode != 200) {
       throw Exception('Failed to request reset otp');
     }
@@ -208,7 +268,6 @@ class AuthService {
       data: jsonEncode(data),
     );
 
-    print(response.data);
     if (response.statusCode != 200) {
       throw Exception(
         response.data['error'] ?? 'Failed to request confirmation OTP',

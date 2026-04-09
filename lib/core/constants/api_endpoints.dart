@@ -15,10 +15,11 @@ class AuthEndpoints {
   final String confirmPinReset = "$baseUrl/account/confirm-reset-password/";
   final String closeAccount = "$baseUrl/account/close-account/";
 
-  // NEW: 2FA & FCM
+  // 2FA & FCM
   final String verify2FA = "$baseUrl/account/verify-2fa/";
-  final String resend2FA =
-      "$baseUrl/account/resend-2fa-otp/"; // Confirm with schema logic (resend-activation-code exists, but 2FA might have its own)
+  final String twoFaResend = "$baseUrl/account/2fa/resend/";
+  final String twoFaReset = "$baseUrl/account/2fa/reset/";
+  final String twoFaSettings = "$baseUrl/account/2fa/settings/";
   final String registerFCM = "$baseUrl/account/register-fcm-token/";
 }
 

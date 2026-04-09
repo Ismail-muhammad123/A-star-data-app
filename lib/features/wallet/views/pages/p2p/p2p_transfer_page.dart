@@ -25,18 +25,54 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
   bool _isLookingUp = false;
   Map<String, dynamic>? _recipient;
   String? _lookupError;
+  String? _lastAutoLookedUpNumber;
+
+  @override
+  void initState() {
+    super.initState();
+    _identifierController.addListener(_onIdentifierChanged);
+  }
 
   @override
   void dispose() {
+    _identifierController.removeListener(_onIdentifierChanged);
     _identifierController.dispose();
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
+  void _onIdentifierChanged() {
+    final number = _identifierController.text.trim();
+
+    if (number.length < 10) {
+      if (_recipient != null || _lookupError != null) {
+        setState(() {
+          _recipient = null;
+          _lookupError = null;
+        });
+      }
+      _lastAutoLookedUpNumber = null;
+      return;
+    }
+
+    if (number.length == 10 && _lastAutoLookedUpNumber != number && !_isLookingUp) {
+      _lastAutoLookedUpNumber = number;
+      _lookupUser();
+    }
+  }
+
   Future<void> _lookupUser() async {
     final identifier = _identifierController.text.trim();
     if (identifier.isEmpty) return;
+    if (identifier.length != 10) {
+      setState(() {
+        _lookupError = "Enter a valid 10-digit phone number.";
+        _recipient = null;
+      });
+      return;
+    }
+    if (_isLookingUp) return;
 
     setState(() {
       _isLookingUp = true;
@@ -52,7 +88,7 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
       });
     } catch (e) {
       setState(() {
-        _lookupError = e.toString().contains("404") ? "User not found" : e.toString().replaceAll("Exception: ", "");
+        _lookupError = _friendlyLookupError(e);
       });
     } finally {
       setState(() => _isLookingUp = false);
@@ -107,11 +143,39 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceAll("Exception: ", "")), backgroundColor: Colors.red),
+        SnackBar(content: Text(_friendlyTransferError(e)), backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  String _friendlyLookupError(Object error) {
+    final raw = error.toString().toLowerCase();
+    if (raw.contains('not found') || raw.contains('404')) {
+      return "No user was found with this phone number.";
+    }
+    if (raw.contains('network') || raw.contains('socket') || raw.contains('connection')) {
+      return "Could not verify the user right now. Please check your internet and try again.";
+    }
+    if (raw.contains('unauthorized') || raw.contains('401')) {
+      return "Your session has expired. Please log in again and retry.";
+    }
+    return "We couldn't verify this user right now. Please try again.";
+  }
+
+  String _friendlyTransferError(Object error) {
+    final raw = error.toString().toLowerCase();
+    if (raw.contains('insufficient')) {
+      return "Insufficient balance for this transfer.";
+    }
+    if (raw.contains('pin')) {
+      return "The transaction PIN you entered is invalid.";
+    }
+    if (raw.contains('network') || raw.contains('socket') || raw.contains('connection')) {
+      return "Transfer failed due to a network issue. Please try again.";
+    }
+    return "Transfer failed. Please try again.";
   }
 
   void _showSuccessDialog() {
@@ -186,19 +250,28 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
               ),
               const SizedBox(height: 32),
 
-              _buildLabel("Recipient Identifier"),
+              _buildLabel("Recipient Phone Number"),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _identifierController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
                 decoration: _inputDecoration(
-                  hint: "Phone, Email or Username",
+                  hint: "Enter 10-digit phone number",
                   icon: Icons.person_search_outlined,
                   suffix: _isLookingUp 
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
                     : IconButton(icon: const Icon(Icons.arrow_forward), onPressed: _lookupUser),
                 ),
                 onFieldSubmitted: (_) => _lookupUser(),
-                validator: (v) => (v?.isEmpty ?? true) ? "Required" : null,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return "Required";
+                  if (v.trim().length != 10) return "Enter a valid 10-digit phone number";
+                  return null;
+                },
               ),
               if (_lookupError != null)
                 Padding(

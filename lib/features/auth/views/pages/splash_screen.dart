@@ -33,18 +33,11 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Hero(
               tag: 'logo',
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: Image.asset(
-                  "assets/images/logo/a-star_app_logo.png",
-                  height: 120,
-                  width: 120,
-                  fit: BoxFit.contain,
-                ),
+              child: Image.asset(
+                "assets/images/logo/starboy.png",
+                height: 200,
+                width: 200,
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(height: 24),

@@ -148,7 +148,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           shape: BoxShape.circle,
                         ),
                         child: Image.asset(
-                          "assets/images/logo/a-star_app_logo.png",
+                          "assets/images/logo/starboy.png",
                           height: 60,
                           width: 60,
                         ),

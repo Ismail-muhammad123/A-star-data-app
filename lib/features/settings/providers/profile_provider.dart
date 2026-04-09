@@ -29,4 +29,9 @@ class ProfileProvider extends ChangeNotifier {
     }
     return false;
   }
+
+  Future<void> setTwoFactorStatus(String authToken, bool enabled) async {
+    await _profileService.setTwoFactorStatus(authToken, enabled);
+    await loadProfile(authToken);
+  }
 }

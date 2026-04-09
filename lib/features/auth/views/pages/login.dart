@@ -76,8 +76,9 @@ class _LoginPageState extends State<LoginPage> {
       if (res?['success'] == true) {
         if (mounted) _navigateToHome();
       } else if (res?['requires_2fa'] == true) {
+        final identifier = (res?['identifier'] ?? _phoneNumberController.text.trim()).toString();
         if (mounted) {
-          context.push('/verify-2fa', extra: _phoneNumberController.text.trim());
+          context.push('/verify-2fa', extra: identifier);
         }
       } else {
         if (mounted) {
@@ -187,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                           ],
                         ),
                         child: Image.asset(
-                          "assets/images/logo/a-star_app_logo.png",
+                          "assets/images/logo/starboy.png",
                           height: 60,
                           width: 60,
                           fit: BoxFit.contain,

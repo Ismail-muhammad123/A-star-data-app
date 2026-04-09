@@ -48,7 +48,7 @@ class HomePageState extends State<HomePage> {
                 Icon(Icons.celebration, color: Colors.orange),
                 SizedBox(width: 10),
                 Text(
-                  "Welcome to A-Star!",
+                  "Welcome to Starboy Global!",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],

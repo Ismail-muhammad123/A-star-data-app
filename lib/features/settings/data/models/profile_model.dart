@@ -13,6 +13,7 @@ class UserProfile {
   final bool emailVerified;
   final bool phoneVerified;
   final bool hasTransactionPin;
+  final bool twoFactorEnabled;
   final String? profileImage;
 
   String get fullName {
@@ -34,6 +35,7 @@ class UserProfile {
     this.emailVerified = false,
     this.phoneVerified = false,
     this.hasTransactionPin = false,
+    this.twoFactorEnabled = false,
     this.profileImage,
   });
 
@@ -52,6 +54,11 @@ class UserProfile {
       emailVerified: json['email_verified'] ?? false,
       phoneVerified: json['phone_verified'] ?? false,
       hasTransactionPin: json['has_transaction_pin'] ?? false,
+      twoFactorEnabled:
+          _toBool(json['requires_2fa']) ||
+          _toBool(json['two_factor_enabled']) ||
+          _toBool(json['two_fa_enabled']) ||
+          _toBool(json['is_2fa_enabled']),
       profileImage: json['profile_image'],
       createdAt: DateTime.parse(json['created_at']),
     );
@@ -72,8 +79,19 @@ class UserProfile {
       'email_verified': emailVerified,
       'phone_verified': phoneVerified,
       'has_transaction_pin': hasTransactionPin,
+      'requires_2fa': twoFactorEnabled,
       'profile_image': profileImage,
       'created_at': createdAt.toIso8601String(),
     };
+  }
+
+  static bool _toBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is int) return value == 1;
+    if (value is String) {
+      final v = value.trim().toLowerCase();
+      return v == 'true' || v == '1' || v == 'yes' || v == 'enabled';
+    }
+    return false;
   }
 }

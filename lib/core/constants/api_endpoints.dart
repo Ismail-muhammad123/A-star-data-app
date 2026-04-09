@@ -20,7 +20,7 @@ class AuthEndpoints {
   final String twoFaResend = "$baseUrl/account/2fa/resend/";
   final String twoFaReset = "$baseUrl/account/2fa/reset/";
   final String twoFaSettings = "$baseUrl/account/2fa/settings/";
-  final String registerFCM = "$baseUrl/account/register-fcm-token/";
+  final String registerFCM = "$baseUrl/account/device/register-fcm-token/";
 }
 
 class ProfileEndpoints {
@@ -99,9 +99,10 @@ class SupportEndpoints {
 }
 
 class NotificationEndpoints {
-  final String list = "$baseUrl/notifications/";
-  String markRead(int id) => "$baseUrl/notifications/$id/read/";
-  final String markAllRead = "$baseUrl/notifications/mark-all-read/";
+  final String list = "$baseUrl/account/notifications/";
+  final String announcements = "$baseUrl/account/announcements/";
+  String markRead(int id) => "$baseUrl/account/notifications/$id/mark-as-read/";
+  final String markAllRead = "$baseUrl/account/notifications/mark-all-as-read/";
 }
 
 class KycEndpoints {

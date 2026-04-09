@@ -15,6 +15,7 @@ class UserProfile {
   final bool hasTransactionPin;
   final bool twoFactorEnabled;
   final String? profileImage;
+  final String? userType;
 
   String get fullName {
     return '$firstName $lastName';
@@ -37,6 +38,7 @@ class UserProfile {
     this.hasTransactionPin = false,
     this.twoFactorEnabled = false,
     this.profileImage,
+    this.userType = 'customer',
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -60,6 +62,7 @@ class UserProfile {
           _toBool(json['two_fa_enabled']) ||
           _toBool(json['is_2fa_enabled']),
       profileImage: json['profile_image'],
+      userType: json['role'],
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -81,8 +84,20 @@ class UserProfile {
       'has_transaction_pin': hasTransactionPin,
       'requires_2fa': twoFactorEnabled,
       'profile_image': profileImage,
+      'user_type': userType,
       'created_at': createdAt.toIso8601String(),
     };
+  }
+
+  String get userTypeLabel {
+    switch (userType) {
+      case 'agent':
+        return 'Agent';
+      case 'api_developer':
+        return 'API/Developer';
+      default:
+        return 'Customer';
+    }
   }
 
   static bool _toBool(dynamic value) {

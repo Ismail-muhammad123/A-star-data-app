@@ -1,14 +1,17 @@
+import 'dart:async';
+
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/core/constants/support_phone_number.dart';
+import 'package:app/core/widgets/whatsapp_support_bottom_sheet.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
 import 'package:app/core/providers/balance_visibility_provider.dart';
+import 'package:app/features/notifications/data/models/notification_model.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:app/features/notifications/providers/notification_provider.dart';
@@ -23,6 +26,9 @@ class OrdersTab extends StatefulWidget {
 class _OrdersTabState extends State<OrdersTab> {
   static const String _whatsAppChannelUrl =
       "https://whatsapp.com/channel/0029Vb7rJr035fLz4bUIKS1d";
+  final PageController _announcementPageController = PageController();
+  Timer? _announcementTimer;
+  int _currentAnnouncementPage = 0;
 
   @override
   void initState() {
@@ -30,7 +36,10 @@ class _OrdersTabState extends State<OrdersTab> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
       if (authProvider.authToken != null) {
-        context.read<WalletProvider>().fetchBalance(authProvider.authToken!);
+        final token = authProvider.authToken!;
+        context.read<WalletProvider>().fetchBalance(token);
+        context.read<NotificationProvider>().refreshAll(token);
+        _startAnnouncementAutoSlide();
       }
     });
   }
@@ -38,39 +47,42 @@ class _OrdersTabState extends State<OrdersTab> {
   Future<void> _refresh() async {
     final authProvider = context.read<AuthProvider>();
     if (authProvider.authToken != null) {
-      await context.read<WalletProvider>().fetchBalance(
-        authProvider.authToken!,
-      );
+      final token = authProvider.authToken!;
+      await Future.wait([
+        context.read<WalletProvider>().fetchBalance(token),
+        context.read<NotificationProvider>().refreshAll(token),
+      ]);
     }
     setState(() {});
   }
 
-  Future<void> _openWhatsAppChat() async {
-    final sanitizedPhoneNumber = supportPhoneNumber.replaceAll('+', '');
-    final uri = Uri.parse(
-      "https://wa.me/$sanitizedPhoneNumber?text=${Uri.encodeComponent("Hello, I need help with my order.")}",
-    );
-
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Unable to open WhatsApp chat right now."),
-        ),
-      );
-    }
+  @override
+  void dispose() {
+    _announcementTimer?.cancel();
+    _announcementPageController.dispose();
+    super.dispose();
   }
 
-  Future<void> _openWhatsAppChannel() async {
-    final uri = Uri.parse(_whatsAppChannelUrl);
-    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Unable to open WhatsApp channel right now."),
-        ),
+  void _startAnnouncementAutoSlide() {
+    _announcementTimer?.cancel();
+    _announcementTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (!mounted || !_announcementPageController.hasClients) return;
+
+      final announcements =
+          context.read<NotificationProvider>().announcementsWithImages;
+      if (announcements.length <= 1) return;
+
+      if (_currentAnnouncementPage >= announcements.length) {
+        _currentAnnouncementPage = 0;
+      }
+
+      final nextPage = (_currentAnnouncementPage + 1) % announcements.length;
+      _announcementPageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
       );
-    }
+    });
   }
 
   @override
@@ -83,7 +95,7 @@ class _OrdersTabState extends State<OrdersTab> {
           Theme.of(context).scaffoldBackgroundColor, // sleek background
       appBar: AppBar(
         title: const Text(
-          "A-Star Data",
+          "Starboy Global",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -94,27 +106,16 @@ class _OrdersTabState extends State<OrdersTab> {
         elevation: 0,
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         actions: [
-          PopupMenuButton<String>(
+          IconButton(
             tooltip: "WhatsApp",
+            onPressed:
+                () => showWhatsAppSupportBottomSheet(
+                  context,
+                  chatPhoneNumber: supportPhoneNumber,
+                  channelUrl: _whatsAppChannelUrl,
+                  chatMessage: "Hello, I need help with my order.",
+                ),
             icon: const FaIcon(FontAwesomeIcons.whatsapp, size: 20),
-            onSelected: (value) async {
-              if (value == "chat") {
-                await _openWhatsAppChat();
-              } else if (value == "channel") {
-                await _openWhatsAppChannel();
-              }
-            },
-            itemBuilder:
-                (context) => const [
-                  PopupMenuItem<String>(
-                    value: "chat",
-                    child: Text("Chat via WhatsApp"),
-                  ),
-                  PopupMenuItem<String>(
-                    value: "channel",
-                    child: Text("Join WhatsApp channel"),
-                  ),
-                ],
           ),
           Consumer<NotificationProvider>(
             builder: (context, notifications, child) {
@@ -258,9 +259,9 @@ class _OrdersTabState extends State<OrdersTab> {
                                 : NumberFormat.currency(
                                   locale: 'en_NG',
                                   symbol: '₦',
-                                ).format(walletProvider.balance),
+                            ).format(walletProvider.balance),
                             style: const TextStyle(
-                              fontSize: 32,
+                              fontSize: 28,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
@@ -283,6 +284,8 @@ class _OrdersTabState extends State<OrdersTab> {
                   ],
                 ),
               ),
+              const SizedBox(height: 32),
+              _buildAnnouncementsCarousel(),
               const SizedBox(height: 32),
 
               // Services Section
@@ -492,6 +495,149 @@ class _OrdersTabState extends State<OrdersTab> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAnnouncementsCarousel() {
+    final notificationProvider = context.watch<NotificationProvider>();
+    final announcements = notificationProvider.announcementsWithImages;
+    final hasSlides = announcements.isNotEmpty;
+
+    if (notificationProvider.isLoadingAnnouncements && !hasSlides) {
+      return const SizedBox(
+        height: 140,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (!hasSlides) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Announcements",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 140,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: PageView.builder(
+              controller: _announcementPageController,
+              itemCount: announcements.length,
+              onPageChanged: (index) {
+                if (!mounted) return;
+                setState(() {
+                  _currentAnnouncementPage = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                final announcement = announcements[index];
+                return GestureDetector(
+                  onTap: () => _showAnnouncementDetails(announcement),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        announcement.image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.broken_image_outlined),
+                          );
+                        },
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.08),
+                              Colors.black.withOpacity(0.55),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 12,
+                        right: 12,
+                        bottom: 12,
+                        child: Text(
+                          announcement.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        if (announcements.length > 1) const SizedBox(height: 8),
+        if (announcements.length > 1)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(announcements.length, (index) {
+              final isActive = index == _currentAnnouncementPage;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: isActive ? 14 : 7,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: isActive ? Colors.blueAccent : Colors.grey[400],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              );
+            }),
+          ),
+      ],
+    );
+  }
+
+  void _showAnnouncementDetails(Announcement announcement) {
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text(
+              announcement.title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            content: SingleChildScrollView(
+              child: Text(
+                announcement.body,
+                style: const TextStyle(fontSize: 14, height: 1.5),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text("Close"),
+              ),
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
     );
   }
 

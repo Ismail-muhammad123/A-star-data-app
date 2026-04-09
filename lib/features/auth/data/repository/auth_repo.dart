@@ -321,7 +321,10 @@ class AuthService {
           'Authorization': 'Bearer $authToken',
         },
       ),
-      data: jsonEncode({'fcm_token': fcmToken}),
+      data: jsonEncode({
+        'token': fcmToken,
+        'fcm_token': fcmToken,
+      }),
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {

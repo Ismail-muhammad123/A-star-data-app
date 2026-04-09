@@ -6,6 +6,22 @@ class NotificationService {
   final Dio _dio = Dio();
   final NotificationEndpoints endpoints = NotificationEndpoints();
 
+  List<T> _parsePaginatedResults<T>(
+    dynamic payload,
+    T Function(Map<String, dynamic>) parser,
+  ) {
+    final results = payload is Map<String, dynamic>
+        ? payload['results']
+        : payload;
+
+    if (results is! List) return [];
+
+    return results
+        .whereType<Map<String, dynamic>>()
+        .map(parser)
+        .toList();
+  }
+
   Future<List<AppNotification>> fetchNotifications(String authToken) async {
     final response = await _dio.get(
       endpoints.list,
@@ -16,11 +32,36 @@ class NotificationService {
         },
       ),
     );
+
     if (response.statusCode == 200) {
-      return (response.data as List).map((json) => AppNotification.fromJson(json)).toList();
-    } else {
-      throw Exception(response.data['detail'] ?? 'Failed to fetch notifications');
+      return _parsePaginatedResults<AppNotification>(
+        response.data,
+        AppNotification.fromJson,
+      );
     }
+
+    throw Exception(response.data?['detail'] ?? 'Failed to fetch notifications');
+  }
+
+  Future<List<Announcement>> fetchAnnouncements(String authToken) async {
+    final response = await _dio.get(
+      endpoints.announcements,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      return _parsePaginatedResults<Announcement>(
+        response.data,
+        Announcement.fromJson,
+      );
+    }
+
+    throw Exception(response.data?['detail'] ?? 'Failed to fetch announcements');
   }
 
   Future<void> markRead(String authToken, int id) async {
@@ -33,8 +74,9 @@ class NotificationService {
         },
       ),
     );
+
     if (response.statusCode != 200) {
-      throw Exception(response.data['detail'] ?? 'Failed to mark notification as read');
+      throw Exception(response.data?['detail'] ?? 'Failed to mark notification as read');
     }
   }
 
@@ -48,8 +90,9 @@ class NotificationService {
         },
       ),
     );
+
     if (response.statusCode != 200) {
-      throw Exception(response.data['detail'] ?? 'Failed to mark all notifications as read');
+      throw Exception(response.data?['detail'] ?? 'Failed to mark all notifications as read');
     }
   }
 }

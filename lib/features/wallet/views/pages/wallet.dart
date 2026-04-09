@@ -213,7 +213,7 @@ class _WalletPageState extends State<WalletPage> {
                               symbol: '₦',
                             ).format(walletProvider.balance),
                         style: const TextStyle(
-                          fontSize: 36,
+                          fontSize: 30,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,

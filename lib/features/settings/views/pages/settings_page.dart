@@ -2,15 +2,14 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/settings/data/models/profile_model.dart';
 import 'package:app/features/settings/providers/profile_provider.dart';
 import 'package:app/features/settings/views/widgets/settings_tile.dart';
+import 'package:app/core/widgets/whatsapp_support_bottom_sheet.dart';
 import 'package:app/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:app/core/themes/theme_provider.dart';
 import 'package:app/core/providers/balance_visibility_provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -74,194 +73,6 @@ class _SettingsPageState extends State<SettingsPage> {
     } finally {
       if (mounted) setState(() => _isUpdatingTwoFactor = false);
     }
-  }
-
-  Future<void> openWhatsAppChat(
-    BuildContext context,
-    String phoneNumber, {
-    String message = "Hello, I need help with the A-Star Data app.",
-  }) async {
-    final Uri whatsappUrl = Uri.parse(
-      "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}",
-    );
-
-    try {
-      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      _showNumberDialog(context, phoneNumber);
-    }
-  }
-
-  void _showNumberDialog(BuildContext context, String phoneNumber) {
-    showDialog(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text("WhatsApp not available"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Unable to open WhatsApp. You can contact this number:",
-                ),
-                const SizedBox(height: 10),
-                SelectableText(
-                  phoneNumber,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () async {
-                  await Clipboard.setData(ClipboardData(text: phoneNumber));
-                  Navigator.of(ctx).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Number copied to clipboard")),
-                  );
-                },
-                child: const Text("Copy Number"),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text("Close"),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _showWhatsAppSupportOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder:
-          (context) => Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(24),
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  "WhatsApp Support",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  "How would you like to reach us?",
-                  style: TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-                const SizedBox(height: 24),
-                _buildSupportOption(
-                  context,
-                  title: "Chat with Support",
-                  subtitle: "Directly chat with our agent",
-                  icon: FontAwesomeIcons.whatsapp,
-                  iconColor: Colors.green,
-                  onTap: () {
-                    Navigator.pop(context);
-                    openWhatsAppChat(context, "+2348067682425");
-                  },
-                ),
-                const SizedBox(height: 12),
-                _buildSupportOption(
-                  context,
-                  title: "Support & Updates Channel",
-                  subtitle: "Join our channel for latest news",
-                  icon: Icons.campaign_rounded,
-                  iconColor: Colors.blue,
-                  onTap: () async {
-                    Navigator.pop(context);
-                    final Uri channelUrl = Uri.parse(
-                      "https://whatsapp.com/channel/0029Vb7rJr035fLz4bUIKS1d",
-                    );
-                    if (await canLaunchUrl(channelUrl)) {
-                      await launchUrl(
-                        channelUrl,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    }
-                  },
-                ),
-                const SizedBox(height: 10),
-              ],
-            ),
-          ),
-    );
-  }
-
-  Widget _buildSupportOption(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color iconColor,
-    required VoidCallback onTap,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900] : Colors.grey[100],
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child:
-                  icon is FontAwesomeIcons
-                      ? FaIcon(icon, color: iconColor, size: 24)
-                      : Icon(icon, color: iconColor, size: 24),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right, color: Colors.grey[400]),
-          ],
-        ),
-      ),
-    );
   }
 
   double _calculateProfileCompletion(UserProfile? profile) {
@@ -520,6 +331,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
                   _buildSectionHeader("Account Details"),
                   SettingsTile(
+                    title: "User Type",
+                    subTitle: profile?.userTypeLabel ?? "Customer",
+                    leadingIcon: Icons.badge_outlined,
+                    showChevron: false,
+                  ),
+                  SettingsTile(
                     title: "Personal Information",
                     subTitle: "Name, email & phone number",
                     leadingIcon: Icons.person_outline,
@@ -663,7 +480,13 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Colors.green,
                       size: 24,
                     ),
-                    onTap: () => _showWhatsAppSupportOptions(context),
+                    onTap:
+                        () => showWhatsAppSupportBottomSheet(
+                          context,
+                          chatPhoneNumber: "+2348067682425",
+                          channelUrl:
+                              "https://whatsapp.com/channel/0029Vb7rJr035fLz4bUIKS1d",
+                        ),
                   ),
 
                   const SizedBox(height: 32),

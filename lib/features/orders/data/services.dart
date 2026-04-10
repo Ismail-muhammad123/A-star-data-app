@@ -105,6 +105,7 @@ class OrderServices {
 
   Future<void> purchaseAirtime({
     required String authToken,
+    required String transactionPin,
     required String serviceId,
     required String phoneNumber,
     required double amount,
@@ -112,6 +113,7 @@ class OrderServices {
     var response = await _dio.post(
       _endpoints.purchaseAirtime,
       data: {
+        'transaction_pin': transactionPin,
         'service_id': serviceId,
         'phone_number': phoneNumber,
         'amount': amount,
@@ -136,12 +138,17 @@ class OrderServices {
 
   Future<void> purchaseDataBundle({
     required String authToken,
+    required String transactionPin,
     required int bundleId,
     required String phoneNumber,
   }) async {
     var response = await _dio.post(
       _endpoints.purchaseDataBundle,
-      data: {'plan_id': bundleId, 'phone_number': phoneNumber},
+      data: {
+        'transaction_pin': transactionPin,
+        'plan_id': bundleId,
+        'phone_number': phoneNumber
+      },
       options: Options(
         validateStatus: (status) => true,
         headers: {
@@ -185,12 +192,17 @@ class OrderServices {
 
   Future<void> purchaseSmileSubscription({
     required String authToken,
+    required String transactionPin,
     required int bundleId,
     required String phoneNumber,
   }) async {
     var response = await _dio.post(
       _endpoints.purchaseSmileSubscription,
-      data: {'plan_id': bundleId, 'phone_number': phoneNumber},
+      data: {
+        'transaction_pin': transactionPin,
+        'plan_id': bundleId,
+        'phone_number': phoneNumber
+      },
       options: Options(
         validateStatus: (status) => true,
         headers: {
@@ -212,21 +224,15 @@ class OrderServices {
   Future<Map<String, dynamic>> verifyCustomer({
     required String authToken,
     required String serviceId,
-    required String variationId,
     required String customerId,
-    String? meterType,
+    required String purchaseType,
   }) async {
-    if (customerId.startsWith("0") && customerId.length > 10) {
-      customerId = customerId.substring(1, customerId.length);
-      customerId = "234$customerId";
-    }
     var response = await _dio.post(
       _endpoints.verifyCustomer,
       data: {
         'service_id': serviceId,
-        'variation_id': variationId,
         'customer_id': customerId,
-        if (meterType != null) 'meter_type': meterType,
+        'purchase_type': purchaseType,
       },
       options: Options(
         validateStatus: (status) => true,
@@ -329,6 +335,7 @@ class OrderServices {
 
   Future<OrderHistory> purchaseElectricity({
     required String authToken,
+    required String transactionPin,
     required int amount,
     required String serviceId,
     required String variationId,
@@ -337,6 +344,7 @@ class OrderServices {
     var response = await _dio.post(
       _endpoints.purchaseElectricity,
       data: {
+        'transaction_pin': transactionPin,
         'amount': amount,
         'service_id': serviceId,
         'variation_id': variationId,
@@ -362,6 +370,7 @@ class OrderServices {
 
   Future<OrderHistory> purchaseTVSubscription({
     required String authToken,
+    required String transactionPin,
     required int amount,
     required String serviceId,
     required String variationId,
@@ -371,6 +380,7 @@ class OrderServices {
     var response = await _dio.post(
       _endpoints.purchaseTVSubscription,
       data: {
+        'transaction_pin': transactionPin,
         "amount": amount,
         "service_id": serviceId,
         "variation_id": variationId,
@@ -556,11 +566,10 @@ class OrderServices {
 
   Future<List<EducationPackage>> fetchEducationPackages(
     String authToken,
-    String? serviceId,
+    int? networkId,
   ) async {
     var response = await _dio.get(
-      _endpoints.getEducationPackages,
-      queryParameters: serviceId != null ? {'service_id': serviceId} : null,
+      "${_endpoints.getEducationServices}$networkId/plans/",
       options: Options(
         validateStatus: (status) => true,
         headers: {
@@ -569,6 +578,7 @@ class OrderServices {
         },
       ),
     );
+    print(response.data);
     if (response.statusCode == 200 || response.statusCode == 201) {
       dynamic data = response.data;
       List<dynamic> results =

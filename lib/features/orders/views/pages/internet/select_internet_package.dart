@@ -16,8 +16,13 @@ class SelectInternetPackagePage extends StatefulWidget {
 }
 
 class _SelectInternetPackagePageState extends State<SelectInternetPackagePage> {
+  String _selectedSmileFilter = "Smile Voice";
+
   @override
   Widget build(BuildContext context) {
+    bool isSmile =
+        widget.provider.serviceName.toLowerCase().contains("smile") ||
+        widget.provider.serviceId.toLowerCase().contains("smile");
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -34,12 +39,77 @@ class _SelectInternetPackagePageState extends State<SelectInternetPackagePage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Available packages for ${widget.provider.serviceName}",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Available packages for ${widget.provider.serviceName}",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (isSmile) ...[
+                  const SizedBox(height: 16),
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children:
+                            ["Smile Voice", "Smile Data"].map((filter) {
+                              bool isSelected = _selectedSmileFilter == filter;
+                              return GestureDetector(
+                                onTap:
+                                    () => setState(
+                                      () => _selectedSmileFilter = filter,
+                                    ),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        isSelected
+                                            ? Colors.blueAccent
+                                            : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow:
+                                        isSelected
+                                            ? [
+                                              BoxShadow(
+                                                color: Colors.blueAccent
+                                                    .withOpacity(0.3),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                            : null,
+                                  ),
+                                  child: Text(
+                                    filter,
+                                    style: TextStyle(
+                                      color:
+                                          isSelected
+                                              ? Colors.white
+                                              : Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           Expanded(
@@ -56,14 +126,45 @@ class _SelectInternetPackagePageState extends State<SelectInternetPackagePage> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text('No packages found.'));
                 } else {
-                  final packages = snapshot.data!;
+                  var packages = snapshot.data!;
+
+                  if (isSmile) {
+                    if (_selectedSmileFilter == "Smile Voice") {
+                      packages =
+                          packages
+                              .where(
+                                (p) =>
+                                    p.name.toLowerCase().contains("smilevoice"),
+                              )
+                              .toList();
+                    } else {
+                      packages =
+                          packages
+                              .where(
+                                (p) =>
+                                    !p.name.toLowerCase().contains(
+                                      "smilevoice",
+                                    ),
+                              )
+                              .toList();
+                    }
+                  }
+
+                  if (packages.isEmpty) {
+                    return const Center(
+                      child: Text('No packages in this category.'),
+                    );
+                  }
+
                   return ListView.builder(
                     itemCount: packages.length,
                     itemBuilder: (context, index) {
                       final package = packages[index];
                       return Card(
                         margin: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -77,15 +178,16 @@ class _SelectInternetPackagePageState extends State<SelectInternetPackagePage> {
                               color: Colors.blueAccent.withOpacity(0.1),
                             ),
                             clipBehavior: Clip.antiAlias,
-                            child: (package.service.image ?? "").isNotEmpty
-                                ? Image.network(
-                                    package.service.image!,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            const Icon(Icons.router_outlined),
-                                  )
-                                : const Icon(Icons.router_outlined),
+                            child:
+                                (package.service.image ?? "").isNotEmpty
+                                    ? Image.network(
+                                      package.service.image!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const Icon(Icons.router_outlined),
+                                    )
+                                    : const Icon(Icons.router_outlined),
                           ),
                           title: Text(
                             package.name,
@@ -116,8 +218,10 @@ class _SelectInternetPackagePageState extends State<SelectInternetPackagePage> {
                             ],
                           ),
                           onTap: () {
-                            context.push("/orders/buy-internet",
-                                extra: package);
+                            context.push(
+                              "/orders/buy-internet",
+                              extra: package,
+                            );
                           },
                         ),
                       );

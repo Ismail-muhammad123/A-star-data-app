@@ -1,3 +1,4 @@
+import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
@@ -6,7 +7,6 @@ import 'package:app/core/widgets/balance_summary.dart';
 import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -59,19 +59,21 @@ class _PurchaseTVSubscriptionFormPageState
       setState(() {
         _isLoading = true;
       });
-      var meterInfo = await OrderServices().verifyCustomer(
+      var response = await OrderServices().verifyCustomer(
         authToken: context.read<AuthProvider>().authToken ?? "",
         serviceId: widget.service.serviceId,
         customerId: _smartCardNumberController.text,
-        variationId: _subscriptionType!,
+        purchaseType: 'tv',
       );
 
-      print(meterInfo);
       setState(() {
-        minimumAmount = meterInfo['minimum_amount'] ?? 500;
-        maximumAmount = meterInfo['maximum_amount'] ?? 100000;
+        minimumAmount = 500;
+        maximumAmount = 100000;
 
-        smartCardDetails = {"customer_name": meterInfo['customer_name']};
+        smartCardDetails = {'Customer Name': response['account_name'] ?? 'Verified Customer'};
+        if (response['raw_response'] != null && response['raw_response'] is Map) {
+            smartCardDetails.addAll(response['raw_response'] as Map<String, dynamic>);
+        }
         _isVerified = true;
         _isLoading = false;
       });
@@ -129,6 +131,17 @@ class _PurchaseTVSubscriptionFormPageState
       return;
     }
 
+    final transactionPin = await showPinEntrySheet(
+      context,
+      title: "Enter Transaction PIN",
+      subtitle:
+          "Enter your 4-digit transaction PIN to complete this purchase of ₦${NumberFormat("#,##0.00").format(amount)} TV subscription",
+    );
+
+    if (transactionPin == null || transactionPin.length < 4) {
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -136,6 +149,7 @@ class _PurchaseTVSubscriptionFormPageState
     try {
       await OrderServices().purchaseTVSubscription(
         authToken: context.read<AuthProvider>().authToken ?? "",
+        transactionPin: transactionPin,
         serviceId: widget.service.serviceId,
         variationId: _subscriptionType!,
         customerId: _smartCardNumberController.text,
@@ -257,25 +271,32 @@ class _PurchaseTVSubscriptionFormPageState
                                 color: Colors.blueAccent.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                                child: widget.service.imageUrl != null &&
-                                        widget.service.imageUrl!.isNotEmpty
-                                    ? Image.network(
+                              child:
+                                  widget.service.imageUrl != null &&
+                                          widget.service.imageUrl!.isNotEmpty
+                                      ? Image.network(
                                         widget.service.imageUrl!,
                                         width: 40,
                                         height: 40,
-                                        errorBuilder: (context, error,
-                                                stackTrace) =>
-                                            Container(
+                                        errorBuilder:
+                                            (
+                                              context,
+                                              error,
+                                              stackTrace,
+                                            ) => Container(
                                               width: 40,
                                               height: 40,
-                                              color: Colors.primaries[widget
-                                                      .service
-                                                      .serviceName
-                                                      .length %
-                                                  Colors.primaries.length],
+                                              color:
+                                                  Colors.primaries[widget
+                                                          .service
+                                                          .serviceName
+                                                          .length %
+                                                      Colors.primaries.length],
                                               alignment: Alignment.center,
                                               child: Text(
-                                                widget.service.serviceName
+                                                widget
+                                                            .service
+                                                            .serviceName
                                                             .length >=
                                                         2
                                                     ? widget.service.serviceName
@@ -291,14 +312,15 @@ class _PurchaseTVSubscriptionFormPageState
                                               ),
                                             ),
                                       )
-                                    : Container(
+                                      : Container(
                                         width: 40,
                                         height: 40,
-                                        color: Colors.primaries[widget
-                                                .service
-                                                .serviceName
-                                                .length %
-                                            Colors.primaries.length],
+                                        color:
+                                            Colors.primaries[widget
+                                                    .service
+                                                    .serviceName
+                                                    .length %
+                                                Colors.primaries.length],
                                         alignment: Alignment.center,
                                         child: Text(
                                           widget.service.serviceName.length >= 2
@@ -526,9 +548,12 @@ class _PurchaseTVSubscriptionFormPageState
                                       width: 140,
                                       child: Text(
                                         "${entry.key.split("_").map((s) => s.capitalize()).join(" ")}:",
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.black54,
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodySmall?.color,
                                         ),
                                       ),
                                     ),

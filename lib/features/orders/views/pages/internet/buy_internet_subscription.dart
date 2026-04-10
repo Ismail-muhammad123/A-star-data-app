@@ -24,6 +24,43 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
 
   final OrderServices _orderServices = OrderServices();
   bool _isLoading = false;
+  bool _isVerified = false;
+  Map<String, dynamic> _verificationDetails = {};
+
+  Future<void> _verifyBeneficiary() async {
+    final phone = _phoneController.text.trim();
+    if (phone.isEmpty) {
+      _showMessage('Please enter account number/phone', isError: true);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final response = await _orderServices.verifyCustomer(
+        authToken: context.read<AuthProvider>().authToken ?? "",
+        serviceId: widget.package.service.serviceId.toString(),
+        customerId: phone,
+        purchaseType: 'internet',
+      );
+
+      setState(() {
+        _isVerified = true;
+        _verificationDetails = {
+          'Account Name': response['account_name'] ?? 'Verified',
+        };
+        if (response['raw_response'] != null &&
+            response['raw_response'] is Map) {
+          _verificationDetails.addAll(
+            response['raw_response'] as Map<String, dynamic>,
+          );
+        }
+      });
+    } catch (e) {
+      _showMessage(e.toString().split(":").last.trim(), isError: true);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -34,8 +71,13 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
 
   Future<void> _purchaseInternetSubscription() async {
     final phone = _phoneController.text.trim();
-    if (phone.length < 10) {
-      _showMessage('Please enter a valid phone number');
+    if (phone.isEmpty) {
+      _showMessage('Please enter a valid account number/phone', isError: true);
+      return;
+    }
+
+    if (!_isVerified) {
+      _showMessage('Please verify the account first', isError: true);
       return;
     }
 
@@ -127,13 +169,16 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 10.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const BalanceSummary(),
                   const SizedBox(height: 24),
-                  
+
                   // Package Info Card
                   Container(
                     width: double.infinity,
@@ -170,15 +215,26 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
                                 color: Colors.blueAccent.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: (widget.package.service.image ?? "").isNotEmpty
-                                  ? Image.network(
-                                      widget.package.service.image!,
-                                      width: 40,
-                                      height: 40,
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.router_outlined, size: 40, color: Colors.blueAccent),
-                                    )
-                                  : const Icon(Icons.router_outlined, size: 40, color: Colors.blueAccent),
+                              child:
+                                  (widget.package.service.image ?? "")
+                                          .isNotEmpty
+                                      ? Image.network(
+                                        widget.package.service.image!,
+                                        width: 40,
+                                        height: 40,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(
+                                                  Icons.router_outlined,
+                                                  size: 40,
+                                                  color: Colors.blueAccent,
+                                                ),
+                                      )
+                                      : const Icon(
+                                        Icons.router_outlined,
+                                        size: 40,
+                                        color: Colors.blueAccent,
+                                      ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -195,7 +251,10 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
                                   Text(
                                     widget.package.service.serviceName,
                                     style: TextStyle(
-                                      color: Colors.grey[600],
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall?.color,
                                       fontSize: 14,
                                     ),
                                   ),
@@ -219,7 +278,7 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
                   Text(
                     "Phone Number",
@@ -232,15 +291,61 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _phoneController,
-                    enabled: !_isLoading,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    keyboardType: TextInputType.text,
+                    onChanged: (v) => setState(() => _isVerified = false),
                     decoration: _inputDecoration(
-                      hintText: "Enter beneficiary phone number",
-                      prefixIcon: Icons.phone_android,
+                      hintText: "Enter ID/Phone",
+                      prefixIcon: Icons.account_circle_outlined,
                     ),
                   ),
-                  
+
+                  if (_isVerified) ...[
+                    const SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.blueAccent.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.blueAccent.withOpacity(0.2),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Account Details",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueAccent,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ..._verificationDetails.entries.map(
+                            (entry) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4.0,
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "${entry.key}: ",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Expanded(child: Text("${entry.value}")),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
                   const SizedBox(height: 20),
                   Text(
                     "Promo Code (Optional)",
@@ -259,37 +364,53 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
                       prefixIcon: Icons.discount_outlined,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _purchaseInternetSubscription,
+                      onPressed:
+                          _isLoading
+                              ? null
+                              : (_isVerified
+                                  ? _purchaseInternetSubscription
+                                  : _verifyBeneficiary),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
+                        backgroundColor:
+                            _isVerified
+                                ? Colors.blueAccent
+                                : Theme.of(context).cardColor,
+                        foregroundColor:
+                            _isVerified ? Colors.white : Colors.blueAccent,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
+                          side:
+                              _isVerified
+                                  ? BorderSide.none
+                                  : const BorderSide(color: Colors.blueAccent),
                         ),
                         elevation: 0,
                       ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
+                      child:
+                          _isLoading
+                              ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.blueAccent,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : Text(
+                                _isVerified
+                                    ? "Pay ${NumberFormat.currency(locale: 'en_NG', symbol: '₦').format(widget.package.sellingPrice)}"
+                                    : "Verify Account",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            )
-                          : Text(
-                              "Pay ${NumberFormat.currency(locale: 'en_NG', symbol: '₦').format(widget.package.sellingPrice)}",
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
                     ),
                   ),
                 ],

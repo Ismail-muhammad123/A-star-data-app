@@ -441,13 +441,17 @@ class _SignUpPageState extends State<SignUpPage> {
                       height: 56,
                       child: OutlinedButton.icon(
                         onPressed: () {},
-                        icon: const Icon(Icons.g_mobiledata_rounded, size: 34, color: Colors.red),
-                        label: const Text(
+                        icon: const Icon(
+                          Icons.g_mobiledata_rounded,
+                          size: 34,
+                          color: Colors.red,
+                        ),
+                        label: Text(
                           "Sign up with Google",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: Colors.black,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                         ),
                         style: OutlinedButton.styleFrom(

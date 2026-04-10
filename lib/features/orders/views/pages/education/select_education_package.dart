@@ -47,7 +47,7 @@ class _SelectEducationPackagePageState
             child: FutureBuilder<List<EducationPackage>>(
               future: OrderServices().fetchEducationPackages(
                 context.read<AuthProvider>().authToken ?? "",
-                widget.provider.serviceId,
+                widget.provider.id,
               ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

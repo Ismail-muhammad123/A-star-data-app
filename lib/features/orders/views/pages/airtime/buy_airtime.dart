@@ -1,3 +1,4 @@
+import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
@@ -63,12 +64,22 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
       return;
     }
 
+    final transactionPin = await showPinEntrySheet(
+      context,
+      title: "Enter Transaction PIN",
+      subtitle:
+          "Enter your 4-digit transaction PIN to complete this purchase of ₦${NumberFormat("#,##0.00").format(enteredAmount)} airtime",
+    );
+
+    if (transactionPin == null || transactionPin.length < 4) return;
+
     setState(() {
       _isLoading = true;
     });
     try {
       await OrderServices().purchaseAirtime(
         authToken: context.read<AuthProvider>().authToken ?? "",
+        transactionPin: transactionPin,
         serviceId: _selectedNetworkId!,
         amount: enteredAmount,
         phoneNumber: _phoneController.text,
@@ -319,10 +330,10 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                     controller: _amountController,
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                     decoration: InputDecoration(
                       prefixIcon: const Padding(

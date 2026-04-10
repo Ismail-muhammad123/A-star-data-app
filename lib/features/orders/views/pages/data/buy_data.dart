@@ -1,3 +1,4 @@
+import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
@@ -62,12 +63,22 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
       return;
     }
 
+    final transactionPin = await showPinEntrySheet(
+      context,
+      title: "Enter Transaction PIN",
+      subtitle:
+          "Enter your 4-digit transaction PIN to complete this purchase of ${selectedBundle?.name ?? 'data bundle'}",
+    );
+
+    if (transactionPin == null || transactionPin.length < 4) return;
+
     setState(() {
       _isLoading = true;
     });
     try {
       await OrderServices().purchaseDataBundle(
         authToken: context.read<AuthProvider>().authToken ?? "",
+        transactionPin: transactionPin,
         bundleId: selectedBundle?.id ?? 0,
         phoneNumber: _phoneController.text,
       );

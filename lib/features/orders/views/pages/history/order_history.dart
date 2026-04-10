@@ -87,7 +87,7 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                     Theme.of(
                                       context,
                                     ).textTheme.bodyLarge?.color ??
-                                    Colors.black87,
+                                    Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black87,
                               ),
                             ),
                             child: child!,

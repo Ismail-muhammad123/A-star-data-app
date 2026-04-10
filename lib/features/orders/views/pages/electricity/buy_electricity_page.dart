@@ -1,3 +1,4 @@
+import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
@@ -57,14 +58,16 @@ class _PurchaseElectricityFormPageState
         authToken: context.read<AuthProvider>().authToken ?? "",
         serviceId: widget.service.serviceId,
         customerId: _meterNumberController.text,
-        variationId: _meterType!,
-        meterType: _meterType,
+        purchaseType: 'electricity',
       );
       setState(() {
-        minimumAmount = meterInfo['minimum_amount'] ?? 500;
-        maximumAmount = meterInfo['maximum_amount'] ?? 100000;
+        minimumAmount = 500;
+        maximumAmount = 100000;
 
-        meterDetails = meterInfo..remove("status");
+        meterDetails = {'Customer Name': meterInfo['account_name'] ?? 'Verified Customer'};
+        if (meterInfo['raw_response'] != null && meterInfo['raw_response'] is Map) {
+            meterDetails.addAll(meterInfo['raw_response'] as Map<String, dynamic>);
+        }
         _isVerified = true;
         _isLoading = false;
       });
@@ -122,6 +125,17 @@ class _PurchaseElectricityFormPageState
       return;
     }
 
+    final transactionPin = await showPinEntrySheet(
+      context,
+      title: "Enter Transaction PIN",
+      subtitle:
+          "Enter your 4-digit transaction PIN to complete this purchase of ₦${NumberFormat("#,##0.00").format(amount)} electricity",
+    );
+
+    if (transactionPin == null || transactionPin.length < 4) {
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -129,6 +143,7 @@ class _PurchaseElectricityFormPageState
     try {
       await OrderServices().purchaseElectricity(
         authToken: context.read<AuthProvider>().authToken ?? "",
+        transactionPin: transactionPin,
         serviceId: widget.service.serviceId,
         variationId: _meterType!,
         customerId: _meterNumberController.text,
@@ -243,25 +258,32 @@ class _PurchaseElectricityFormPageState
                                 color: Colors.orange.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                                child: widget.service.imageUrl != null &&
-                                        widget.service.imageUrl!.isNotEmpty
-                                    ? Image.network(
+                              child:
+                                  widget.service.imageUrl != null &&
+                                          widget.service.imageUrl!.isNotEmpty
+                                      ? Image.network(
                                         widget.service.imageUrl!,
                                         width: 40,
                                         height: 40,
-                                        errorBuilder: (context, error,
-                                                stackTrace) =>
-                                            Container(
+                                        errorBuilder:
+                                            (
+                                              context,
+                                              error,
+                                              stackTrace,
+                                            ) => Container(
                                               width: 40,
                                               height: 40,
-                                              color: Colors.primaries[widget
-                                                      .service
-                                                      .serviceName
-                                                      .length %
-                                                  Colors.primaries.length],
+                                              color:
+                                                  Colors.primaries[widget
+                                                          .service
+                                                          .serviceName
+                                                          .length %
+                                                      Colors.primaries.length],
                                               alignment: Alignment.center,
                                               child: Text(
-                                                widget.service.serviceName
+                                                widget
+                                                            .service
+                                                            .serviceName
                                                             .length >=
                                                         2
                                                     ? widget.service.serviceName
@@ -277,14 +299,15 @@ class _PurchaseElectricityFormPageState
                                               ),
                                             ),
                                       )
-                                    : Container(
+                                      : Container(
                                         width: 40,
                                         height: 40,
-                                        color: Colors.primaries[widget
-                                                .service
-                                                .serviceName
-                                                .length %
-                                            Colors.primaries.length],
+                                        color:
+                                            Colors.primaries[widget
+                                                    .service
+                                                    .serviceName
+                                                    .length %
+                                                Colors.primaries.length],
                                         alignment: Alignment.center,
                                         child: Text(
                                           widget.service.serviceName.length >= 2
@@ -492,9 +515,12 @@ class _PurchaseElectricityFormPageState
                                       width: 140,
                                       child: Text(
                                         "${entry.key.split("_").map((s) => s.capitalize()).join(" ")}:",
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.black54,
+                                          color:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodySmall?.color,
                                         ),
                                       ),
                                     ),

@@ -1,3 +1,4 @@
+import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
@@ -24,8 +25,37 @@ class PurchaseEducationFormPage extends StatefulWidget {
 class _PurchaseEducationFormPageState extends State<PurchaseEducationFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
-  final _pinController = TextEditingController();
   bool _isLoading = false;
+  bool _isVerified = false;
+  Map<String, dynamic> _beneficiaryDetails = {};
+
+  Future<void> _verifyBeneficiary() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    setState(() => _isLoading = true);
+    try {
+      final response = await OrderServices().verifyCustomer(
+        authToken: context.read<AuthProvider>().authToken ?? "",
+        serviceId: widget.service.serviceId,
+        customerId: _phoneController.text.trim(),
+        purchaseType: 'education',
+      );
+      
+      setState(() {
+        _isVerified = true;
+        _beneficiaryDetails = {'Account Name': response['account_name'] ?? 'Verified'};
+        if (response['raw_response'] != null && response['raw_response'] is Map) {
+          _beneficiaryDetails.addAll(response['raw_response'] as Map<String, dynamic>);
+        }
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().split(":").last.trim()), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,16 +78,20 @@ class _PurchaseEducationFormPageState extends State<PurchaseEducationFormPage> {
             children: [
               _buildSummaryHeader(),
               const SizedBox(height: 30),
-              const Text(
+              Text(
                 "Phone Number",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
               ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
+                onChanged: (v) => setState(() => _isVerified = false),
                 decoration: InputDecoration(
-                  hintText: "Enter phone number for PIN delivery",
+                  hintText: "Enter ID/Phone",
                   prefixIcon: const Icon(Icons.phone_android),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -70,52 +104,46 @@ class _PurchaseEducationFormPageState extends State<PurchaseEducationFormPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "Transaction PIN",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _pinController,
-                obscureText: true,
-                keyboardType: TextInputType.number,
-                maxLength: 4,
-                decoration: InputDecoration(
-                  hintText: "Enter 4-digit PIN",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  counterText: "",
-                  border: OutlineInputBorder(
+              if (_isVerified) ...[
+                const SizedBox(height: 20),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blueAccent.withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Beneficiary Details", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+                      const SizedBox(height: 8),
+                      ..._beneficiaryDetails.entries.map((e) => Text("${e.key}: ${e.value}")),
+                    ],
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter your PIN";
-                  }
-                  if (value.length < 4) {
-                    return "PIN must be 4 digits";
-                  }
-                  return null;
-                },
-              ),
+              ],
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handlePurchase,
+                  onPressed: _isLoading ? null : (_isVerified ? _handlePurchase : _verifyBeneficiary),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
+                    backgroundColor: _isVerified ? Colors.blueAccent : Colors.grey[200],
+                    foregroundColor: _isVerified ? Colors.white : Colors.blueAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
+                      side: _isVerified ? BorderSide.none : const BorderSide(color: Colors.blueAccent),
                     ),
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
-                          "Pay ${NumberFormat.currency(symbol: '₦', decimalDigits: 0).format(widget.package.sellingPrice)}",
+                          _isVerified 
+                            ? "Pay ${NumberFormat.currency(symbol: '₦', decimalDigits: 0).format(widget.package.sellingPrice)}"
+                            : "Verify Beneficiary",
                           style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
@@ -196,7 +224,7 @@ class _PurchaseEducationFormPageState extends State<PurchaseEducationFormPage> {
                 ),
                 Text(
                   widget.service.serviceName,
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color),
                 ),
               ],
             ),
@@ -208,6 +236,18 @@ class _PurchaseEducationFormPageState extends State<PurchaseEducationFormPage> {
 
   void _handlePurchase() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_isVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please verify beneficiary first")));
+      return;
+    }
+
+    final transactionPin = await showPinEntrySheet(
+      context,
+      title: "Enter Transaction PIN",
+      subtitle: "Enter your 4-digit transaction PIN to complete this purchase",
+    );
+
+    if (transactionPin == null || transactionPin.length < 4) return;
 
     setState(() => _isLoading = true);
 
@@ -215,7 +255,7 @@ class _PurchaseEducationFormPageState extends State<PurchaseEducationFormPage> {
       final authProvider = context.read<AuthProvider>();
       final result = await OrderServices().purchaseEducation(
         authToken: authProvider.authToken ?? "",
-        transactionPin: _pinController.text,
+        transactionPin: transactionPin,
         serviceId: widget.service.serviceId,
         variationId: widget.package.variationId,
         phoneNumber: _phoneController.text,
@@ -227,7 +267,9 @@ class _PurchaseEducationFormPageState extends State<PurchaseEducationFormPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text(e.toString().split(":").last.trim()),
+              backgroundColor: Colors.red),
         );
       }
     } finally {

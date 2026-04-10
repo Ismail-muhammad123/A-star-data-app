@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
+import 'package:app/features/settings/providers/profile_provider.dart';
 import 'package:app/features/settings/providers/transaction_pin_provider.dart';
 
 class SetTransactionPinPage extends StatefulWidget {
@@ -51,6 +52,8 @@ class _SetTransactionPinPageState extends State<SetTransactionPinPage> {
     if (!mounted) return;
 
     if (res['success'] == true) {
+      await context.read<ProfileProvider>().loadProfile(authProvider.authToken ?? "");
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Transaction PIN set successfully!"),

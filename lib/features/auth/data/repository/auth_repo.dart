@@ -36,7 +36,10 @@ class AuthService {
   }
 
   // Verify 2FA
-  Future<Map<String, dynamic>> verify2FA(String identifier, String otpCode) async {
+  Future<Map<String, dynamic>> verify2FA(
+    String identifier,
+    String otpCode,
+  ) async {
     final response = await _dio.post(
       endpoints.verify2FA,
       options: Options(
@@ -63,7 +66,9 @@ class AuthService {
       data: jsonEncode({'identifier': identifier, 'channel': channel}),
     );
     if (response.statusCode != 200) {
-      throw Exception(_extractError(response.data, 'Failed to resend 2FA code'));
+      throw Exception(
+        _extractError(response.data, 'Failed to resend 2FA code'),
+      );
     }
   }
 
@@ -120,7 +125,9 @@ class AuthService {
       }),
     );
     if (response.statusCode != 200) {
-      throw Exception(_extractError(response.data, 'Failed to update 2FA settings'));
+      throw Exception(
+        _extractError(response.data, 'Failed to update 2FA settings'),
+      );
     }
   }
 
@@ -321,10 +328,7 @@ class AuthService {
           'Authorization': 'Bearer $authToken',
         },
       ),
-      data: jsonEncode({
-        'token': fcmToken,
-        'fcm_token': fcmToken,
-      }),
+      data: jsonEncode({'token': fcmToken, 'fcm_token': fcmToken}),
     );
 
     if (response.statusCode != 200 && response.statusCode != 201) {

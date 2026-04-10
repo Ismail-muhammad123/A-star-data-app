@@ -20,6 +20,8 @@ class ProfileService {
           },
         ),
       );
+      print(response.data);
+
       if (response.statusCode == 200) {
         return UserProfile.fromJson(response.data as Map<String, dynamic>);
       } else {
@@ -37,9 +39,7 @@ class ProfileService {
   }) async {
     try {
       dynamic data;
-      Map<String, dynamic> headers = {
-        'Authorization': "Bearer $authToken",
-      };
+      Map<String, dynamic> headers = {'Authorization': "Bearer $authToken"};
 
       if (profileImagePath != null) {
         data = FormData.fromMap({
@@ -58,10 +58,7 @@ class ProfileService {
       final response = await _dio.put(
         profileEndpoints.updateProfile,
         data: data,
-        options: Options(
-          validateStatus: (status) => true,
-          headers: headers,
-        ),
+        options: Options(validateStatus: (status) => true, headers: headers),
       );
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;

@@ -110,6 +110,12 @@ class OrderServices {
     required String phoneNumber,
     required double amount,
   }) async {
+    print({
+      'transaction_pin': transactionPin,
+      'service_id': serviceId,
+      'phone_number': phoneNumber,
+      'amount': amount,
+    });
     var response = await _dio.post(
       _endpoints.purchaseAirtime,
       data: {
@@ -147,7 +153,7 @@ class OrderServices {
       data: {
         'transaction_pin': transactionPin,
         'plan_id': bundleId,
-        'phone_number': phoneNumber
+        'phone_number': phoneNumber,
       },
       options: Options(
         validateStatus: (status) => true,
@@ -201,7 +207,7 @@ class OrderServices {
       data: {
         'transaction_pin': transactionPin,
         'plan_id': bundleId,
-        'phone_number': phoneNumber
+        'phone_number': phoneNumber,
       },
       options: Options(
         validateStatus: (status) => true,

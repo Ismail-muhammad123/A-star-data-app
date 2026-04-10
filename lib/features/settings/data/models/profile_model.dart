@@ -51,11 +51,11 @@ class UserProfile {
       tier: json['tier'] ?? 1,
       phoneNumber: json['phone_number'],
       phoneCountryCode: json['phone_country_code'] ?? '+234',
-      isActive: json['is_active'] ?? false,
-      isVerified: json['is_verified'] ?? false,
-      emailVerified: json['email_verified'] ?? false,
-      phoneVerified: json['phone_verified'] ?? false,
-      hasTransactionPin: json['has_transaction_pin'] ?? false,
+      isActive: _toBool(json['is_active']),
+      isVerified: _toBool(json['is_verified']),
+      emailVerified: _toBool(json['email_verified']),
+      phoneVerified: _toBool(json['phone_verified']),
+      hasTransactionPin: _toBool(json['transaction_pin_set']),
       twoFactorEnabled:
           _toBool(json['requires_2fa']) ||
           _toBool(json['two_factor_enabled']) ||
@@ -81,7 +81,7 @@ class UserProfile {
       'is_verified': isVerified,
       'email_verified': emailVerified,
       'phone_verified': phoneVerified,
-      'has_transaction_pin': hasTransactionPin,
+      'transaction_pin_set': hasTransactionPin,
       'requires_2fa': twoFactorEnabled,
       'profile_image': profileImage,
       'user_type': userType,

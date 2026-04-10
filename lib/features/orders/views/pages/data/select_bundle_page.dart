@@ -141,8 +141,35 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
                                     child: Image.network(
                                       bundle.service.imageUrl,
                                       fit: BoxFit.contain,
-                                      webHtmlElementStrategy:
-                                          WebHtmlElementStrategy.prefer,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Container(
+                                                width: 40,
+                                                height: 40,
+                                                color: Colors.primaries[bundle
+                                                        .service
+                                                        .serviceName
+                                                        .length %
+                                                    Colors.primaries.length],
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  bundle.service.serviceName
+                                                              .length >=
+                                                          2
+                                                      ? bundle
+                                                          .service.serviceName
+                                                          .substring(0, 2)
+                                                          .toUpperCase()
+                                                      : bundle
+                                                          .service.serviceName
+                                                          .toUpperCase(),
+                                                  style: const TextStyle(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
                                     ),
                                   ),
                                   title: Text(

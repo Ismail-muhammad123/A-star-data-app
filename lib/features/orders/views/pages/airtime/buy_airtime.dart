@@ -235,15 +235,22 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                                               Container(
                                                 width: 60,
                                                 height: 60,
-                                                color: Colors.grey[200],
+                                                color: Colors.primaries[network
+                                                        .serviceName
+                                                        .length %
+                                                    Colors.primaries.length],
                                                 alignment: Alignment.center,
                                                 child: Text(
-                                                  network.serviceName.substring(
-                                                    0,
-                                                    3,
-                                                  ),
+                                                  network.serviceName.length >=
+                                                          2
+                                                      ? network.serviceName
+                                                          .substring(0, 2)
+                                                          .toUpperCase()
+                                                      : network.serviceName
+                                                          .toUpperCase(),
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
                                                   ),
                                                 ),
                                               ),

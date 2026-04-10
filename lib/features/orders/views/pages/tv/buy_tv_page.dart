@@ -257,22 +257,62 @@ class _PurchaseTVSubscriptionFormPageState
                                 color: Colors.blueAccent.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child:
-                                  widget.service.imageUrl?.isNotEmpty == true
-                                      ? Image.network(
+                                child: widget.service.imageUrl != null &&
+                                        widget.service.imageUrl!.isNotEmpty
+                                    ? Image.network(
                                         widget.service.imageUrl!,
                                         width: 40,
                                         height: 40,
-                                        errorBuilder:
-                                            (_, __, ___) => const Icon(
-                                              Icons.tv,
-                                              color: Colors.blueAccent,
+                                        errorBuilder: (context, error,
+                                                stackTrace) =>
+                                            Container(
+                                              width: 40,
+                                              height: 40,
+                                              color: Colors.primaries[widget
+                                                      .service
+                                                      .serviceName
+                                                      .length %
+                                                  Colors.primaries.length],
+                                              alignment: Alignment.center,
+                                              child: Text(
+                                                widget.service.serviceName
+                                                            .length >=
+                                                        2
+                                                    ? widget.service.serviceName
+                                                        .substring(0, 2)
+                                                        .toUpperCase()
+                                                    : widget.service.serviceName
+                                                        .toUpperCase(),
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
                                             ),
                                       )
-                                      : const Icon(
-                                        Icons.tv,
-                                        size: 40,
-                                        color: Colors.blueAccent,
+                                    : Container(
+                                        width: 40,
+                                        height: 40,
+                                        color: Colors.primaries[widget
+                                                .service
+                                                .serviceName
+                                                .length %
+                                            Colors.primaries.length],
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          widget.service.serviceName.length >= 2
+                                              ? widget.service.serviceName
+                                                  .substring(0, 2)
+                                                  .toUpperCase()
+                                              : widget.service.serviceName
+                                                  .toUpperCase(),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
                                       ),
                             ),
                             const SizedBox(width: 16),

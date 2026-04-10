@@ -1,6 +1,6 @@
-// const baseUrl = "https://backend.stardata.com.ng/api";
+const baseUrl = "https://backend.stardata.com.ng/api";
 // const baseUrl = "https://0663225b3ddb.ngrok-free.app/api";
-const baseUrl = "https://a-star-backend-staging.up.railway.app/api";
+// const baseUrl = "https://a-star-backend-staging.up.railway.app/api";
 
 // AUTH
 class AuthEndpoints {
@@ -78,6 +78,10 @@ class OrderEndpoints {
   final String purchaseInternetSubscription =
       "$baseUrl/orders/buy-internet-subscription/";
 
+  final String getEducationServices = "$baseUrl/orders/education-services/";
+  final String getEducationPackages = "$baseUrl/orders/education-packages/";
+  final String purchaseEducation = "$baseUrl/orders/buy-education/";
+
   final String orderHistory = "$baseUrl/orders/purchase-history/";
 }
 
@@ -119,6 +123,12 @@ class BeneficiaryEndpoints {
       "$baseUrl/account/purchase-beneficiaries/";
   String deletePurchaseBeneficiary(int id) =>
       "$baseUrl/account/purchase-beneficiaries/$id/";
+}
+
+class AccountUpgradeEndpoints {
+  final String fees = "$baseUrl/account/upgrade/fees/";
+  final String upgrade = "$baseUrl/account/upgrade/";
+  final String upgradeAgent = "$baseUrl/account/upgrade/agent/";
 }
 
 class P2PEndpoints {

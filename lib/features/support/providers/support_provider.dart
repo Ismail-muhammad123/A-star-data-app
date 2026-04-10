@@ -90,7 +90,7 @@ class SupportProvider extends ChangeNotifier {
     try {
       await _supportService.closeTicket(authToken, ticketId);
       // Update ticket status locally
-      var idx = _tickets.indexWhere((t) => t.id == ticketId);
+      _tickets.indexWhere((t) => t.id == ticketId);
       _tickets.removeWhere((t) => t.id == ticketId);
       fetchTickets(authToken);
       notifyListeners();

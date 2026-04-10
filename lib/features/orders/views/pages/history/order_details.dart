@@ -2,6 +2,7 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -386,6 +387,26 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
                                                   "Reference",
                                                   transactionDetails!.reference,
                                                 ),
+                                                if (transactionDetails?.token != null &&
+                                                    transactionDetails!.token!.isNotEmpty) ...[
+                                                  _buildDivider(),
+                                                  _buildDetailRow(
+                                                    "PIN / Token",
+                                                    transactionDetails!.token!,
+                                                    onTap: () {
+                                                      Clipboard.setData(
+                                                        ClipboardData(
+                                                          text: transactionDetails!.token!,
+                                                        ),
+                                                      );
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        const SnackBar(
+                                                          content: Text("Token copied to clipboard"),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
                                               ],
                                             ),
                                   ),
@@ -481,51 +502,66 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value, {bool isStatus = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[600],
-              fontSize: 14,
-            ),
-          ),
-          isStatus
-              ? Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color:
-                      value == "SUCCESS"
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  value,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: value == "SUCCESS" ? Colors.green : Colors.orange,
-                  ),
-                ),
-              )
-              : Flexible(
-                child: Text(
-                  value,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.right,
-                ),
+  Widget _buildDetailRow(
+    String label,
+    String value, {
+    bool isStatus = false,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
+                fontSize: 14,
               ),
-        ],
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: isStatus
+                    ? Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            value == "SUCCESS"
+                                ? Colors.green.withOpacity(0.1)
+                                : Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        value,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: value == "SUCCESS" ? Colors.green : Colors.orange,
+                        ),
+                      ),
+                    )
+                    : Text(
+                      value,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

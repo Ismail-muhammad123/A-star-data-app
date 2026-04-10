@@ -104,6 +104,7 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
         _networks = networks;
       });
     } catch (e) {
+      print(e);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error fetching networks')));
@@ -231,22 +232,32 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                                       height: 60,
                                       fit: BoxFit.cover,
                                       errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              Container(
-                                                width: 60,
-                                                height: 60,
-                                                color: Colors.grey[200],
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  network.serviceName.substring(
-                                                    0,
-                                                    3,
-                                                  ),
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
+                                          (
+                                            context,
+                                            error,
+                                            stackTrace,
+                                          ) => Container(
+                                            width: 60,
+                                            height: 60,
+                                            color:
+                                                Colors.primaries[network
+                                                        .serviceName
+                                                        .length %
+                                                    Colors.primaries.length],
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              network.serviceName.length >= 2
+                                                  ? network.serviceName
+                                                      .substring(0, 2)
+                                                      .toUpperCase()
+                                                  : network.serviceName
+                                                      .toUpperCase(),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
                                               ),
+                                            ),
+                                          ),
                                     ),
                                   ),
                                 ),
@@ -331,28 +342,43 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                                     : Colors.grey,
                           ),
                           const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              selectedBundle != null
-                                  ? selectedBundle!.name
-                                  : "Tap to select Data Bundle",
-                              style: TextStyle(
-                                color:
-                                    selectedBundle != null
-                                        ? Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge?.color
-                                        : Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.color
-                                            ?.withOpacity(0.6),
-                                fontSize: 16,
-                                fontWeight:
-                                    selectedBundle != null
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                              ),
+                           Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  selectedBundle != null
+                                      ? selectedBundle!.name
+                                      : "Tap to select Data Bundle",
+                                  style: TextStyle(
+                                    color:
+                                        selectedBundle != null
+                                            ? Theme.of(
+                                              context,
+                                            ).textTheme.bodyLarge?.color
+                                            : Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.color
+                                                ?.withOpacity(0.6),
+                                    fontSize: 16,
+                                    fontWeight:
+                                        selectedBundle != null
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                  ),
+                                ),
+                                if (selectedBundle != null)
+                                  Text(
+                                    "Price: ₦${selectedBundle!.sellingPrice}",
+                                    style: const TextStyle(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                           const Icon(Icons.arrow_drop_down, color: Colors.grey),

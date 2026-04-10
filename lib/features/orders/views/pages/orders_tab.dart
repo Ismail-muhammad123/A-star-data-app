@@ -29,6 +29,8 @@ class _OrdersTabState extends State<OrdersTab> {
   final PageController _announcementPageController = PageController();
   Timer? _announcementTimer;
   int _currentAnnouncementPage = 0;
+  List<InternetService> _internetServices = [];
+  bool _isLoadingInternet = false;
 
   @override
   void initState() {
@@ -40,8 +42,23 @@ class _OrdersTabState extends State<OrdersTab> {
         context.read<WalletProvider>().fetchBalance(token);
         context.read<NotificationProvider>().refreshAll(token);
         _startAnnouncementAutoSlide();
+        _fetchInternetServices(token);
       }
     });
+  }
+
+  Future<void> _fetchInternetServices(String token) async {
+    setState(() => _isLoadingInternet = true);
+    try {
+      final services = await OrderServices().fetchInternetServices(token);
+      setState(() {
+        _internetServices = services.where((s) => s.isActive).toList();
+      });
+    } catch (e) {
+      debugPrint("Error fetching internet services: $e");
+    } finally {
+      setState(() => _isLoadingInternet = false);
+    }
   }
 
   Future<void> _refresh() async {
@@ -51,6 +68,7 @@ class _OrdersTabState extends State<OrdersTab> {
       await Future.wait([
         context.read<WalletProvider>().fetchBalance(token),
         context.read<NotificationProvider>().refreshAll(token),
+        _fetchInternetServices(token),
       ]);
     }
     setState(() {});
@@ -115,7 +133,11 @@ class _OrdersTabState extends State<OrdersTab> {
                   channelUrl: _whatsAppChannelUrl,
                   chatMessage: "Hello, I need help with my order.",
                 ),
-            icon: const FaIcon(FontAwesomeIcons.whatsapp, size: 20),
+            icon: const FaIcon(
+              FontAwesomeIcons.whatsapp,
+              size: 20,
+              color: Color.fromARGB(255, 0, 255, 94),
+            ),
           ),
           Consumer<NotificationProvider>(
             builder: (context, notifications, child) {
@@ -259,7 +281,7 @@ class _OrdersTabState extends State<OrdersTab> {
                                 : NumberFormat.currency(
                                   locale: 'en_NG',
                                   symbol: '₦',
-                            ).format(walletProvider.balance),
+                                ).format(walletProvider.balance),
                             style: const TextStyle(
                               fontSize: 28,
                               color: Colors.white,
@@ -331,7 +353,7 @@ class _OrdersTabState extends State<OrdersTab> {
                     color: Colors.indigo,
                     onTap:
                         () => context
-                            .push("/orders/buy-internet")
+                            .push("/orders/select-internet-service")
                             .then((_) => setState(() {})),
                   ),
                   _buildServiceCard(
@@ -339,11 +361,7 @@ class _OrdersTabState extends State<OrdersTab> {
                     icon: Icons.school_outlined,
                     color: Colors.brown,
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Education Services Coming Soon"),
-                        ),
-                      );
+                      context.push("/orders/select-education-service");
                     },
                   ),
                   _buildServiceCard(
@@ -364,32 +382,28 @@ class _OrdersTabState extends State<OrdersTab> {
                             .push("/orders/select-tv-service")
                             .then((_) => setState(() {})),
                   ),
-                  _buildServiceCard(
-                    title: "Smile",
-                    icon: Icons.router_outlined,
-                    color: Colors.pinkAccent,
-                    onTap:
-                        () => context
-                            .push("/orders/buy-internet", extra: "smile")
-                            .then((_) => setState(() {})),
-                  ),
-                  _buildServiceCard(
-                    title: "Kirani",
-                    icon: Icons.router_outlined,
-                    color: Colors.green,
-                    onTap:
-                        () => context
-                            .push("/orders/buy-internet", extra: "kirani")
-                            .then((_) => setState(() {})),
-                  ),
-                  _buildServiceCard(
-                    title: "Ratel",
-                    icon: Icons.router_outlined,
-                    color: Colors.deepOrange,
-                    onTap:
-                        () => context
-                            .push("/orders/buy-internet", extra: "ratel")
-                            .then((_) => setState(() {})),
+                  if (_isLoadingInternet)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  ..._internetServices.map(
+                    (service) => _buildServiceCard(
+                      title: service.serviceName,
+                      icon: Icons.router_outlined,
+                      color: Colors.primaries[service.serviceName.length %
+                          Colors.primaries.length],
+                      onTap:
+                          () => context
+                              .push("/orders/select-internet-package",
+                                  extra: service)
+                              .then((_) => setState(() {})),
+                      networkImage: (service.image?.isNotEmpty ?? false)
+                          ? service.image
+                          : null,
+                    ),
                   ),
                   // _buildServiceCard(
                   //   title: "History",
@@ -647,6 +661,7 @@ class _OrdersTabState extends State<OrdersTab> {
     required Color color,
     required VoidCallback onTap,
     String? image,
+    String? networkImage,
   }) {
     return InkWell(
       onTap: onTap,
@@ -674,7 +689,17 @@ class _OrdersTabState extends State<OrdersTab> {
                 shape: BoxShape.circle,
               ),
               child:
-                  image != null
+                  networkImage != null
+                      ? Image.network(
+                        networkImage,
+                        width: 30,
+                        height: 30,
+                        fit: BoxFit.contain,
+                        errorBuilder:
+                            (context, error, stackTrace) =>
+                                Icon(icon, size: 24, color: color),
+                      )
+                      : image != null
                       ? Image.asset(image, width: 30, height: 30)
                       : Icon(icon, size: 24, color: color),
             ),

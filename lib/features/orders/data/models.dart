@@ -11,13 +11,15 @@ class DataNetwork {
     required this.serviceId,
     required this.imageUrl,
   });
-
   factory DataNetwork.fromJson(Map<String, dynamic> json) {
     return DataNetwork(
-      id: json['id'],
-      serviceName: json['service_name'],
-      serviceId: json['service_id'],
-      imageUrl: json['image'],
+      id:
+          json['id'] is int
+              ? json['id']
+              : (int.tryParse(json['id'].toString()) ?? 0),
+      serviceName: json['service_name'] ?? "",
+      serviceId: json['service_id'] ?? "",
+      imageUrl: json['image'] ?? "",
     );
   }
 
@@ -57,15 +59,18 @@ class AirtimeNetwork {
 
   factory AirtimeNetwork.fromJson(Map<String, dynamic> json) {
     return AirtimeNetwork(
-      id: json['id'],
-      serviceName: json['service_name'],
-      serviceId: json['service_id'],
-      minimumAmount: double.tryParse(json['min_amount'] as String) ?? 0.0,
-      maximumAmount: double.tryParse(json['max_amount'] as String) ?? 0.0,
-      imageUrl: json['image'],
+      id:
+          json['id'] is int
+              ? json['id']
+              : (int.tryParse(json['id'].toString())),
+      serviceName: json['service_name'] ?? "",
+      serviceId: json['service_id'] ?? "",
+      minimumAmount: double.tryParse(json['min_amount'].toString()) ?? 0.0,
+      maximumAmount: double.tryParse(json['max_amount'].toString()) ?? 0.0,
+      imageUrl: json['image'] ?? "",
       isActive: json['is_active'] ?? true,
-      discount: json['discount'] ?? '0',
-      agentDiscount: json['agent_discount'] ?? '0',
+      discount: json['discount']?.toString() ?? '0',
+      agentDiscount: json['agent_discount']?.toString() ?? '0',
     );
   }
 
@@ -100,10 +105,13 @@ class ElectricityService {
 
   factory ElectricityService.fromJson(Map<String, dynamic> json) {
     return ElectricityService(
-      id: json['id'],
-      serviceName: json['service_name'],
-      serviceId: json['service_id'],
-      imageUrl: json['image_url'],
+      id:
+          json['id'] is int
+              ? json['id']
+              : (int.tryParse(json['id'].toString())),
+      serviceName: json['service_name'] ?? "",
+      serviceId: json['service_id'] ?? "",
+      imageUrl: json['image_url'] ?? "",
     );
   }
 
@@ -131,10 +139,13 @@ class CableTVService {
   });
   factory CableTVService.fromJson(Map<String, dynamic> json) {
     return CableTVService(
-      id: json['id'],
-      serviceName: json['service_name'],
-      serviceId: json['service_id'],
-      imageUrl: json['image_url'],
+      id:
+          json['id'] is int
+              ? json['id']
+              : (int.tryParse(json['id'].toString())),
+      serviceName: json['service_name'] ?? "",
+      serviceId: json['service_id'] ?? "",
+      imageUrl: json['image_url'] ?? "",
     );
   }
 
@@ -170,12 +181,12 @@ class CableTVPackage {
   factory CableTVPackage.fromJson(Map<String, dynamic> json) {
     return CableTVPackage(
       id: json['id'],
-      name: json['name'],
+      name: json['name'] ?? "",
       service: CableTVService.fromJson(json['service']),
-      variationId: json['variation_id'],
+      variationId: json['variation_id']?.toString() ?? "",
       description: json['description'],
-      sellingPrice: double.tryParse(json['selling_price']) ?? 0.0,
-      isActive: json['is_active'],
+      sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
+      isActive: json['is_active'] ?? true,
     );
   }
 
@@ -221,7 +232,7 @@ class DataBundle {
       service: DataNetwork.fromJson(json['service']),
       variationId: json['variation_id'],
       description: json['description'],
-      sellingPrice: double.tryParse(json['selling_price']) ?? 0.0,
+      sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
       durationDays: json['duration_days'],
       isActive: json['is_active'],
     );
@@ -278,6 +289,69 @@ class DataBundle {
 //   }
 // }
 
+// EDUCATION SERVICES
+class EducationService {
+  final int? id;
+  final String serviceName;
+  final String serviceId;
+  final String? imageUrl;
+  EducationService({
+    required this.id,
+    required this.serviceName,
+    required this.serviceId,
+    required this.imageUrl,
+  });
+  factory EducationService.fromJson(Map<String, dynamic> json) {
+    return EducationService(
+      id:
+          json['id'] is int
+              ? json['id']
+              : int.tryParse(json['id']?.toString() ?? ""),
+      serviceName: json['service_name'] ?? "",
+      serviceId: json['service_id'] ?? "",
+      imageUrl: json['image_url'] ?? "",
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'service_name': serviceName,
+      'service_id': serviceId,
+      'image_url': imageUrl,
+    };
+  }
+}
+
+class EducationPackage {
+  final int? id;
+  final String name;
+  final EducationService service;
+  final String variationId;
+  final double sellingPrice;
+  final bool isActive;
+  EducationPackage({
+    this.id,
+    required this.name,
+    required this.service,
+    required this.variationId,
+    required this.sellingPrice,
+    required this.isActive,
+  });
+  factory EducationPackage.fromJson(Map<String, dynamic> json) {
+    return EducationPackage(
+      id:
+          json['id'] is int
+              ? json['id']
+              : int.tryParse(json['id']?.toString() ?? ""),
+      name: json['name'] ?? "",
+      service: EducationService.fromJson(json['service']),
+      variationId: json['variation_id']?.toString() ?? "",
+      sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
+      isActive: json['is_active'] ?? true,
+    );
+  }
+}
+
 // INTERNET SERVICES
 class InternetService {
   final int id;
@@ -300,12 +374,18 @@ class InternetService {
 
   factory InternetService.fromJson(Map<String, dynamic> json) {
     return InternetService(
-      id: json['id'],
-      serviceName: json['service_name'],
-      serviceId: json['service_id'],
-      provider: json['provider'],
+      id:
+          json['id'] is int
+              ? json['id']
+              : (int.tryParse(json['id'].toString()) ?? 0),
+      serviceName: json['service_name'] ?? "",
+      serviceId: json['service_id'] ?? "",
+      provider:
+          json['provider'] is int
+              ? json['provider']
+              : (int.tryParse(json['provider'].toString())),
       providerName: json['provider_name'],
-      image: json['image'],
+      image: json['image'] ?? "",
       isActive: json['is_active'] ?? true,
     );
   }
@@ -349,11 +429,14 @@ class InternetPackage {
 
   factory InternetPackage.fromJson(Map<String, dynamic> json) {
     return InternetPackage(
-      id: json['id'],
-      name: json['name'],
+      id:
+          json['id'] is int
+              ? json['id']
+              : (int.tryParse(json['id'].toString()) ?? 0),
+      name: json['name'] ?? "",
       service: InternetService.fromJson(json['service']),
       providerName: json['provider_name'],
-      variationId: json['variation_id'],
+      variationId: json['variation_id']?.toString() ?? "",
       sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
       agentPrice:
           json['agent_price'] != null
@@ -397,6 +480,7 @@ class OrderHistory {
   final int? tvVariation;
   final int? internetVariation;
   final int? educationVariation;
+  final String? token;
 
   OrderHistory({
     required this.id,
@@ -415,6 +499,7 @@ class OrderHistory {
     this.tvVariation,
     this.internetVariation,
     this.educationVariation,
+    this.token,
   });
 
   factory OrderHistory.fromJson(Map<String, dynamic> json) {
@@ -435,6 +520,7 @@ class OrderHistory {
       tvVariation: json['tv_variation'],
       internetVariation: json['internet_variation'],
       educationVariation: json['education_variation'],
+      token: json['token'],
     );
   }
 
@@ -456,6 +542,7 @@ class OrderHistory {
       'tv_variation': tvVariation,
       'internet_variation': internetVariation,
       'education_variation': educationVariation,
+      'token': token,
     };
   }
 }

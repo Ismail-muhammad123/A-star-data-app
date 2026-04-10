@@ -44,7 +44,7 @@ class OrderServices {
     print(response.data);
 
     if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
+      List<dynamic> data = response.data['results'] as List<dynamic>;
       return data
           .map((item) => DataNetwork.fromJson(item as Map<String, dynamic>))
           .toList();
@@ -66,7 +66,7 @@ class OrderServices {
     );
 
     if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
+      List<dynamic> data = response.data['results'] as List<dynamic>;
       return data
           .map((item) => DataBundle.fromJson(item as Map<String, dynamic>))
           .toList();
@@ -92,8 +92,10 @@ class OrderServices {
     );
 
     if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
-      return data
+      dynamic data = response.data;
+      List<dynamic> results =
+          (data is Map && data.containsKey('results')) ? data['results'] : data;
+      return results
           .map((item) => DataBundle.fromJson(item as Map<String, dynamic>))
           .toList();
     } else {
@@ -260,8 +262,10 @@ class OrderServices {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      // Purchase successful
-      return (response.data as List)
+      dynamic data = response.data;
+      List<dynamic> results =
+          (data is Map && data.containsKey('results')) ? data['results'] : data;
+      return results
           .map(
             (item) => ElectricityService.fromJson(item as Map<String, dynamic>),
           )
@@ -286,8 +290,10 @@ class OrderServices {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      // Purchase successful
-      return (response.data as List)
+      dynamic data = response.data;
+      List<dynamic> results =
+          (data is Map && data.containsKey('results')) ? data['results'] : data;
+      return results
           .map((item) => CableTVService.fromJson(item as Map<String, dynamic>))
           .toList();
     } else {
@@ -297,11 +303,10 @@ class OrderServices {
 
   Future<List<CableTVPackage>> fetchTVPackages(
     String authToken,
-    String? serviceId,
+    int networkId,
   ) async {
     var response = await _dio.get(
-      _endpoints.getTVPackages,
-      queryParameters: serviceId != null ? {'service_id': serviceId} : null,
+      "${_endpoints.getTVServices}$networkId/packages/",
       options: Options(
         validateStatus: (status) => true,
         headers: {
@@ -310,9 +315,11 @@ class OrderServices {
         },
       ),
     );
+    print("tv packagses");
+    print(response.data);
     if (response.statusCode == 200 || response.statusCode == 201) {
-      // Purchase successful
-      return (response.data as List)
+      List<dynamic> data = response.data['results'];
+      return data
           .map((item) => CableTVPackage.fromJson(item as Map<String, dynamic>))
           .toList();
     } else {
@@ -513,6 +520,102 @@ class OrderServices {
     } else {
       throw Exception(
         response.data['error'] ?? 'Failed to purchase internet subscription',
+      );
+    }
+  }
+
+  //======================== EDUCATION SERVICES ======================================
+  Future<List<EducationService>> fetchEducationServices(
+    String authToken,
+  ) async {
+    var response = await _dio.get(
+      _endpoints.getEducationServices,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      dynamic data = response.data;
+      List<dynamic> results =
+          (data is Map && data.containsKey('results')) ? data['results'] : data;
+      return results
+          .map(
+            (item) => EducationService.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
+    } else {
+      throw Exception(
+        response.data['error'] ?? 'Failed to load education services',
+      );
+    }
+  }
+
+  Future<List<EducationPackage>> fetchEducationPackages(
+    String authToken,
+    String? serviceId,
+  ) async {
+    var response = await _dio.get(
+      _endpoints.getEducationPackages,
+      queryParameters: serviceId != null ? {'service_id': serviceId} : null,
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      dynamic data = response.data;
+      List<dynamic> results =
+          (data is Map && data.containsKey('results')) ? data['results'] : data;
+      return results
+          .map(
+            (item) => EducationPackage.fromJson(item as Map<String, dynamic>),
+          )
+          .toList();
+    } else {
+      throw Exception(
+        response.data['error'] ?? 'Failed to load education packages',
+      );
+    }
+  }
+
+  Future<OrderHistory> purchaseEducation({
+    required String authToken,
+    required String transactionPin,
+    required String serviceId,
+    required String variationId,
+    required String phoneNumber,
+    String? promoCode,
+  }) async {
+    var response = await _dio.post(
+      _endpoints.purchaseEducation,
+      data: {
+        'transaction_pin': transactionPin,
+        'service_id': serviceId,
+        'variation_id': variationId,
+        'phone_number': phoneNumber,
+        if (promoCode != null) 'promo_code': promoCode,
+      },
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $authToken',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return OrderHistory.fromJson(response.data as Map<String, dynamic>);
+    } else {
+      throw Exception(
+        response.data['error'] ?? 'Failed to purchase education service',
       );
     }
   }

@@ -115,26 +115,58 @@ class TvServiceProvidersListPageState
                                       color: Colors.blueAccent.withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    child:
-                                        (provider.imageUrl ?? "").isNotEmpty
-                                            ? Image.network(
-                                              provider.imageUrl!,
-                                              webHtmlElementStrategy:
-                                                  WebHtmlElementStrategy.prefer,
-                                              errorBuilder:
-                                                  (
-                                                    context,
-                                                    error,
-                                                    stackTrace,
-                                                  ) => const Icon(
-                                                    Icons.tv,
-                                                    color: Colors.blueAccent,
+                                    child: (provider.imageUrl ?? "").isNotEmpty
+                                        ? Image.network(
+                                            provider.imageUrl!,
+                                            webHtmlElementStrategy:
+                                                WebHtmlElementStrategy.prefer,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error,
+                                                    stackTrace) =>
+                                                Container(
+                                                  color: Colors.primaries[
+                                                      provider.serviceName
+                                                              .length %
+                                                          Colors.primaries
+                                                              .length],
+                                                  alignment: Alignment.center,
+                                                  child: Text(
+                                                    provider.serviceName
+                                                                .length >=
+                                                            2
+                                                        ? provider.serviceName
+                                                            .substring(0, 2)
+                                                            .toUpperCase()
+                                                        : provider.serviceName
+                                                            .toUpperCase(),
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.white,
+                                                      fontSize: 14,
+                                                    ),
                                                   ),
-                                            )
-                                            : const Icon(
-                                              Icons.tv,
-                                              color: Colors.blueAccent,
+                                                ),
+                                          )
+                                        : Container(
+                                            color: Colors.primaries[provider
+                                                    .serviceName.length %
+                                                Colors.primaries.length],
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              provider.serviceName.length >= 2
+                                                  ? provider.serviceName
+                                                      .substring(0, 2)
+                                                      .toUpperCase()
+                                                  : provider.serviceName
+                                                      .toUpperCase(),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
                                             ),
+                                          ),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(

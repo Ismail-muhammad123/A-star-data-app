@@ -7,11 +7,17 @@ import 'package:app/features/orders/views/pages/electricity/list_electricity_pro
 import 'package:app/features/orders/views/pages/history/order_details.dart';
 import 'package:app/features/orders/views/pages/history/order_history.dart';
 import 'package:app/features/orders/views/pages/internet/buy_internet_subscription.dart';
+import 'package:app/features/orders/views/pages/internet/select_internet_package.dart';
+import 'package:app/features/orders/views/pages/internet/select_internet_service.dart';
 import 'package:app/features/orders/views/pages/tv/buy_tv_page.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_pachage.dart';
 import 'package:app/features/orders/views/pages/tv/select_tv_service.dart';
+import 'package:app/features/orders/views/pages/education/buy_education_page.dart';
+import 'package:app/features/orders/views/pages/education/select_education_package.dart';
+import 'package:app/features/orders/views/pages/education/select_education_service.dart';
 
 import 'package:app/features/settings/views/pages/personal/change_pin_form_page.dart';
+import 'package:app/features/settings/views/pages/personal/upgrade_role_page.dart';
 import 'package:app/features/settings/views/pages/transaction_pin/change_transaction_pin_page.dart';
 import 'package:app/features/settings/views/pages/transaction_pin/reset_transaction_pin_page.dart';
 import 'package:app/features/settings/views/pages/transaction_pin/set_transaction_pin_page.dart';
@@ -158,12 +164,21 @@ final GoRouter router = GoRouter(
       builder: (context, state) => DataPurchaseFormPage(),
     ),
     GoRoute(
+      path: "/orders/select-internet-service",
+      builder: (context, state) => const InternetServicesListPage(),
+    ),
+    GoRoute(
+      path: "/orders/select-internet-package",
+      builder: (context, state) {
+        final service = state.extra as InternetService;
+        return SelectInternetPackagePage(provider: service);
+      },
+    ),
+    GoRoute(
       path: "/orders/buy-internet",
       builder: (context, state) {
-        final preferredNetworkName = state.extra as String?;
-        return InternetPurchasePage(
-          preferredNetworkName: preferredNetworkName,
-        );
+        final package = state.extra as InternetPackage;
+        return InternetPurchasePage(package: package);
       },
     ),
 
@@ -206,6 +221,29 @@ final GoRouter router = GoRouter(
       },
     ),
 
+    // ==================== Education Routes =====================
+    GoRoute(
+      path: "/orders/select-education-service",
+      builder: (context, state) => const EducationServicesListPage(),
+    ),
+    GoRoute(
+      path: "/orders/select-education-package",
+      builder: (context, state) {
+        final service = state.extra as EducationService;
+        return SelectEducationPackagePage(provider: service);
+      },
+    ),
+    GoRoute(
+      path: "/orders/buy-education",
+      builder: (context, state) {
+        final package = state.extra as EducationPackage;
+        return PurchaseEducationFormPage(
+          service: package.service,
+          package: package,
+        );
+      },
+    ),
+
     // ===================== Wallet Routes =====================
     // GoRoute(
     //   path: "/orders/buy-smile",
@@ -223,7 +261,7 @@ final GoRouter router = GoRouter(
       path: '/wallet/p2p',
       builder: (context, state) => const P2PTransferPage(),
     ),
-   
+
     GoRoute(
       path: '/wallet/history/:transactionId',
       builder: (context, state) {
@@ -280,6 +318,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const NotificationsPage(),
     ),
     GoRoute(path: '/profile/kyc', builder: (context, state) => const KycPage()),
+    GoRoute(
+      path: '/profile/upgrade-role',
+      builder: (context, state) => const UpgradeRolePage(),
+    ),
     GoRoute(
       path: '/referral',
       builder: (context, state) => const ReferralPage(),

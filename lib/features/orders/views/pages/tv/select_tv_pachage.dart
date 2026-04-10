@@ -43,10 +43,10 @@ class SelectTvPackagePageState extends State<SelectTvPackagePage> {
             ),
           ),
           Expanded(
-            child: FutureBuilder(
+            child: FutureBuilder<List<CableTVPackage>>(
               future: OrderServices().fetchTVPackages(
                 context.read<AuthProvider>().authToken ?? "",
-                widget.provider.serviceId,
+                widget.provider.id!,
               ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -69,15 +69,27 @@ class SelectTvPackagePageState extends State<SelectTvPackagePage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: ListTile(
-                              leading: Icon(Icons.electrical_services),
+                              leading: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.blueAccent.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: (package.service.imageUrl ?? "").isNotEmpty
+                                    ? Image.network(
+                                        package.service.imageUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            const Icon(Icons.tv, color: Colors.blueAccent),
+                                      )
+                                    : const Icon(Icons.tv, color: Colors.blueAccent),
+                              ),
                               title: Text(
                                 package.name,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge?.color,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
                                 ),
                               ),
                               subtitle: Text(

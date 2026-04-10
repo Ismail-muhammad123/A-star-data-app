@@ -46,7 +46,9 @@ class _SettingsPageState extends State<SettingsPage> {
       if (res['success'] != true) {
         throw Exception(res['message'] ?? 'Unable to update 2FA right now.');
       }
-      await context.read<ProfileProvider>().loadProfile(authProvider.authToken ?? "");
+      await context.read<ProfileProvider>().loadProfile(
+        authProvider.authToken ?? "",
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -95,107 +97,164 @@ class _SettingsPageState extends State<SettingsPage> {
     final completion = _calculateProfileCompletion(profile);
 
     return Scaffold(
+      appBar: AppBar(title: Text("Settings")),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 200.0,
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                "Settings",
-                style: TextStyle(
-                  color: Theme.of(context).appBarTheme.foregroundColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              background: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).appBarTheme.backgroundColor,
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: -50,
-                      top: -50,
-                      child: CircleAvatar(
-                        radius: 100,
-                        backgroundColor: Colors.white.withOpacity(0.05),
-                      ),
-                    ),
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 35,
-                              backgroundColor:
-                                  Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.grey[800]
-                                      : Colors.white,
-                              backgroundImage:
-                                  (profile?.profileImage != null &&
-                                          profile!.profileImage!.isNotEmpty)
-                                      ? NetworkImage(profile!.profileImage!)
-                                      : null,
-                              child:
-                                  (profile?.profileImage == null ||
-                                          profile!.profileImage!.isEmpty)
-                                      ? Icon(
-                                        Icons.person,
-                                        size: 40,
-                                        color:
-                                            Theme.of(context).colorScheme.primary,
-                                      )
-                                      : null,
-                            ),
-                            const SizedBox(width: 15),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      profile == null
-                                          ? "Loading..."
-                                          : (profile.fullName.isNotEmpty)
-                                          ? profile.fullName.capitalize()
-                                          : profile.phoneNumber,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    if (profile?.isVerified ?? false) ...[
-                                      const SizedBox(width: 8),
-                                      const Icon(
-                                        Icons.verified,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Content
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.only(bottom: 40),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.primary.withOpacity(0.8),
                   ],
                 ),
               ),
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: -50,
+                    top: -50,
+                    child: CircleAvatar(
+                      radius: 100,
+                      backgroundColor: Colors.white.withOpacity(0.05),
+                    ),
+                  ),
+                  Positioned(
+                    left: -30,
+                    bottom: -30,
+                    child: CircleAvatar(
+                      radius: 70,
+                      backgroundColor: Colors.white.withOpacity(0.05),
+                    ),
+                  ),
+                  SafeArea(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        Center(
+                          child: Column(
+                            children: [
+                              // Profile Picture
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.white,
+                                  backgroundImage:
+                                      (profile?.profileImage != null &&
+                                              profile!.profileImage!.isNotEmpty)
+                                          ? NetworkImage(profile.profileImage!)
+                                          : null,
+                                  child:
+                                      (profile?.profileImage == null ||
+                                              profile!.profileImage!.isEmpty)
+                                          ? Icon(
+                                            Icons.person,
+                                            size: 60,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                          )
+                                          : null,
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              // Name + Badge
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    profile == null
+                                        ? "Loading..."
+                                        : profile.fullName.isNotEmpty
+                                        ? profile.fullName.capitalize()
+                                        : "User",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  if (profile?.isVerified ?? false) ...[
+                                    const SizedBox(width: 8),
+                                    const Icon(
+                                      Icons.verified,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 5),
+                              // Phone
+                              Text(
+                                profile?.phoneNumber ?? "",
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 14,
+                                ),
+                              ),
+                              // Email
+                              if (profile?.email != null)
+                                Text(
+                                  profile!.email!,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              const SizedBox(height: 12),
+                              // User Type Badge
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                  ),
+                                ),
+                                child: Text(
+                                  (profile?.userTypeLabel ?? "Customer")
+                                      .toUpperCase(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.1,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: Padding(
+            Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,6 +417,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () => context.push("/profile/kyc"),
                   ),
 
+                  SettingsTile(
+                    title: "Upgrade Account",
+                    subTitle: "Become an Agent or API Developer",
+                    leadingIcon: Icons.star_outline_rounded,
+                    leadingIconColor: Colors.amber,
+                    onTap: () => context.push("/profile/upgrade-role"),
+                  ),
                   const SizedBox(height: 24),
                   _buildSectionHeader("Security"),
                   SettingsTile(
@@ -477,7 +543,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     subTitle: "Chat or join our updates channel",
                     leading: const FaIcon(
                       FontAwesomeIcons.whatsapp,
-                      color: Colors.green,
+                      color: Color(0xFF25D366),
                       size: 24,
                     ),
                     onTap:
@@ -514,8 +580,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

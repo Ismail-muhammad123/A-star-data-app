@@ -36,9 +36,10 @@ class UpgradeFeesResponse {
     return UpgradeFeesResponse(
       isActive: json['is_active'] ?? false,
       currentRole: json['current_role'] ?? '',
-      availableUpgrades: (json['available_upgrades'] as List)
-          .map((item) => UpgradeRoleInfo.fromJson(item))
-          .toList(),
+      availableUpgrades:
+          (json['available_upgrades'] as List)
+              .map((item) => UpgradeRoleInfo.fromJson(item))
+              .toList(),
     );
   }
 }
@@ -82,10 +83,12 @@ class UpgradeService {
       ),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return response.data;
     } else {
-      throw Exception(response.data['error'] ?? 'Upgrade failed');
+      throw Exception(
+        (response.data['error'] ?? 'Upgrade failed').toString().split(":").last,
+      );
     }
   }
 

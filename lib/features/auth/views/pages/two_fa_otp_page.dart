@@ -508,31 +508,83 @@ class _TwoFaOtpPageState extends State<TwoFaOtpPage> {
                                                   "Choose where to receive your 2FA reset code.",
                                                 ),
                                                 const SizedBox(height: 16),
-                                                DropdownButtonFormField<String>(
-                                                  value: _resetChannel,
-                                                  decoration: const InputDecoration(
-                                                    labelText: "Channel",
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                      color: theme.dividerColor,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
                                                   ),
-                                                  items: const [
-                                                    DropdownMenuItem(
-                                                      value: 'sms',
-                                                      child: Text('SMS'),
-                                                    ),
-                                                    DropdownMenuItem(
-                                                      value: 'whatsapp',
-                                                      child: Text('WhatsApp'),
-                                                    ),
-                                                    DropdownMenuItem(
-                                                      value: 'email',
-                                                      child: Text('Email'),
-                                                    ),
-                                                  ],
-                                                  onChanged: (value) {
-                                                    if (value == null) return;
-                                                    setModalState(() {
-                                                      _resetChannel = value;
-                                                    });
-                                                  },
+                                                  child: Column(
+                                                    children: [
+                                                      CheckboxListTile(
+                                                        value:
+                                                            _resetChannel ==
+                                                            'sms',
+                                                        onChanged: (selected) {
+                                                          if (selected != true) {
+                                                            return;
+                                                          }
+                                                          setModalState(() {
+                                                            _resetChannel =
+                                                                'sms';
+                                                          });
+                                                        },
+                                                        title: const Text(
+                                                          'SMS',
+                                                        ),
+                                                        dense: true,
+                                                        controlAffinity:
+                                                            ListTileControlAffinity
+                                                                .leading,
+                                                      ),
+                                                      CheckboxListTile(
+                                                        value:
+                                                            _resetChannel ==
+                                                            'whatsapp',
+                                                        onChanged: (selected) {
+                                                          if (selected != true) {
+                                                            return;
+                                                          }
+                                                          setModalState(() {
+                                                            _resetChannel =
+                                                                'whatsapp';
+                                                          });
+                                                        },
+                                                        title: const Text(
+                                                          'WhatsApp',
+                                                        ),
+                                                        dense: true,
+                                                        controlAffinity:
+                                                            ListTileControlAffinity
+                                                                .leading,
+                                                      ),
+                                                      CheckboxListTile(
+                                                        value:
+                                                            _resetChannel ==
+                                                            'email',
+                                                        onChanged: (selected) {
+                                                          if (selected != true) {
+                                                            return;
+                                                          }
+                                                          setModalState(() {
+                                                            _resetChannel =
+                                                                'email';
+                                                          });
+                                                        },
+                                                        title: const Text(
+                                                          'Email',
+                                                        ),
+                                                        dense: true,
+                                                        controlAffinity:
+                                                            ListTileControlAffinity
+                                                                .leading,
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                                 const SizedBox(height: 20),
                                                 SizedBox(

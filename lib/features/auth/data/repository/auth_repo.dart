@@ -1,6 +1,18 @@
 import 'dart:convert';
+import 'package:app/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:app/core/constants/api_endpoints.dart';
+
+class AuthApiException implements Exception {
+  final String message;
+  final Map<String, List<String>> fieldErrors;
+
+  AuthApiException(this.message, {Map<String, List<String>>? fieldErrors})
+    : fieldErrors = fieldErrors ?? {};
+
+  @override
+  String toString() => message;
+}
 
 class AuthService {
   final Dio _dio = Dio();
@@ -18,6 +30,48 @@ class AuthService {
     return fallback;
   }
 
+  Map<String, List<String>> _extractFieldErrors(dynamic responseData) {
+    if (responseData is! Map<String, dynamic>) return {};
+
+    final Map<String, List<String>> extracted = {};
+
+    responseData.forEach((key, value) {
+      if (key == 'detail' || key == 'error' || key == 'message') {
+        return;
+      }
+
+      if (value is List) {
+        final errors =
+            value
+                .where((item) => item != null)
+                .map((item) => item.toString().trim())
+                .where((item) => item.isNotEmpty)
+                .toList();
+        if (errors.isNotEmpty) {
+          extracted[key] = errors;
+        }
+      } else if (value is String && value.trim().isNotEmpty) {
+        extracted[key] = [value.trim()];
+      }
+    });
+
+    return extracted;
+  }
+
+  String _formatFieldErrors(Map<String, List<String>> fieldErrors) {
+    if (fieldErrors.isEmpty) return '';
+
+    final lines = <String>[];
+    fieldErrors.forEach((field, errors) {
+      final label = field.replaceAll('_', ' ').capitalize();
+      for (final error in errors) {
+        lines.add('$label: $error');
+      }
+    });
+
+    return lines.join('\n');
+  }
+
   // Login
   Future<Map<String, dynamic>> login(String phoneNumber, String pin) async {
     final response = await _dio.post(
@@ -28,6 +82,7 @@ class AuthService {
       ),
       data: jsonEncode({'phone_number': phoneNumber, 'pin': pin}),
     );
+    print(response.data);
     if (response.statusCode == 200 || response.statusCode == 202) {
       return response.data as Map<String, dynamic>;
     } else {
@@ -171,7 +226,12 @@ class AuthService {
     if (response.statusCode == 201 || response.statusCode == 200) {
       return response.data as Map<String, dynamic>;
     } else {
-      throw Exception(response.data['error'] ?? 'Failed to register');
+      final fieldErrors = _extractFieldErrors(response.data);
+      final primaryError = _extractError(response.data, 'Failed to register');
+      final formattedFieldErrors = _formatFieldErrors(fieldErrors);
+      final message =
+          formattedFieldErrors.isNotEmpty ? formattedFieldErrors : primaryError;
+      throw AuthApiException(message, fieldErrors: fieldErrors);
     }
   }
 

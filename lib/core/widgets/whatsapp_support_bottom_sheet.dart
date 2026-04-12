@@ -7,7 +7,7 @@ Future<void> showWhatsAppSupportBottomSheet(
   BuildContext context, {
   required String chatPhoneNumber,
   required String channelUrl,
-  String chatMessage = "Hello, I need help with the A-Star Data app.",
+  String chatMessage = "Hello, I need help with the Starboy Global Data app.",
 }) async {
   await showModalBottomSheet(
     context: context,
@@ -44,7 +44,7 @@ Future<void> showWhatsAppSupportBottomSheet(
               _SupportOptionTile(
                 title: "Chat with Support",
                 subtitle: "Directly chat with our agent",
-                icon: FontAwesomeIcons.whatsapp,
+                icon: FontAwesomeIcons.whatsapp.data,
                 iconColor: Colors.green,
                 onTap: () async {
                   Navigator.pop(sheetContext);
@@ -89,7 +89,9 @@ void _showNumberDialog(BuildContext context, String phoneNumber) {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text("Unable to open WhatsApp. You can contact this number:"),
+              const Text(
+                "Unable to open WhatsApp. You can contact this number:",
+              ),
               const SizedBox(height: 10),
               SelectableText(
                 phoneNumber,
@@ -157,10 +159,7 @@ class _SupportOptionTile extends StatelessWidget {
                 color: iconColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child:
-                  icon == FontAwesomeIcons.whatsapp
-                      ? FaIcon(icon, color: iconColor, size: 24)
-                      : Icon(icon, color: iconColor, size: 24),
+              child: Icon(icon, color: iconColor, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(

@@ -1,10 +1,10 @@
 name: app
-description: "A-Star Connect. Data and Airtime recharge app. Buy Airtime and Data plans for MTN, Airtel, glo, smile, 9mobile, etc."
+description: "Starboy Global. Data and Airtime recharge app. Buy Airtime and Data plans for MTN, Airtel, glo, smile, 9mobile, etc."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.3.0+12
+version: 1.3.0+13
 
 environment:
   sdk: ^3.7.2
@@ -46,6 +46,7 @@ dependencies:
   firebase_core: ^4.6.0
   firebase_auth: ^6.3.0
   firebase_messaging: ^16.1.3
+  flutter_local_notifications: ^18.0.0
   
 dev_dependencies:
   flutter_test:

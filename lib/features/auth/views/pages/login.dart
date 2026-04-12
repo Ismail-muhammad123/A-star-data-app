@@ -76,7 +76,9 @@ class _LoginPageState extends State<LoginPage> {
       if (res?['success'] == true) {
         if (mounted) _navigateToHome();
       } else if (res?['requires_2fa'] == true) {
-        final identifier = (res?['identifier'] ?? _phoneNumberController.text.trim()).toString();
+        final identifier =
+            (res?['identifier'] ?? _phoneNumberController.text.trim())
+                .toString();
         if (mounted) {
           context.push('/verify-2fa', extra: identifier);
         }
@@ -101,7 +103,12 @@ class _LoginPageState extends State<LoginPage> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text("Error", style: TextStyle(color: Colors.red)),
+            icon: const Icon(Icons.error, color: Colors.red),
+            title: const Text(
+              "Login Failed",
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
             content: Text(message),
             actions: [
               TextButton(

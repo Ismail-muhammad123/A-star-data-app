@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:app/core/constants/api_endpoints.dart';
 import 'package:app/features/wallet/data/models/wallet.dart';
 import 'package:app/features/wallet/data/models/withdrawal_account_model.dart';
+import 'package:app/features/wallet/data/models/transfer_beneficiary_model.dart';
 import 'package:dio/dio.dart';
 
 class WalletService {
@@ -160,7 +161,8 @@ class WalletService {
     double amount,
     String bankName,
     String accountNumber,
-    String accountName, {
+    String accountName,
+    String pin, {
     String? reason = "",
     String? bankCode = "",
   }) async {
@@ -173,6 +175,7 @@ class WalletService {
         "account_number": accountNumber,
         "account_name": accountName,
         "bank_code": bankCode,
+        "transaction_pin": pin,
       },
       options: Options(
         validateStatus: (status) => true,
@@ -321,5 +324,62 @@ class WalletService {
     } catch (e) {
       return {};
     }
+  }
+
+  Future<List<TransferBeneficiary>> getTransferBeneficiaries(String authToken) async {
+    try {
+      final response = await _dio.get(
+        BeneficiaryEndpoints().walletBeneficiaries,
+        options: Options(
+          validateStatus: (status) => true,
+          headers: {
+            'Authorization': "Bearer $authToken",
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        final List results = response.data['results'] ?? response.data;
+        return results.map((e) => TransferBeneficiary.fromJson(e as Map<String, dynamic>)).toList();
+      }
+    } catch (e) {
+      // Ignored
+    }
+    return [];
+  }
+
+  Future<TransferBeneficiary> saveTransferBeneficiary(
+    String authToken,
+    TransferBeneficiary accountData,
+  ) async {
+    final response = await _dio.post(
+      BeneficiaryEndpoints().walletBeneficiaries,
+      data: jsonEncode(accountData.toJson()),
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Authorization': "Bearer $authToken",
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return TransferBeneficiary.fromJson(response.data as Map<String, dynamic>);
+    } else {
+      throw Exception(response.data['message'] ?? 'Failed to save beneficiary');
+    }
+  }
+
+  Future<void> deleteTransferBeneficiary(String authToken, int id) async {
+    await _dio.delete(
+      BeneficiaryEndpoints().deleteWalletBeneficiary(id),
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Authorization': "Bearer $authToken",
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
   }
 }

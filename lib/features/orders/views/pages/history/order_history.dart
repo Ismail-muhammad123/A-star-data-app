@@ -87,7 +87,10 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                                     Theme.of(
                                       context,
                                     ).textTheme.bodyLarge?.color ??
-                                    Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black87,
+                                    Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color ??
+                                    Colors.black87,
                               ),
                             ),
                             child: child!,
@@ -199,6 +202,14 @@ class _PurchaseHistoryState extends State<PurchaseHistory> {
                           child: Text("Electricity"),
                         ),
                         DropdownMenuItem(value: "tv", child: Text("TV")),
+                        DropdownMenuItem(
+                          value: "internet",
+                          child: Text("Internet"),
+                        ),
+                        DropdownMenuItem(
+                          value: "education",
+                          child: Text("Education"),
+                        ),
                       ],
                       onChanged: (value) {
                         setState(() {

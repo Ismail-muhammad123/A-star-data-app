@@ -256,7 +256,6 @@ class _WalletPageState extends State<WalletPage> {
               ),
 
               const SizedBox(height: 32),
-
               // Virtual Account Section
               FutureBuilder<VirtualAccount>(
                 future: WalletService().getVirtualAccount(
@@ -267,7 +266,12 @@ class _WalletPageState extends State<WalletPage> {
                     return const Center(child: CircularProgressIndicator());
                   }
 
-                  if (!snapshot.hasData || snapshot.hasError) {
+                  if (!snapshot.hasData ||
+                      snapshot.hasError ||
+                      (snapshot.data?.accountNumber == null ||
+                          snapshot.data?.accountNumber.isEmpty == true ||
+                          snapshot.data?.accountNumber.trim().isEmpty ==
+                              true)) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

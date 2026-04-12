@@ -23,8 +23,44 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _referralController = TextEditingController();
 
   String _countryCode = "+234";
+  String _selectedChannel = "sms";
   bool _isLoading = false;
   bool _obscurePin = true;
+
+  void _onChannelChanged(String channel, bool selected) {
+    if (!selected) return;
+    setState(() => _selectedChannel = channel);
+  }
+
+  String _formatApiErrors(dynamic rawErrors, {String? fallback}) {
+    if (rawErrors is! Map) {
+      return fallback ?? "Registration failed. Please try again.";
+    }
+
+    final lines = <String>[];
+    rawErrors.forEach((key, value) {
+      final fieldName = key.toString().replaceAll('_', ' ');
+      if (value is List) {
+        for (final err in value) {
+          final message = err?.toString().trim() ?? "";
+          if (message.isNotEmpty) {
+            lines.add("$fieldName: $message");
+          }
+        }
+      } else {
+        final message = value?.toString().trim() ?? "";
+        if (message.isNotEmpty) {
+          lines.add("$fieldName: $message");
+        }
+      }
+    });
+
+    if (lines.isEmpty) {
+      return fallback ?? "Registration failed. Please try again.";
+    }
+
+    return lines.join("\n");
+  }
 
   @override
   void dispose() {
@@ -60,6 +96,7 @@ class _SignUpPageState extends State<SignUpPage> {
         lastName: _lastNameController.text.trim(),
         middleName: _middleNameController.text.trim(),
         referralCode: _referralController.text.trim(),
+        channel: _selectedChannel,
       );
 
       if (res?['success'] == true) {
@@ -67,15 +104,19 @@ class _SignUpPageState extends State<SignUpPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.green,
-            content: Text(
-              "Account created successfully! Please verify your phone number.",
-            ),
+            content: Text("Account created successfully! Please login."),
           ),
         );
         context.go('/login', extra: _phoneController.text);
       } else {
         if (!mounted) return;
-        _showError(res?['message'] ?? "Registration failed. Please try again.");
+        _showError(
+          _formatApiErrors(
+            res?['errors'],
+            fallback:
+                res?['message'] ?? "Registration failed. Please try again.",
+          ),
+        );
       }
     } catch (e) {
       _showError("An unexpected error occurred. Please check your connection.");
@@ -286,6 +327,68 @@ class _SignUpPageState extends State<SignUpPage> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 20),
+
+                          // OTP Delivery Channel
+                          _buildLabel("OTP Delivery Channel", theme),
+                          const SizedBox(height: 8),
+                          // Container(
+                          //   padding: const EdgeInsets.symmetric(
+                          //     horizontal: 12,
+                          //     vertical: 8,
+                          //   ),
+                          //   decoration: BoxDecoration(
+                          //     color:
+                          //         theme.brightness == Brightness.dark
+                          //             ? theme.colorScheme.surface
+                          //             : Colors.grey[50],
+                          //     borderRadius: BorderRadius.circular(16),
+                          //     border: Border.all(color: theme.dividerColor),
+                          //   ),
+                          //   child: Column(
+                          //     children: [
+                          //       CheckboxListTile(
+                          //         value: _selectedChannel == 'sms',
+                          //         onChanged:
+                          //             (selected) => _onChannelChanged(
+                          //               'sms',
+                          //               selected ?? false,
+                          //             ),
+                          //         dense: true,
+                          //         controlAffinity:
+                          //             ListTileControlAffinity.leading,
+                          //         title: const Text("SMS"),
+                          //         contentPadding: EdgeInsets.zero,
+                          //       ),
+                          //       CheckboxListTile(
+                          //         value: _selectedChannel == 'email',
+                          //         onChanged:
+                          //             (selected) => _onChannelChanged(
+                          //               'email',
+                          //               selected ?? false,
+                          //             ),
+                          //         dense: true,
+                          //         controlAffinity:
+                          //             ListTileControlAffinity.leading,
+                          //         title: const Text("Email"),
+                          //         contentPadding: EdgeInsets.zero,
+                          //       ),
+                          //       CheckboxListTile(
+                          //         value: _selectedChannel == 'whatsapp',
+                          //         onChanged:
+                          //             (selected) => _onChannelChanged(
+                          //               'whatsapp',
+                          //               selected ?? false,
+                          //             ),
+                          //         dense: true,
+                          //         controlAffinity:
+                          //             ListTileControlAffinity.leading,
+                          //         title: const Text("WhatsApp"),
+                          //         contentPadding: EdgeInsets.zero,
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
                           const SizedBox(height: 20),
 
                           // Email (Optional)

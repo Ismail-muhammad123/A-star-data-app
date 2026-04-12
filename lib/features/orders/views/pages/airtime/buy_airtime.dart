@@ -1,6 +1,7 @@
 import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
+import 'package:app/features/orders/data/models/purchase_beneficiary_model.dart';
 import 'package:app/features/orders/data/services.dart';
 import 'package:app/core/widgets/balance_summary.dart';
 import 'package:app/features/wallet/providers/wallet_provider.dart';
@@ -24,7 +25,9 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
   String? _selectedNetworkId;
 
   bool _isLoading = false;
+  bool _saveBeneficiary = false;
   List<AirtimeNetwork> _networks = [];
+  List<PurchaseBeneficiary> _beneficiaries = [];
 
   _purchaseAirtime() async {
     final balance = context.read<WalletProvider>().balance;
@@ -77,6 +80,22 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
       _isLoading = true;
     });
     try {
+      if (_saveBeneficiary && _phoneController.text.isNotEmpty) {
+        try {
+          await OrderServices().savePurchaseBeneficiary(
+            context.read<AuthProvider>().authToken ?? "",
+            PurchaseBeneficiary(
+              id: 0,
+              serviceType: 'airtime',
+              identifier: _phoneController.text,
+              nickname: _phoneController.text,
+            ),
+          );
+        } catch (e) {
+          print("Failed to save beneficiary: $e");
+        }
+      }
+
       await OrderServices().purchaseAirtime(
         authToken: context.read<AuthProvider>().authToken ?? "",
         transactionPin: transactionPin,
@@ -118,6 +137,20 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error fetching networks')));
+    }
+
+    try {
+      final token = context.read<AuthProvider>().authToken;
+      if (token != null) {
+        final fetched = await OrderServices().getPurchaseBeneficiaries(token);
+        if (mounted) {
+          setState(() {
+            _beneficiaries = fetched.where((b) => b.serviceType == 'airtime').toList();
+          });
+        }
+      }
+    } catch (e) {
+      // Ignored
     }
   }
 
@@ -275,6 +308,71 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                   ),
                   const SizedBox(height: 28),
 
+                  if (_beneficiaries.isNotEmpty) ...[
+                    Text(
+                      "Saved Beneficiaries",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 90,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _beneficiaries.length,
+                        separatorBuilder: (context, index) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final ben = _beneficiaries[index];
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _phoneController.text = ben.identifier;
+                                _saveBeneficiary = false;
+                              });
+                            },
+                            child: Container(
+                              width: 120,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).cardColor,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: _phoneController.text == ben.identifier
+                                      ? Colors.blueAccent
+                                      : Colors.transparent,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(Icons.person, color: Colors.blueAccent, size: 24),
+                                  const Spacer(),
+                                  Text(
+                                    ben.nickname,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  ),
+                                  Text(
+                                    ben.identifier,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
                   Text(
                     "Phone Number",
                     style: TextStyle(
@@ -314,6 +412,20 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 16),
+                  CheckboxListTile(
+                    title: const Text("Save this number as a beneficiary"),
+                    value: _saveBeneficiary,
+                    onChanged: (val) {
+                      setState(() {
+                        _saveBeneficiary = val ?? false;
+                      });
+                    },
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+
                   const SizedBox(height: 28),
 
                   Text(

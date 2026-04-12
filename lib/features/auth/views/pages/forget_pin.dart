@@ -16,6 +16,11 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
   bool _isLoading = false;
   String _selectedChannel = 'sms';
 
+  void _onChannelChanged(String channel, bool selected) {
+    if (!selected) return;
+    setState(() => _selectedChannel = channel);
+  }
+
   void _handlePinReset() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -200,40 +205,62 @@ class _ForgetPinPageState extends State<ForgetPinPage> {
                           const SizedBox(height: 24),
                           _buildLabel("Delivery Channel", theme),
                           const SizedBox(height: 8),
-                          DropdownButtonFormField<String>(
-                            value: _selectedChannel,
-                            dropdownColor: theme.cardColor,
-                            style: TextStyle(
-                              color: theme.textTheme.bodyLarge?.color,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
-                            decoration: _inputDecoration(
-                              theme: theme,
-                              hint: "Select Channel",
-                              icon: Icons.send_rounded,
+                            decoration: BoxDecoration(
+                              color:
+                                  theme.brightness == Brightness.dark
+                                      ? theme.colorScheme.surface
+                                      : Colors.grey[50],
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: theme.dividerColor),
                             ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: 'sms',
-                                child: Text("SMS"),
-                              ),
-                              DropdownMenuItem(
-                                value: 'email',
-                                child: Text("Email"),
-                              ),
-                              DropdownMenuItem(
-                                value: 'whatsapp',
-                                enabled: false,
-                                child: Text(
-                                  "WhatsApp (Coming Soon)",
-                                  style: TextStyle(color: Colors.grey),
+                            child: Column(
+                              children: [
+                                CheckboxListTile(
+                                  value: _selectedChannel == 'sms',
+                                  onChanged:
+                                      (selected) => _onChannelChanged(
+                                        'sms',
+                                        selected ?? false,
+                                      ),
+                                  dense: true,
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
+                                  title: const Text("SMS"),
+                                  contentPadding: EdgeInsets.zero,
                                 ),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() => _selectedChannel = value);
-                              }
-                            },
+                                CheckboxListTile(
+                                  value: _selectedChannel == 'email',
+                                  onChanged:
+                                      (selected) => _onChannelChanged(
+                                        'email',
+                                        selected ?? false,
+                                      ),
+                                  dense: true,
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
+                                  title: const Text("Email"),
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                                CheckboxListTile(
+                                  value: _selectedChannel == 'whatsapp',
+                                  onChanged:
+                                      (selected) => _onChannelChanged(
+                                        'whatsapp',
+                                        selected ?? false,
+                                      ),
+                                  dense: true,
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
+                                  title: const Text("WhatsApp"),
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 40),
 

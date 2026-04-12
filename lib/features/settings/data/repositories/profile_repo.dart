@@ -32,41 +32,81 @@ class ProfileService {
     }
   }
 
-  Future<Map<String, dynamic>?> updateUserProfile(
+  Map<String, List<String>> _extractFieldErrors(dynamic responseData) {
+    if (responseData is! Map<String, dynamic>) return {};
+    final Map<String, List<String>> extracted = {};
+    responseData.forEach((key, value) {
+      if (key == 'detail' || key == 'error' || key == 'message') return;
+      if (value is List) {
+        final errors =
+            value
+                .where((item) => item != null)
+                .map((item) => item.toString().trim())
+                .where((item) => item.isNotEmpty)
+                .toList();
+        if (errors.isNotEmpty) extracted[key] = errors;
+      } else if (value is String && value.trim().isNotEmpty) {
+        extracted[key] = [value.trim()];
+      }
+    });
+    return extracted;
+  }
+
+  String _formatFieldErrors(Map<String, List<String>> fieldErrors) {
+    if (fieldErrors.isEmpty) return '';
+    final lines = <String>[];
+    fieldErrors.forEach((field, errors) {
+      final label = field
+          .replaceAll('_', ' ')
+          .replaceFirstMapped(
+            RegExp(r'^[a-z]'),
+            (match) => match.group(0)!.toUpperCase(),
+          );
+      for (final error in errors) {
+        lines.add('$label: $error');
+      }
+    });
+    return lines.join('\n');
+  }
+
+  Future<Map<String, dynamic>> updateUserProfile(
     String authToken,
     Map<String, dynamic> updatedData, {
     String? profileImagePath,
   }) async {
-    try {
-      dynamic data;
-      Map<String, dynamic> headers = {'Authorization': "Bearer $authToken"};
+    dynamic data;
+    Map<String, dynamic> headers = {'Authorization': "Bearer $authToken"};
 
-      if (profileImagePath != null) {
-        data = FormData.fromMap({
-          ...updatedData,
-          'profile_image': await MultipartFile.fromFile(
-            profileImagePath,
-            filename: profileImagePath.split('/').last,
-          ),
-        });
-        // Dio handles content-type for FormData automatically
-      } else {
-        data = jsonEncode(updatedData);
-        headers['Content-Type'] = 'application/json';
-      }
+    if (profileImagePath != null) {
+      data = FormData.fromMap({
+        ...updatedData,
+        'profile_image': await MultipartFile.fromFile(
+          profileImagePath,
+          filename: profileImagePath.split('/').last,
+        ),
+      });
+      // Dio handles content-type for FormData automatically
+    } else {
+      data = jsonEncode(updatedData);
+      headers['Content-Type'] = 'application/json';
+    }
 
-      final response = await _dio.put(
-        profileEndpoints.updateProfile,
-        data: data,
-        options: Options(validateStatus: (status) => true, headers: headers),
-      );
-      if (response.statusCode == 200) {
-        return response.data as Map<String, dynamic>;
-      } else {
-        return null;
-      }
-    } catch (e) {
-      return null;
+    final response = await _dio.post(
+      profileEndpoints.updateProfile,
+      data: data,
+      options: Options(validateStatus: (status) => true, headers: headers),
+    );
+    print(response.data);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return response.data as Map<String, dynamic>;
+    } else {
+      final fieldErrors = _extractFieldErrors(response.data);
+      final primaryError =
+          _extractErrorMessage(response.data) ?? 'Failed to update profile';
+      final formattedFieldErrors = _formatFieldErrors(fieldErrors);
+      final message =
+          formattedFieldErrors.isNotEmpty ? formattedFieldErrors : primaryError;
+      throw Exception(message);
     }
   }
 
@@ -109,25 +149,27 @@ class ProfileService {
   }
 
   Future<bool> changePin(String authToken, String oldPin, String newPin) async {
-    try {
-      final response = await _dio.post(
-        profileEndpoints.changePin,
-        data: jsonEncode({"old_pin": oldPin, "new_pin": newPin}),
-        options: Options(
-          validateStatus: (status) => true,
-          headers: {
-            'Authorization': "Bearer $authToken",
-            'content-Type': 'application/json',
-          },
-        ),
-      );
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      return false;
+    final response = await _dio.post(
+      profileEndpoints.changePin,
+      data: jsonEncode({"old_pin": oldPin, "new_pin": newPin}),
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Authorization': "Bearer $authToken",
+          'content-Type': 'application/json',
+        },
+      ),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return true;
+    } else {
+      final fieldErrors = _extractFieldErrors(response.data);
+      final primaryError =
+          _extractErrorMessage(response.data) ?? 'Failed to change PIN';
+      final formattedFieldErrors = _formatFieldErrors(fieldErrors);
+      final message =
+          formattedFieldErrors.isNotEmpty ? formattedFieldErrors : primaryError;
+      throw Exception(message);
     }
   }
 
@@ -143,7 +185,7 @@ class ProfileService {
           },
         ),
       );
-      // print(response);
+      print(response);
       if (response.statusCode == 200) {
         return BankInformationModel.fromJson(
           response.data as Map<String, dynamic>,

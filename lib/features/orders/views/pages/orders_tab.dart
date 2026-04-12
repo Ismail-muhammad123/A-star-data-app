@@ -48,16 +48,21 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> _fetchInternetServices(String token) async {
+    if (!mounted) return;
     setState(() => _isLoadingInternet = true);
     try {
       final services = await OrderServices().fetchInternetServices(token);
-      setState(() {
-        _internetServices = services.where((s) => s.isActive).toList();
-      });
+      if (mounted) {
+        setState(() {
+          _internetServices = services.where((s) => s.isActive).toList();
+        });
+      }
     } catch (e) {
       debugPrint("Error fetching internet services: $e");
     } finally {
-      setState(() => _isLoadingInternet = false);
+      if (mounted) {
+        setState(() => _isLoadingInternet = false);
+      }
     }
   }
 
@@ -393,16 +398,20 @@ class _OrdersTabState extends State<OrdersTab> {
                     (service) => _buildServiceCard(
                       title: service.serviceName,
                       icon: Icons.router_outlined,
-                      color: Colors.primaries[service.serviceName.length %
-                          Colors.primaries.length],
+                      color:
+                          Colors.primaries[service.serviceName.length %
+                              Colors.primaries.length],
                       onTap:
                           () => context
-                              .push("/orders/select-internet-package",
-                                  extra: service)
+                              .push(
+                                "/orders/select-internet-package",
+                                extra: service,
+                              )
                               .then((_) => setState(() {})),
-                      networkImage: (service.image?.isNotEmpty ?? false)
-                          ? service.image
-                          : null,
+                      networkImage:
+                          (service.image?.isNotEmpty ?? false)
+                              ? service.image
+                              : null,
                     ),
                   ),
                   // _buildServiceCard(

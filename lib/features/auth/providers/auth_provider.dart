@@ -192,7 +192,7 @@ class AuthProvider extends ChangeNotifier {
       if (kDebugMode) {
         print(e);
       }
-      return {"success": false, "message": e.toString()};
+      return {"success": false, "message": e.toString().split(":").last};
     }
   }
 
@@ -266,10 +266,7 @@ class AuthProvider extends ChangeNotifier {
     }
 
     try {
-      await _authService.request2FAReset(
-        resolvedIdentifier,
-        channel: channel,
-      );
+      await _authService.request2FAReset(resolvedIdentifier, channel: channel);
       return {'success': true};
     } catch (e) {
       return {'success': false, 'message': e.toString()};
@@ -354,6 +351,8 @@ class AuthProvider extends ChangeNotifier {
       } else {
         return {"success": false, "message": "Registration failed"};
       }
+    } on AuthApiException catch (e) {
+      return {"success": false, "message": e.message, "errors": e.fieldErrors};
     } catch (e) {
       return {"success": false, "message": e.toString()};
     }

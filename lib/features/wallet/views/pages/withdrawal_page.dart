@@ -2,6 +2,8 @@ import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/wallet/data/models/withdrawal_account_model.dart';
 import 'package:app/features/wallet/data/repositories/wallet_repo.dart';
 import 'package:app/features/settings/views/pages/bank_information/wallet_bank_picker.dart';
+import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';
+import 'package:app/features/wallet/data/models/transfer_beneficiary_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -25,11 +27,10 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
   bool _isLoading = false;
   double _balance = 0.0;
   bool _isLoadingData = true;
-  WithdrawalAccount? _withdrawalAccount;
-  bool _useOtherAccount = false;
   String? _otherBankCode;
   bool _isResolving = false;
-  // bool _isSaving = false;
+  bool _saveBeneficiary = false;
+  List<TransferBeneficiary> _beneficiaries = [];
 
   double _withdrawalCharge = 0.0;
   bool _isChargePercentage = false;
@@ -46,11 +47,10 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
       final token = context.read<AuthProvider>().authToken;
       if (token != null) {
         final balString = await WalletService().getBalance(token);
-        final account = await WalletService().getWithdrawalAccount(token);
         final config = await WalletService().getChargesConfig(token);
+        final fetchedBeneficiaries = await WalletService().getTransferBeneficiaries(token);
         setState(() {
           _balance = double.tryParse(balString) ?? 0.0;
-          _withdrawalAccount = account;
           _isChargePercentage =
               config['withdrawal_charge_type'] == 'percentage';
           _withdrawalCharge =
@@ -58,6 +58,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                 config['withdrawal_charge']?.toString() ?? '0.0',
               ) ??
               0.0;
+          _beneficiaries = fetchedBeneficiaries.where((b) => b.bankCode != 'P2P').toList();
         });
       }
     } catch (e) {
@@ -93,64 +94,6 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     }
   }
 
-  // Future<void> _saveAsWithdrawalAccount() async {
-  //   if (_isSaving) return;
-
-  //   final bankName = _otherBankNameController.text;
-  //   final accountNumber = _otherAccountNumberController.text;
-  //   final accountName = _otherAccountNameController.text;
-  //   final bankCode = _otherBankCode;
-
-  //   if (bankCode == null || accountName.isEmpty) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text(
-  //           "Please select a bank and resolve the account name first",
-  //         ),
-  //         backgroundColor: Colors.orange,
-  //       ),
-  //     );
-  //     return;
-  //   }
-
-  //   setState(() => _isSaving = true);
-  //   try {
-  //     final token = context.read<AuthProvider>().authToken;
-  //     if (token != null) {
-  //       final account = WithdrawalAccount(
-  //         bankName: bankName,
-  //         bankCode: bankCode,
-  //         accountNumber: accountNumber,
-  //         accountName: accountName,
-  //       );
-  //       await WalletService().saveWithdrawalAccount(token, account);
-  //       if (mounted) {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           const SnackBar(
-  //             content: Text("Withdrawal account saved successfully"),
-  //             backgroundColor: Colors.green,
-  //           ),
-  //         );
-  //         await _loadData(); // Reload to get the new withdrawal account
-  //         setState(() {
-  //           _useOtherAccount = false; // Switch to saved account tab
-  //         });
-  //       }
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(
-  //           content: Text(e.toString().replaceAll("Exception: ", "")),
-  //           backgroundColor: Colors.red,
-  //         ),
-  //       );
-  //     }
-  //   } finally {
-  //     if (mounted) setState(() => _isSaving = false);
-  //   }
-  // }
-
   Future<void> _submitWithdrawal() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -159,38 +102,19 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     String accountName;
     String? bankCode;
 
-    if (_useOtherAccount) {
-      if (_otherBankCode == null || _otherAccountNameController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Please select a bank and resolve the account name"),
-            backgroundColor: Colors.orange,
-          ),
-        );
-        return;
-      }
-      bankName = _otherBankNameController.text;
-      accountNumber = _otherAccountNumberController.text;
-      accountName = _otherAccountNameController.text;
-      bankCode = _otherBankCode;
-    } else {
-      if (_withdrawalAccount == null ||
-          _withdrawalAccount!.accountNumber.isEmpty ||
-          _withdrawalAccount!.bankName.isEmpty ||
-          _withdrawalAccount!.accountName.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Please link a valid withdrawal account first"),
-            backgroundColor: Colors.orange,
-          ),
-        );
-        return;
-      }
-      bankName = _withdrawalAccount!.bankName;
-      accountNumber = _withdrawalAccount!.accountNumber;
-      accountName = _withdrawalAccount!.accountName;
-      bankCode = _withdrawalAccount!.bankCode;
+    if (_otherBankCode == null || _otherAccountNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select a bank and resolve the account name"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
     }
+    bankName = _otherBankNameController.text;
+    accountNumber = _otherAccountNumberController.text;
+    accountName = _otherAccountNameController.text;
+    bankCode = _otherBankCode;
 
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     if (amount > _balance) {
@@ -203,6 +127,32 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
       return;
     }
 
+    final pin = await showPinEntrySheet(
+      context,
+      title: "Confirm Withdrawal",
+      subtitle: "Enter your transaction PIN to authorize this withdrawal.",
+    );
+
+    if (pin != null && pin.length == 4) {
+      _executeWithdrawal(
+        amount,
+        bankName,
+        accountNumber,
+        accountName,
+        bankCode,
+        pin,
+      );
+    }
+  }
+
+  Future<void> _executeWithdrawal(
+    double amount,
+    String bankName,
+    String accountNumber,
+    String accountName,
+    String? bankCode,
+    String pin,
+  ) async {
     setState(() {
       _isLoading = true;
     });
@@ -210,12 +160,30 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     try {
       final token = context.read<AuthProvider>().authToken;
       if (token != null) {
+        if (_saveBeneficiary) {
+          try {
+            await WalletService().saveTransferBeneficiary(
+              token,
+              TransferBeneficiary(
+                id: 0,
+                bankName: bankName,
+                bankCode: bankCode ?? '',
+                accountNumber: accountNumber,
+                accountName: accountName,
+                nickname: accountName,
+              ),
+            );
+          } catch (e) {
+            print("Failed to save beneficiary: $e");
+          }
+        }
         await WalletService().requestWithdrawal(
           token,
           amount,
           bankName,
           accountNumber,
           accountName,
+          pin,
           reason: "Withdrawal request",
           bankCode: bankCode,
         );
@@ -352,6 +320,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
+                          enabled: !_isLoading,
                           controller: _amountController,
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -707,6 +676,67 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_beneficiaries.isNotEmpty) ...[
+          _buildLabel("Saved Beneficiaries"),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 90,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: _beneficiaries.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final ben = _beneficiaries[index];
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _otherBankNameController.text = ben.bankName;
+                      _otherBankCode = ben.bankCode;
+                      _otherAccountNumberController.text = ben.accountNumber;
+                      _otherAccountNameController.text = ben.accountName;
+                      _saveBeneficiary = false;
+                    });
+                  },
+                  child: Container(
+                    width: 120,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _otherAccountNumberController.text == ben.accountNumber
+                            ? Colors.blueAccent
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.person, color: Colors.blueAccent, size: 24),
+                        const Spacer(),
+                        Text(
+                          ben.nickname,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        Text(
+                          ben.bankName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+
         _buildLabel("Select Bank"),
         const SizedBox(height: 8),
         GestureDetector(
@@ -728,6 +758,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
           },
           child: AbsorbPointer(
             child: TextFormField(
+              enabled: !_isLoading,
               controller: _otherBankNameController,
               readOnly: true,
               decoration: _inputDecoration(
@@ -735,10 +766,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                 icon: Icons.account_balance,
               ),
               validator:
-                  (v) =>
-                      (_useOtherAccount && (v == null || v.isEmpty))
-                          ? "Bank is required"
-                          : null,
+                  (v) => (v == null || v.isEmpty) ? "Bank is required" : null,
             ),
           ),
         ),
@@ -746,6 +774,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
         _buildLabel("Account Number"),
         const SizedBox(height: 8),
         TextFormField(
+          enabled: !_isLoading,
           controller: _otherAccountNumberController,
           keyboardType: TextInputType.number,
           maxLength: 10,
@@ -762,7 +791,7 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
           },
           validator:
               (v) =>
-                  (_useOtherAccount && (v == null || v.length != 10))
+                  (v == null || v.length != 10)
                       ? "Enter a valid 10-digit account number"
                       : null,
         ),
@@ -790,6 +819,18 @@ class _WithdrawalPageState extends State<WithdrawalPage> {
                     )
                     : null,
           ),
+        ),
+        const SizedBox(height: 16),
+        CheckboxListTile(
+          title: const Text("Save this beneficiary for future withdrawals", style: TextStyle(fontSize: 14)),
+          value: _saveBeneficiary,
+          onChanged: (val) {
+            setState(() {
+              _saveBeneficiary = val ?? false;
+            });
+          },
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
         ),
       ],
     );

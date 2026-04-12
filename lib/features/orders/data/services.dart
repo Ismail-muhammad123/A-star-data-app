@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:app/core/constants/api_endpoints.dart';
 import 'package:app/features/orders/data/models.dart';
+import 'package:app/features/orders/data/models/purchase_beneficiary_model.dart';
 import 'package:dio/dio.dart';
 
 class OrderServices {
@@ -634,5 +637,69 @@ class OrderServices {
         response.data['error'] ?? 'Failed to purchase education service',
       );
     }
+  }
+
+  //======================== PURCHASE BENEFICIARIES ======================================
+  Future<List<PurchaseBeneficiary>> getPurchaseBeneficiaries(
+    String authToken,
+  ) async {
+    try {
+      final response = await _dio.get(
+        BeneficiaryEndpoints().purchaseBeneficiaries,
+        options: Options(
+          validateStatus: (status) => true,
+          headers: {
+            'Authorization': "Bearer $authToken",
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      if (response.statusCode == 200) {
+        final List results = response.data['results'] ?? response.data;
+        return results
+            .map((e) => PurchaseBeneficiary.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+    } catch (e) {
+      // Ignored
+    }
+    return [];
+  }
+
+  Future<PurchaseBeneficiary> savePurchaseBeneficiary(
+    String authToken,
+    PurchaseBeneficiary beneficiaryData,
+  ) async {
+    final response = await _dio.post(
+      BeneficiaryEndpoints().purchaseBeneficiaries,
+      data: jsonEncode(beneficiaryData.toJson()),
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Authorization': "Bearer $authToken",
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return PurchaseBeneficiary.fromJson(
+        response.data as Map<String, dynamic>,
+      );
+    } else {
+      throw Exception(response.data['message'] ?? 'Failed to save beneficiary');
+    }
+  }
+
+  Future<void> deletePurchaseBeneficiary(String authToken, int id) async {
+    await _dio.delete(
+      BeneficiaryEndpoints().deletePurchaseBeneficiary(id),
+      options: Options(
+        validateStatus: (status) => true,
+        headers: {
+          'Authorization': "Bearer $authToken",
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
   }
 }

@@ -53,8 +53,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('PIN change failed. Please check your current PIN.'),
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
             backgroundColor: Colors.redAccent,
           ),
         );

@@ -14,4 +14,9 @@ class PermissionService {
     }
     return status.isGranted;
   }
+
+  static Future<bool> requestNotificationPermission() async {
+    final status = await Permission.notification.request();
+    return status.isGranted;
+  }
 }

@@ -96,8 +96,8 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Profile Update failed"),
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
             backgroundColor: Colors.redAccent,
           ),
         );

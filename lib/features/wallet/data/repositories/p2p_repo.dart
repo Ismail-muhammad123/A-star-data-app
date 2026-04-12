@@ -35,7 +35,9 @@ class P2PService {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       }
-      throw P2PException(_extractErrorMessage(response.data) ?? 'User not found');
+      throw P2PException(
+        _extractErrorMessage(response.data) ?? 'User not found',
+      );
     } on DioException {
       throw const P2PException(
         'Unable to verify recipient right now. Please check your connection and try again.',
@@ -54,10 +56,10 @@ class P2PService {
       final response = await _dio.post(
         endpoints.transfer,
         data: jsonEncode({
-          'recipient': recipientIdentifier,
+          'recipient_phone': recipientIdentifier,
           'amount': amount,
-          'pin': pin,
-          'note': note,
+          'transaction_pin': pin,
+          'description': note,
         }),
         options: Options(
           validateStatus: (status) => true,
@@ -67,8 +69,11 @@ class P2PService {
           },
         ),
       );
+      print(response.data);
       if (response.statusCode != 200 && response.statusCode != 201) {
-        throw P2PException(_extractErrorMessage(response.data) ?? 'Transfer failed');
+        throw P2PException(
+          _extractErrorMessage(response.data) ?? 'Transfer failed',
+        );
       }
     } on DioException {
       throw const P2PException(

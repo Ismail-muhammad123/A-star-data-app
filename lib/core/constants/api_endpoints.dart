@@ -40,7 +40,7 @@ class WalletEndpoints {
       "$baseUrl/account/generate-virtual-account/";
   final String fundWallet = "$baseUrl/wallet/deposit/";
   final String walletTransactions = "$baseUrl/wallet/transactions/";
-  final String withdraw = "$baseUrl/payment/withdrawal-request/";
+  final String withdraw = "$baseUrl/wallet/withdraw-to-bank/";
   final String banks = "$baseUrl/wallet/banks/";
   final String resolveAccount = "$baseUrl/wallet/resolve-account/";
   final String withdrawalAccount = "$baseUrl/wallet/withdrawal-account/";
@@ -119,10 +119,14 @@ class ReferralEndpoints {
 }
 
 class BeneficiaryEndpoints {
-  final String purchaseBeneficiaries =
-      "$baseUrl/account/purchase-beneficiaries/";
+  final String purchaseBeneficiaries = "$baseUrl/orders/beneficiaries/";
+  final String walletBeneficiaries = "$baseUrl/wallet/beneficiaries/";
+  
   String deletePurchaseBeneficiary(int id) =>
-      "$baseUrl/account/purchase-beneficiaries/$id/";
+      "$baseUrl/orders/beneficiaries/$id/";
+      
+  String deleteWalletBeneficiary(int id) =>
+      "$baseUrl/wallet/beneficiaries/$id/";
 }
 
 class AccountUpgradeEndpoints {
@@ -133,5 +137,5 @@ class AccountUpgradeEndpoints {
 
 class P2PEndpoints {
   final String lookup = "$baseUrl/wallet/p2p-verify/";
-  final String transfer = "$baseUrl/wallet/p2p-transfer/";
+  final String transfer = "$baseUrl/wallet/transfer-p2p/";
 }

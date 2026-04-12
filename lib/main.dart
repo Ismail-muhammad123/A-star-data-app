@@ -11,6 +11,7 @@ import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:app/features/settings/providers/transaction_pin_provider.dart';
 import 'package:app/features/support/providers/support_provider.dart';
 import 'package:app/features/notifications/providers/notification_provider.dart';
+import 'package:app/core/permission_services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
@@ -52,29 +53,21 @@ class _AStarDataAppState extends State<AStarDataApp> {
     final authProvider = context.read<AuthProvider>();
     final notificationProvider = context.read<NotificationProvider>();
 
+    // Request notification permission
+    await PermissionService.requestNotificationPermission();
+
     await PushNotificationService.instance.initialize(
       onForegroundMessage: (RemoteMessage message) async {
         final token = authProvider.authToken;
         if (token != null && token.isNotEmpty) {
           await notificationProvider.fetchNotifications(token);
         }
-
-        if (!mounted) return;
-        final title = message.notification?.title ?? "New notification";
-        final body = message.notification?.body;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(body == null || body.isEmpty ? title : "$title: $body"),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
       },
       onMessageOpenedApp: (RemoteMessage message) async {
         final token = authProvider.authToken;
         if (token != null && token.isNotEmpty) {
           await notificationProvider.fetchNotifications(token);
         }
-        router.push('/notifications');
       },
       onTokenRefresh: (String token) async {
         await authProvider.registerSpecificFcmToken(token);
@@ -89,7 +82,7 @@ class _AStarDataAppState extends State<AStarDataApp> {
     final themeProvider = context.watch<ThemeProvider>();
 
     return MaterialApp.router(
-      title: 'A-Star Data App',
+      title: 'Starboy Global - Data & Airtime App',
       debugShowCheckedModeBanner: false,
       themeMode: themeProvider.themeMode,
       theme: AppTheme.lightTheme,

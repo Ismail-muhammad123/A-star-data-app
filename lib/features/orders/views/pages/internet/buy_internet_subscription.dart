@@ -2,6 +2,7 @@ import 'package:app/core/widgets/balance_summary.dart';
 import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
+import 'package:app/features/orders/data/models/purchase_beneficiary_model.dart';
 import 'package:app/features/orders/data/services.dart';
 import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,32 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
   bool _isLoading = false;
   bool _isVerified = false;
   Map<String, dynamic> _verificationDetails = {};
+  bool _saveBeneficiary = false;
+  List<PurchaseBeneficiary> _beneficiaries = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchBeneficiaries();
+    });
+  }
+
+  Future<void> _fetchBeneficiaries() async {
+    try {
+      final token = context.read<AuthProvider>().authToken;
+      if (token != null) {
+        final fetched = await _orderServices.getPurchaseBeneficiaries(token);
+        if (mounted) {
+          setState(() {
+            _beneficiaries = fetched.where((b) => b.serviceType == 'internet').toList();
+          });
+        }
+      }
+    } catch (e) {
+      // Ignored
+    }
+  }
 
   Future<void> _verifyBeneficiary() async {
     final phone = _phoneController.text.trim();
@@ -100,6 +127,22 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
 
     setState(() => _isLoading = true);
     try {
+      if (_saveBeneficiary && phone.isNotEmpty) {
+        try {
+          await _orderServices.savePurchaseBeneficiary(
+            context.read<AuthProvider>().authToken ?? "",
+            PurchaseBeneficiary(
+              id: 0,
+              serviceType: 'internet',
+              identifier: phone,
+              nickname: _verificationDetails['Account Name'] ?? phone,
+            ),
+          );
+        } catch (e) {
+          print("Failed to save beneficiary: $e");
+        }
+      }
+
       await _orderServices.purchaseInternetSubscription(
         authToken: context.read<AuthProvider>().authToken ?? "",
         transactionPin: transactionPin,
@@ -280,6 +323,74 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
                   ),
 
                   const SizedBox(height: 24),
+
+                  if (_beneficiaries.isNotEmpty) ...[
+                    Text(
+                      "Saved Beneficiaries",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 90,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _beneficiaries.length,
+                        separatorBuilder: (context, index) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final ben = _beneficiaries[index];
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _phoneController.text = ben.identifier;
+                                _isVerified = false;
+                                _saveBeneficiary = false;
+                              });
+                              _verifyBeneficiary();
+                            },
+                            child: Container(
+                              width: 120,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).cardColor,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: _phoneController.text == ben.identifier
+                                      ? Colors.blueAccent
+                                      : Colors.transparent,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(Icons.person, color: Colors.blueAccent, size: 24),
+                                  const Spacer(),
+                                  Text(
+                                    ben.nickname,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  ),
+                                  Text(
+                                    ben.identifier,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
                   Text(
                     "Phone Number",
                     style: TextStyle(
@@ -297,6 +408,19 @@ class _InternetPurchasePageState extends State<InternetPurchasePage> {
                       hintText: "Enter ID/Phone",
                       prefixIcon: Icons.account_circle_outlined,
                     ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  CheckboxListTile(
+                    title: const Text("Save this number as a beneficiary"),
+                    value: _saveBeneficiary,
+                    onChanged: (val) {
+                      setState(() {
+                        _saveBeneficiary = val ?? false;
+                      });
+                    },
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
                   ),
 
                   if (_isVerified) ...[

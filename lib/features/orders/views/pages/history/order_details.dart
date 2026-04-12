@@ -63,7 +63,7 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
 
       await Share.shareXFiles([
         XFile(imagePath.path),
-      ], text: 'Purchase Receipt - A-Star Connect');
+      ], text: 'Purchase Receipt - Starboy Global');
     } catch (e) {
       debugPrint("Error sharing receipt: $e");
       if (mounted) {
@@ -162,7 +162,7 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
                                   child: Transform.rotate(
                                     angle: -0.5,
                                     child: Text(
-                                      "A-Star Connect",
+                                      "Starboy Global",
                                       style: TextStyle(
                                         fontSize: 40,
                                         fontWeight: FontWeight.bold,
@@ -382,13 +382,27 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
                                                       .toUpperCase(),
                                                   isStatus: true,
                                                 ),
+                                                if ((transactionDetails
+                                                            ?.token ??
+                                                        "")
+                                                    .isNotEmpty) ...[
+                                                  _buildDivider(),
+                                                  _buildDetailRow(
+                                                    "Token",
+                                                    transactionDetails?.token ??
+                                                        "",
+                                                  ),
+                                                ],
                                                 _buildDivider(),
                                                 _buildDetailRow(
                                                   "Reference",
                                                   transactionDetails!.reference,
                                                 ),
-                                                if (transactionDetails?.token != null &&
-                                                    transactionDetails!.token!.isNotEmpty) ...[
+                                                if (transactionDetails?.token !=
+                                                        null &&
+                                                    transactionDetails!
+                                                        .token!
+                                                        .isNotEmpty) ...[
                                                   _buildDivider(),
                                                   _buildDetailRow(
                                                     "PIN / Token",
@@ -396,12 +410,18 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
                                                     onTap: () {
                                                       Clipboard.setData(
                                                         ClipboardData(
-                                                          text: transactionDetails!.token!,
+                                                          text:
+                                                              transactionDetails!
+                                                                  .token!,
                                                         ),
                                                       );
-                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
                                                         const SnackBar(
-                                                          content: Text("Token copied to clipboard"),
+                                                          content: Text(
+                                                            "Token copied to clipboard",
+                                                          ),
                                                         ),
                                                       );
                                                     },
@@ -413,7 +433,7 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
                                   const SizedBox(height: 20),
                                   Center(
                                     child: Text(
-                                      "A-Star Connect",
+                                      "Starboy Global",
                                       style: TextStyle(
                                         color: Colors.blueAccent.withOpacity(
                                           0.5,
@@ -527,37 +547,41 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
             Expanded(
               child: Align(
                 alignment: Alignment.centerRight,
-                child: isStatus
-                    ? Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color:
-                            value == "SUCCESS"
-                                ? Colors.green.withOpacity(0.1)
-                                : Colors.orange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        value,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: value == "SUCCESS" ? Colors.green : Colors.orange,
+                child:
+                    isStatus
+                        ? Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                value == "SUCCESS"
+                                    ? Colors.green.withOpacity(0.1)
+                                    : Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            value,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color:
+                                  value == "SUCCESS"
+                                      ? Colors.green
+                                      : Colors.orange,
+                            ),
+                          ),
+                        )
+                        : Text(
+                          value,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.right,
                         ),
-                      ),
-                    )
-                    : Text(
-                      value,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.right,
-                    ),
               ),
             ),
           ],

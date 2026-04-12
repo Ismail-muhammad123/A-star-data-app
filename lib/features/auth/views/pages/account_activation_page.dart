@@ -163,7 +163,7 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "A 6-digit one-time password has been sent to your SMS and Email. Please enter it below to verify your account.",
+                    "A 6-digit one-time password has been sent to your selected channel. Please enter it below to verify your account.",
                     style: TextStyle(
                       fontSize: 14,
                       color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
@@ -331,53 +331,91 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
   }
 
   void _showResendOptions(BuildContext context) {
+    String selectedChannel = 'sms';
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Resend Code Via",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.headlineSmall?.color,
-                ),
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Resend Code Via",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.headlineSmall?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  CheckboxListTile(
+                    value: selectedChannel == 'sms',
+                    onChanged: (selected) {
+                      if (selected != true) return;
+                      setModalState(() => selectedChannel = 'sms');
+                    },
+                    title: const Text("SMS"),
+                    dense: true,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    secondary: const Icon(Icons.sms_outlined),
+                  ),
+                  CheckboxListTile(
+                    value: selectedChannel == 'email',
+                    onChanged: (selected) {
+                      if (selected != true) return;
+                      setModalState(() => selectedChannel = 'email');
+                    },
+                    title: const Text("Email"),
+                    dense: true,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    secondary: const Icon(Icons.email_outlined),
+                  ),
+                  CheckboxListTile(
+                    value: selectedChannel == 'whatsapp',
+                    onChanged: (selected) {
+                      if (selected != true) return;
+                      setModalState(() => selectedChannel = 'whatsapp');
+                    },
+                    title: const Text("WhatsApp"),
+                    dense: true,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    secondary: const Icon(Icons.chat_outlined),
+                  ),
+                  CheckboxListTile(
+                    value: selectedChannel == 'all',
+                    onChanged: (selected) {
+                      if (selected != true) return;
+                      setModalState(() => selectedChannel = 'all');
+                    },
+                    title: const Text("All Channels"),
+                    dense: true,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    secondary: const Icon(Icons.all_inclusive),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _resendOtp(
+                          selectedChannel == 'all' ? null : selectedChannel,
+                        );
+                      },
+                      child: const Text("Send Code"),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ),
-              const SizedBox(height: 24),
-              ListTile(
-                leading: const Icon(Icons.sms_outlined),
-                title: const Text("SMS Only"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _resendOtp("sms");
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.email_outlined),
-                title: const Text("Email Only"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _resendOtp("email");
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.all_inclusive),
-                title: const Text("SMS & Email"),
-                onTap: () {
-                  Navigator.pop(context);
-                  _resendOtp(null);
-                },
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
+            );
+          },
         );
       },
     );

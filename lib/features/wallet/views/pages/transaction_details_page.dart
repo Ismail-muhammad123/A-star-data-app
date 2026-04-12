@@ -41,9 +41,14 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
       }
     } catch (e) {
       print(e);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to load transaction! ${e.toString()}")),
-      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to load transaction! ${e.toString()}"),
+          ),
+        );
+      }
       if (mounted) {
         context.canPop() ? context.pop() : context.go("/wallet");
       }
@@ -70,7 +75,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
       await Share.shareXFiles([
         XFile(imagePath.path),
-      ], text: 'Transaction Receipt - A-Star Connect');
+      ], text: 'Transaction Receipt - Starboy Global');
     } catch (e) {
       debugPrint("Error sharing receipt: $e");
       if (mounted) {
@@ -168,7 +173,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                 child: Transform.rotate(
                                   angle: -0.5,
                                   child: Text(
-                                    "A-Star Connect",
+                                    "Starboy Global",
                                     style: TextStyle(
                                       fontSize: 40,
                                       fontWeight: FontWeight.bold,
@@ -237,12 +242,16 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
                                   ),
                                 ),
                                 _buildInfoRow("Status", "SUCCESSFUL"),
+                                _buildInfoRow(
+                                  "Description",
+                                  transaction?.description ?? "",
+                                ),
                                 const SizedBox(height: 24),
                                 const Divider(),
                                 const SizedBox(height: 16),
                                 Center(
                                   child: Text(
-                                    "A-Star Connect",
+                                    "Starboy Global",
                                     style: TextStyle(
                                       color: Colors.blueAccent.withOpacity(0.5),
                                       fontWeight: FontWeight.bold,
@@ -314,6 +323,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 14)),

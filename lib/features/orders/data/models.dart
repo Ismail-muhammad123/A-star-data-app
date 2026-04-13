@@ -212,7 +212,9 @@ class DataBundle {
   final String? description;
   final double sellingPrice;
   final int? durationDays;
+  final double? agentPrice;
   final bool isActive;
+  final String? planType;
 
   DataBundle({
     this.id,
@@ -221,8 +223,10 @@ class DataBundle {
     required this.service,
     required this.variationId,
     required this.sellingPrice,
+    this.agentPrice,
     required this.durationDays,
     required this.isActive,
+    this.planType,
   });
 
   factory DataBundle.fromJson(Map<String, dynamic> json) {
@@ -233,8 +237,13 @@ class DataBundle {
       variationId: json['variation_id'],
       description: json['description'],
       sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
+      agentPrice:
+          json['agent_price'] != null
+              ? double.tryParse(json['agent_price'].toString())
+              : null,
       durationDays: json['duration_days'],
       isActive: json['is_active'],
+      planType: json['plan_type'],
     );
   }
 
@@ -246,48 +255,13 @@ class DataBundle {
       'variation_id': variationId,
       'description': description,
       'selling_price': sellingPrice,
+      'agent_price': agentPrice,
       'duration_days': durationDays,
       'is_active': isActive,
+      'plan_type': planType,
     };
   }
 }
-
-// SMILE PACKAGES
-// class SmilePackage {
-//   final int id;
-//   final String name;
-//   final String variationId;
-//   final double sellingPrice;
-//   final bool isActive;
-
-//   SmilePackage({
-//     required this.id,
-//     required this.name,
-//     required this.variationId,
-//     required this.sellingPrice,
-//     required this.isActive,
-//   });
-
-//   factory SmilePackage.fromJson(Map<String, dynamic> json) {
-//     return SmilePackage(
-//       id: json['id'],
-//       name: json['name'],
-//       variationId: json['variation_id'].toString(),
-//       sellingPrice: double.tryParse(json['selling_price'].toString()) ?? 0.0,
-//       isActive: json['is_active'],
-//     );
-//   }
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'id': id,
-//       'name': name,
-//       'variation_id': variationId,
-//       'selling_price': sellingPrice,
-//       'is_active': isActive,
-//     };
-//   }
-// }
 
 // EDUCATION SERVICES
 class EducationService {

@@ -1,5 +1,4 @@
 import 'package:app/features/auth/providers/auth_provider.dart';
-import 'package:app/features/wallet/data/models/withdrawal_account_model.dart';
 import 'package:app/features/wallet/data/repositories/wallet_repo.dart';
 import 'package:app/features/settings/views/pages/bank_information/wallet_bank_picker.dart';
 import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';

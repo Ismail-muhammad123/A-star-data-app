@@ -5,6 +5,7 @@ import 'package:app/features/orders/data/models/purchase_beneficiary_model.dart'
 import 'package:app/features/orders/data/services.dart';
 import 'package:app/features/orders/views/pages/data/select_bundle_page.dart';
 import 'package:app/core/widgets/balance_summary.dart';
+import 'package:app/features/orders/views/widgets/network_card.dart';
 import 'package:app/features/wallet/providers/wallet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -146,7 +147,8 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
         final fetched = await OrderServices().getPurchaseBeneficiaries(token);
         if (mounted) {
           setState(() {
-            _beneficiaries = fetched.where((b) => b.serviceType == 'data').toList();
+            _beneficiaries =
+                fetched.where((b) => b.serviceType == 'data').toList();
           });
         }
       }
@@ -234,76 +236,10 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                                         null; // reset bundle when network changes
                                   });
                                 },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).cardColor,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color:
-                                          isSelected
-                                              ? Colors.blueAccent
-                                              : Colors.grey.shade300,
-                                      width: isSelected ? 3 : 1,
-                                    ),
-                                    boxShadow: [
-                                      if (isSelected)
-                                        BoxShadow(
-                                          color: Colors.blueAccent.withOpacity(
-                                            0.3,
-                                          ),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      if (!isSelected &&
-                                          Theme.of(context).brightness ==
-                                              Brightness.light)
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.04),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Image.network(
-                                      network.imageUrl,
-                                      webHtmlElementStrategy:
-                                          WebHtmlElementStrategy.prefer,
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (
-                                            context,
-                                            error,
-                                            stackTrace,
-                                          ) => Container(
-                                            width: 60,
-                                            height: 60,
-                                            color:
-                                                Colors.primaries[network
-                                                        .serviceName
-                                                        .length %
-                                                    Colors.primaries.length],
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              network.serviceName.length >= 2
-                                                  ? network.serviceName
-                                                      .substring(0, 2)
-                                                      .toUpperCase()
-                                                  : network.serviceName
-                                                      .toUpperCase(),
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                    ),
-                                  ),
+                                child: NetworkContainerCard(
+                                  isSelected: isSelected,
+                                  serviceName: network.serviceName,
+                                  imageUrl: network.imageUrl,
                                 ),
                               ),
                             );
@@ -386,7 +322,7 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                                     : Colors.grey,
                           ),
                           const SizedBox(width: 12),
-                           Expanded(
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
@@ -447,7 +383,8 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: _beneficiaries.length,
-                        separatorBuilder: (context, index) => const SizedBox(width: 12),
+                        separatorBuilder:
+                            (context, index) => const SizedBox(width: 12),
                         itemBuilder: (context, index) {
                           final ben = _beneficiaries[index];
                           return GestureDetector(
@@ -464,28 +401,39 @@ class _DataPurchaseFormPageState extends State<DataPurchaseFormPage> {
                                 color: Theme.of(context).cardColor,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: _phoneController.text == ben.identifier
-                                      ? Colors.blueAccent
-                                      : Colors.transparent,
+                                  color:
+                                      _phoneController.text == ben.identifier
+                                          ? Colors.blueAccent
+                                          : Colors.transparent,
                                   width: 2,
                                 ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.person, color: Colors.blueAccent, size: 24),
+                                  const Icon(
+                                    Icons.person,
+                                    color: Colors.blueAccent,
+                                    size: 24,
+                                  ),
                                   const Spacer(),
                                   Text(
                                     ben.nickname,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                   Text(
                                     ben.identifier,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey[600],
+                                    ),
                                   ),
                                 ],
                               ),

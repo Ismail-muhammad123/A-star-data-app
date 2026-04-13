@@ -27,10 +27,10 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoading = false;
   bool _obscurePin = true;
 
-  void _onChannelChanged(String channel, bool selected) {
-    if (!selected) return;
-    setState(() => _selectedChannel = channel);
-  }
+  // void _onChannelChanged(String channel, bool selected) {
+  //   if (!selected) return;
+  //   setState(() => _selectedChannel = channel);
+  // }
 
   String _formatApiErrors(dynamic rawErrors, {String? fallback}) {
     if (rawErrors is! Map) {

@@ -18,16 +18,13 @@ class ProfileProvider extends ChangeNotifier {
     Map<String, dynamic> data, {
     String? profileImagePath,
   }) async {
-    final result = await _profileService.updateUserProfile(
+    await _profileService.updateUserProfile(
       authToken,
       data,
       profileImagePath: profileImagePath,
     );
-    if (result != null) {
-      await loadProfile(authToken);
-      return true;
-    }
-    return false;
+    await loadProfile(authToken);
+    return true;
   }
 
   Future<void> setTwoFactorStatus(String authToken, bool enabled) async {

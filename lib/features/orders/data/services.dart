@@ -109,16 +109,10 @@ class OrderServices {
   Future<void> purchaseAirtime({
     required String authToken,
     required String transactionPin,
-    required String serviceId,
+    required int serviceId,
     required String phoneNumber,
     required double amount,
   }) async {
-    print({
-      'transaction_pin': transactionPin,
-      'service_id': serviceId,
-      'phone_number': phoneNumber,
-      'amount': amount,
-    });
     var response = await _dio.post(
       _endpoints.purchaseAirtime,
       data: {

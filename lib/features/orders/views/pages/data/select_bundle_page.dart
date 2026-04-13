@@ -29,29 +29,16 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
   @override
   void initState() {
     super.initState();
-    _bundlesFuture = OrderServices().fetchDataBundles(
+    _bundlesFuture = OrderServices().fetchDataBundlesByNetwork(
       context.read<AuthProvider>().authToken ?? "",
+      widget.networkId,
     );
     _bundlesFuture.then((bundles) {
       print(bundles.length);
       setState(() {
         _allBundles =
-            bundles.where((b) => b.service.id == widget.networkId).toList()
-              ..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
-        _filteredBundles =
-            bundles
-                .where((b) => b.service.id == widget.networkId)
-                .where(
-                  (bundle) =>
-                      (!bundle.name.toLowerCase().contains('smile') &&
-                          !bundle.variationId.toLowerCase().contains(
-                            'smile',
-                          )) ||
-                      (bundle.name.toLowerCase().contains('smile') &&
-                          !bundle.name.toLowerCase().contains('voice')),
-                )
-                .toList()
-              ..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
+            bundles..sort((a, b) => a.sellingPrice.compareTo(b.sellingPrice));
+        _filteredBundles = List.from(_allBundles);
       });
     });
   }
@@ -146,22 +133,29 @@ class _SelectBundlePageState extends State<SelectBundlePage> {
                                               Container(
                                                 width: 40,
                                                 height: 40,
-                                                color: Colors.primaries[bundle
-                                                        .service
-                                                        .serviceName
-                                                        .length %
-                                                    Colors.primaries.length],
+                                                color:
+                                                    Colors.primaries[bundle
+                                                            .service
+                                                            .serviceName
+                                                            .length %
+                                                        Colors
+                                                            .primaries
+                                                            .length],
                                                 alignment: Alignment.center,
                                                 child: Text(
-                                                  bundle.service.serviceName
+                                                  bundle
+                                                              .service
+                                                              .serviceName
                                                               .length >=
                                                           2
                                                       ? bundle
-                                                          .service.serviceName
+                                                          .service
+                                                          .serviceName
                                                           .substring(0, 2)
                                                           .toUpperCase()
                                                       : bundle
-                                                          .service.serviceName
+                                                          .service
+                                                          .serviceName
                                                           .toUpperCase(),
                                                   style: const TextStyle(
                                                     fontSize: 10,

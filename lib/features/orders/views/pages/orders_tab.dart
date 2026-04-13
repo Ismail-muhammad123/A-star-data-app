@@ -288,7 +288,7 @@ class _OrdersTabState extends State<OrdersTab> {
                                   symbol: '₦',
                                 ).format(walletProvider.balance),
                             style: const TextStyle(
-                              fontSize: 28,
+                              fontSize: 22,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
@@ -312,9 +312,6 @@ class _OrdersTabState extends State<OrdersTab> {
                 ),
               ),
               const SizedBox(height: 32),
-              _buildAnnouncementsCarousel(),
-              const SizedBox(height: 32),
-
               // Services Section
               Text(
                 "Quick Services",
@@ -387,33 +384,27 @@ class _OrdersTabState extends State<OrdersTab> {
                             .push("/orders/select-tv-service")
                             .then((_) => setState(() {})),
                   ),
-                  if (_isLoadingInternet)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                  if (!_isLoadingInternet)
+                    ..._internetServices.map(
+                      (service) => _buildServiceCard(
+                        title: service.serviceName,
+                        icon: Icons.router_outlined,
+                        color:
+                            Colors.primaries[service.serviceName.length %
+                                Colors.primaries.length],
+                        onTap:
+                            () => context
+                                .push(
+                                  "/orders/select-internet-package",
+                                  extra: service,
+                                )
+                                .then((_) => setState(() {})),
+                        networkImage:
+                            (service.image?.isNotEmpty ?? false)
+                                ? service.image
+                                : null,
                       ),
                     ),
-                  ..._internetServices.map(
-                    (service) => _buildServiceCard(
-                      title: service.serviceName,
-                      icon: Icons.router_outlined,
-                      color:
-                          Colors.primaries[service.serviceName.length %
-                              Colors.primaries.length],
-                      onTap:
-                          () => context
-                              .push(
-                                "/orders/select-internet-package",
-                                extra: service,
-                              )
-                              .then((_) => setState(() {})),
-                      networkImage:
-                          (service.image?.isNotEmpty ?? false)
-                              ? service.image
-                              : null,
-                    ),
-                  ),
                   // _buildServiceCard(
                   //   title: "History",
                   //   icon: Icons.history,
@@ -425,6 +416,8 @@ class _OrdersTabState extends State<OrdersTab> {
                   // ),
                 ],
               ),
+              const SizedBox(height: 32),
+              _buildAnnouncementsCarousel(),
 
               const SizedBox(height: 32),
               Row(

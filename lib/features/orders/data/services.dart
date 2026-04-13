@@ -83,7 +83,7 @@ class OrderServices {
     int networkId,
   ) async {
     var response = await _dio.get(
-      _endpoints.getDataBundles,
+      "${_endpoints.getDataNetworks}$networkId/plans/",
       queryParameters: {'network_id': networkId},
       options: Options(
         validateStatus: (status) => true,
@@ -93,7 +93,7 @@ class OrderServices {
         },
       ),
     );
-
+    print(response.data);
     if (response.statusCode == 200) {
       dynamic data = response.data;
       List<dynamic> results =

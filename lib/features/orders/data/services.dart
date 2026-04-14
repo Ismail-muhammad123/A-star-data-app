@@ -93,7 +93,6 @@ class OrderServices {
         },
       ),
     );
-    print(response.data);
     if (response.statusCode == 200) {
       dynamic data = response.data;
       List<dynamic> results =
@@ -105,7 +104,7 @@ class OrderServices {
       throw Exception('Failed to load data bundles');
     }
   }
-
+ 
   Future<void> purchaseAirtime({
     required String authToken,
     required String transactionPin,
@@ -129,7 +128,6 @@ class OrderServices {
         },
       ),
     );
-    print(response.data);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       // Purchase successful

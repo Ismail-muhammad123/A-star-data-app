@@ -224,8 +224,7 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                     child: Row(
                       children:
                           _networks.map((network) {
-                            bool isSelected =
-                                _selectedNetworkId == network.serviceId;
+                            bool isSelected = _selectedNetworkId == network.id;
                             return Padding(
                               padding: const EdgeInsets.only(right: 12.0),
                               child: GestureDetector(

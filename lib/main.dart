@@ -88,6 +88,20 @@ class _AStarDataAppState extends State<AStarDataApp> {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       routerConfig: router,
+      builder: (context, child) {
+        final theme = Theme.of(context);
+        return Container(
+          color: theme.brightness == Brightness.dark
+              ? Colors.black
+              : Colors.grey[200],
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: child,
+            ),
+          ),
+        );
+      },
     );
   }
 }

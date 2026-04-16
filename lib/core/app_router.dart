@@ -85,17 +85,16 @@ final GoRouter router = GoRouter(
     // Otherwise, allow access
     return null;
   },
-  initialLocation: '/splash',
+  initialLocation: '/',
   errorBuilder: (context, state) {
     return Scaffold(body: Center(child: Text('Error: ${state.error}')));
   },
   routes: [
-    GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+    GoRoute(path: '/', builder: (context, state) => const AuthorizationPage()),
     GoRoute(
       path: '/onboarding',
       builder: (context, state) => const OnboardingPage(),
     ),
-    GoRoute(path: '/', builder: (context, state) => const AuthorizationPage()),
     // ===================== Auth Routes =====================
     GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
     GoRoute(path: '/register', builder: (context, state) => const SignUpPage()),

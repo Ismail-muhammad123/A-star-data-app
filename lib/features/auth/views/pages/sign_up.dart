@@ -1,3 +1,4 @@
+import 'package:app/core/utils/error_handler.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -56,7 +57,7 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     if (lines.isEmpty) {
-      return fallback ?? "Registration failed. Please try again.";
+      return ErrorHandler.getFriendlyMessage(fallback);
     }
 
     return lines.join("\n");
@@ -119,7 +120,7 @@ class _SignUpPageState extends State<SignUpPage> {
         );
       }
     } catch (e) {
-      _showError("An unexpected error occurred. Please check your connection.");
+      _showError(ErrorHandler.getFriendlyMessage(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

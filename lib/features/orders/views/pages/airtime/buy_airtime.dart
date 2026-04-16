@@ -1,3 +1,7 @@
+import 'package:app/core/utils/contact_helper.dart';
+import 'package:app/core/utils/error_handler.dart';
+import 'package:app/core/utils/network_detector.dart';
+import 'package:app/core/widgets/beneficiary_section.dart';
 import 'package:app/core/widgets/pin_entry_bottom_sheet.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
@@ -117,7 +121,7 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toString().split(":").last)));
+      ).showSnackBar(SnackBar(content: Text(ErrorHandler.getFriendlyMessage(e))));
     } finally {
       setState(() {
         _isLoading = false;
@@ -137,7 +141,7 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
       print(e);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error fetching networks')));
+      ).showSnackBar(SnackBar(content: Text(ErrorHandler.getFriendlyMessage(e))));
     }
 
     try {
@@ -156,8 +160,30 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
     }
   }
 
+  /// Called whenever the phone field changes. Detects the network from the
+  /// prefix and auto-selects the matching network card.
+  void _onPhoneChanged() {
+    final phone = _phoneController.text;
+    if (phone.length < 4) return;
+    final detected = detectNigerianNetwork(phone);
+    if (detected == null) return;
+
+    var matches = _networks.where(
+      (n) => n.serviceName.toLowerCase().contains(detected),
+    );
+    if (matches.isEmpty) return;
+
+    var matchedNetwork = matches.first;
+    if (matchedNetwork.id != _selectedNetworkId) {
+      setState(() {
+        _selectedNetworkId = matchedNetwork.id;
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _phoneController.removeListener(_onPhoneChanged);
     _amountController.dispose();
     _phoneController.dispose();
     super.dispose();
@@ -165,6 +191,7 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
 
   @override
   void initState() {
+    _phoneController.addListener(_onPhoneChanged);
     _fetchNetworks();
     super.initState();
   }
@@ -214,8 +241,8 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                     "Select Network",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -247,78 +274,25 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                   const SizedBox(height: 28),
 
                   if (_beneficiaries.isNotEmpty) ...[
-                    Text(
-                      "Saved Beneficiaries",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 90,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _beneficiaries.length,
-                        separatorBuilder:
-                            (context, index) => const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          final ben = _beneficiaries[index];
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _phoneController.text = ben.identifier;
-                                _saveBeneficiary = false;
-                              });
-                            },
-                            child: Container(
-                              width: 120,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).cardColor,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color:
-                                      _phoneController.text == ben.identifier
-                                          ? Colors.blueAccent
-                                          : Colors.transparent,
-                                  width: 2,
+                    BeneficiarySection(
+                      initialBeneficiaries:
+                          _beneficiaries
+                              .map(
+                                (b) => BeneficiaryDisplayModel(
+                                  id: b.id,
+                                  identifier: b.identifier,
+                                  name: b.nickname,
                                 ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Icon(
-                                    Icons.person,
-                                    color: Colors.blueAccent,
-                                    size: 24,
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    ben.nickname,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  Text(
-                                    ben.identifier,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                              )
+                              .toList(),
+                      selectedIdentifier: _phoneController.text,
+                      type: BeneficiaryType.purchase,
+                      onSelect: (ben) {
+                        setState(() {
+                          _phoneController.text = ben.identifier;
+                          _saveBeneficiary = false;
+                        });
+                      },
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -327,8 +301,8 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                     "Phone Number",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -343,6 +317,24 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                         Icons.phone_android,
                         color: Colors.blueAccent,
                       ),
+                      suffixIcon:
+                          ContactHelper.isMobile
+                              ? IconButton(
+                                icon: const Icon(
+                                  Icons.contacts,
+                                  color: Colors.blueAccent,
+                                ),
+                                onPressed: () async {
+                                  final phone =
+                                      await ContactHelper.pickPhoneNumber();
+                                  if (phone != null) {
+                                    setState(() {
+                                      _phoneController.text = phone;
+                                    });
+                                  }
+                                },
+                              )
+                              : null,
                       filled: true,
                       fillColor: Theme.of(context).cardColor,
                       border: OutlineInputBorder(
@@ -361,11 +353,37 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                         ),
                       ),
                     ),
+                    onChanged: (val) => setState(() {}),
+                  ),
+
+                  BeneficiarySuggestions(
+                    beneficiaries:
+                        _beneficiaries
+                            .map(
+                              (b) => BeneficiaryDisplayModel(
+                                id: b.id,
+                                identifier: b.identifier,
+                                name: b.nickname,
+                              ),
+                            )
+                            .toList(),
+                    query: _phoneController.text,
+                    onSelect: (ben) {
+                      setState(() {
+                        _phoneController.text = ben.identifier;
+                      });
+                    },
                   ),
 
                   const SizedBox(height: 16),
                   CheckboxListTile(
-                    title: const Text("Save this number as a beneficiary"),
+                    title: Text(
+                      "Save this number as a beneficiary",
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
+                      ),
+                    ),
                     value: _saveBeneficiary,
                     onChanged: (val) {
                       setState(() {
@@ -382,8 +400,8 @@ class _AirtimePurchaseFormPageState extends State<AirtimePurchaseFormPage> {
                     "Amount (min ₦50)",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.8),
                     ),
                   ),
                   const SizedBox(height: 12),

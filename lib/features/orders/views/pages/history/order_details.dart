@@ -1,3 +1,4 @@
+import 'package:app/core/utils/error_handler.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:app/features/orders/data/models.dart';
 import 'package:app/features/orders/data/services.dart';
@@ -39,7 +40,7 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error fetching transaction details: $e')),
+        SnackBar(content: Text(ErrorHandler.getFriendlyMessage(e))),
       );
       context.canPop() ? context.pop() : context.go("/home");
     } finally {
@@ -68,7 +69,7 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
       debugPrint("Error sharing receipt: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to share receipt: ${e.toString()}")),
+          SnackBar(content: Text(ErrorHandler.getFriendlyMessage(e))),
         );
       }
     }
@@ -93,7 +94,7 @@ class PurchaseDetailsPageState extends State<PurchaseDetailsPage> {
       debugPrint("Error saving receipt: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to save receipt: ${e.toString()}")),
+          SnackBar(content: Text(ErrorHandler.getFriendlyMessage(e))),
         );
       }
     }

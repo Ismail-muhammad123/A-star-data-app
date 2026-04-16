@@ -118,9 +118,9 @@ class _OtpInputState extends State<OtpInput> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(widget.length, (index) {
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 5),
-          width: 35,
-          height: 45,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: 42,
+          height: 50,
           child: RawKeyboardListener(
             focusNode: FocusNode(), // Dummy node for listener
             onKey: (event) => _onKeyPress(event, index),
@@ -152,7 +152,7 @@ class _OtpInputState extends State<OtpInput> {
                   ),
                 ),
               ),
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16),
             ),
           ),
         );

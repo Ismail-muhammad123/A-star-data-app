@@ -1,3 +1,4 @@
+import 'package:app/core/utils/error_handler.dart';
 import 'package:app/features/auth/data/repository/auth_repo.dart';
 import 'package:app/core/widgets/otp_input.dart';
 import 'package:flutter/material.dart';
@@ -73,9 +74,7 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.red,
-          content: Text(
-            "Failed to activate account! ${e.toString().split(":").last}",
-          ),
+          content: Text(ErrorHandler.getFriendlyMessage(e)),
         ),
       );
     } finally {
@@ -176,7 +175,7 @@ class _AccountActivationPageState extends State<AccountActivationPage> {
                   _buildLabel("Phone Number"),
                   const SizedBox(height: 8),
                   TextFormField(
-                    enabled: false,
+                    enabled: widget.phoneNumber == null,
                     controller: _phoneNumberController,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     keyboardType: TextInputType.phone,

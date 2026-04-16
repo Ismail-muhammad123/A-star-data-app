@@ -1,8 +1,9 @@
+import 'package:app/core/utils/error_handler.dart';
+import 'package:app/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:app/features/auth/providers/auth_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -90,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } catch (e) {
       if (mounted) {
-        _showError(e.toString().split(":").last);
+        _showError(ErrorHandler.getFriendlyMessage(e));
         _pinController.clear();
       }
     } finally {

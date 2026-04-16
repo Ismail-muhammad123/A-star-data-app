@@ -25,9 +25,6 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
     // Check auth and refresh token
     await auth.checkAuth();
 
-    // Minimum loading time for a smooth experience
-    await Future.delayed(const Duration(seconds: 3));
-
     if (!mounted) return;
 
     if (auth.isAuthenticated) {

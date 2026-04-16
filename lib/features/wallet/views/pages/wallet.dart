@@ -26,8 +26,11 @@ class _WalletPageState extends State<WalletPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
-      if (authProvider.authToken != null) {
-        context.read<WalletProvider>().fetchBalance(authProvider.authToken!);
+      final walletProvider = context.read<WalletProvider>();
+      if (authProvider.authToken != null &&
+          walletProvider.balance == 0 &&
+          !walletProvider.isLoading) {
+        walletProvider.fetchBalance(authProvider.authToken!);
       }
     });
   }

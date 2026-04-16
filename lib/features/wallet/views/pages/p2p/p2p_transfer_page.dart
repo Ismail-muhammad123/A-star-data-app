@@ -1,3 +1,5 @@
+import 'package:app/core/utils/error_handler.dart';
+import 'package:app/core/widgets/beneficiary_section.dart';
 import 'package:app/features/wallet/data/repositories/wallet_repo.dart';
 import 'package:app/features/wallet/data/models/transfer_beneficiary_model.dart';
 import 'package:app/features/auth/providers/auth_provider.dart';
@@ -105,15 +107,21 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
       final token = context.read<AuthProvider>().authToken;
       final result = await P2PService().lookupUser(token ?? "", identifier);
       print(result);
-      setState(() {
-        _recipient = result;
-      });
+      if (mounted) {
+        setState(() {
+          _recipient = result;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _lookupError = _friendlyLookupError(e);
-      });
+      if (mounted) {
+        setState(() {
+          _lookupError = ErrorHandler.getFriendlyMessage(e);
+        });
+      }
     } finally {
-      setState(() => _isLookingUp = false);
+      if (mounted) {
+        setState(() => _isLookingUp = false);
+      }
     }
   }
 
@@ -185,45 +193,13 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_friendlyTransferError(e)),
+          content: Text(ErrorHandler.getFriendlyMessage(e)),
           backgroundColor: Colors.red,
         ),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  String _friendlyLookupError(Object error) {
-    final raw = error.toString().toLowerCase();
-    if (raw.contains('not found') || raw.contains('404')) {
-      return "No user was found with this phone number.";
-    }
-    if (raw.contains('network') ||
-        raw.contains('socket') ||
-        raw.contains('connection')) {
-      return "Could not verify the user right now. Please check your internet and try again.";
-    }
-    if (raw.contains('unauthorized') || raw.contains('401')) {
-      return "Your session has expired. Please log in again and retry.";
-    }
-    return "We couldn't verify this user right now. Please try again.";
-  }
-
-  String _friendlyTransferError(Object error) {
-    final raw = error.toString().toLowerCase();
-    if (raw.contains('insufficient')) {
-      return "Insufficient balance for this transfer.";
-    }
-    if (raw.contains('pin')) {
-      return "The transaction PIN you entered is invalid.";
-    }
-    if (raw.contains('network') ||
-        raw.contains('socket') ||
-        raw.contains('connection')) {
-      return "Transfer failed due to a network issue. Please try again.";
-    }
-    return "Transfer failed. Please try again.";
   }
 
   void _showSuccessDialog() {
@@ -303,7 +279,10 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
                     const SizedBox(width: 12),
                     const Text(
                       "Balance: ",
-                      style: TextStyle(fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
                     ),
                     Text(
                       NumberFormat.currency(
@@ -313,6 +292,7 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.blueAccent,
+                        fontSize: 14,
                       ),
                     ),
                   ],
@@ -320,64 +300,30 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
               ),
               const SizedBox(height: 32),
 
-              if (_beneficiaries.isNotEmpty) ...[
-                _buildLabel("Saved Beneficiaries"),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 90,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _beneficiaries.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 12),
-                    itemBuilder: (context, index) {
-                      final ben = _beneficiaries[index];
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _identifierController.text = ben.accountNumber;
-                            _saveBeneficiary = false;
-                          });
-                          _lookupUser();
-                        },
-                        child: Container(
-                          width: 120,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: _identifierController.text == ben.accountNumber
-                                  ? Colors.blueAccent
-                                  : Colors.transparent,
-                              width: 2,
-                            ),
+              BeneficiarySection(
+                initialBeneficiaries:
+                    _beneficiaries
+                        .map(
+                          (b) => BeneficiaryDisplayModel(
+                            id: b.id,
+                            identifier: b.accountNumber,
+                            name: b.bankName,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.person, color: Colors.blueAccent, size: 24),
-                              const Spacer(),
-                              Text(
-                                ben.nickname,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                              ),
-                              Text(
-                                ben.accountNumber,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 11, color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
+                        )
+                        .toList(),
+                selectedIdentifier: _identifierController.text,
+                type: BeneficiaryType.transfer,
+                onSelect: (ben) {
+                  setState(() {
+                    _identifierController.text = ben.identifier;
+                    _saveBeneficiary = false;
+                    _recipient = null;
+                    _lookupError = null;
+                  });
+                  _lookupUser();
+                },
+              ),
+              const SizedBox(height: 24),
 
               _buildLabel("Recipient Phone Number"),
               const SizedBox(height: 8),
@@ -404,11 +350,31 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
                           ),
                 ),
                 onFieldSubmitted: (_) => _lookupUser(),
+                onChanged: (val) => setState(() {}),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return "Required";
                   if (v.trim().length != 10)
                     return "Enter a valid 10-digit phone number";
                   return null;
+                },
+              ),
+              BeneficiarySuggestions(
+                beneficiaries:
+                    _beneficiaries
+                        .map(
+                          (b) => BeneficiaryDisplayModel(
+                            id: b.id,
+                            identifier: b.accountNumber,
+                            name: b.bankName,
+                          ),
+                        )
+                        .toList(),
+                query: _identifierController.text,
+                onSelect: (ben) {
+                  setState(() {
+                    _identifierController.text = ben.identifier;
+                  });
+                  _lookupUser();
                 },
               ),
               if (_lookupError != null)
@@ -426,7 +392,10 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
 
                 const SizedBox(height: 16),
                 CheckboxListTile(
-                  title: const Text("Save this beneficiary for future transfers", style: TextStyle(fontSize: 14)),
+                  title: const Text(
+                    "Save this beneficiary for future transfers",
+                    style: TextStyle(fontSize: 13),
+                  ),
                   value: _saveBeneficiary,
                   onChanged: (val) {
                     setState(() {
@@ -555,7 +524,7 @@ class _P2PTransferPageState extends State<P2PTransferPage> {
     return Text(
       text,
       style: const TextStyle(
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: FontWeight.w600,
         color: Colors.grey,
       ),
